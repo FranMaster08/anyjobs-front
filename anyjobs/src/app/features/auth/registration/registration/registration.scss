@@ -1,0 +1,238 @@
+.regPage {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+  background: var(--aj-color-bg);
+  min-height: calc(100vh - 60px);
+}
+
+.regHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.regTitle {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+
+.regSubtitle {
+  margin: 6px 0 0;
+  color: var(--aj-color-muted);
+  font-weight: 700;
+}
+
+.regSteps {
+  margin: 0 0 14px;
+}
+
+.regStepsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.regStep {
+  padding: 8px 10px;
+  border-radius: var(--aj-radius-pill);
+  background: var(--aj-color-chip);
+  border: 1px solid var(--aj-color-border);
+  color: var(--aj-color-muted-2);
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.regStep--active {
+  background: rgba(14, 165, 164, 0.12);
+  border-color: rgba(14, 165, 164, 0.25);
+  color: var(--aj-color-ink);
+}
+
+.regCard {
+  background: var(--aj-color-surface);
+  border: 1px solid var(--aj-color-border);
+  border-radius: var(--aj-radius-md);
+  box-shadow: var(--aj-shadow-sm);
+  padding: 16px;
+}
+
+.regCardHeader {
+  margin-bottom: 12px;
+}
+
+.regH2 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.regHint {
+  margin: 6px 0 0;
+  color: var(--aj-color-muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.regGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 720px) {
+  .regGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.regField {
+  display: grid;
+  gap: 6px;
+}
+
+.regError {
+  margin: 0;
+  color: #b91c1c;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.regRoles {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.regRolesRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.regChip {
+  border: 1px solid var(--aj-color-border);
+  border-radius: var(--aj-radius-pill);
+  padding: 8px 10px;
+  background: var(--aj-color-surface);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.regChip--active {
+  background: rgba(17, 24, 39, 0.06);
+  border-color: var(--aj-color-border-strong);
+}
+
+.regTerms {
+  margin-top: 14px;
+}
+
+.regCheck {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-weight: 800;
+  color: var(--aj-color-muted-2);
+}
+
+.regActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.regActions--split {
+  justify-content: space-between;
+}
+
+.regInlineActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.regBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: var(--aj-radius-pill);
+  background: rgba(17, 24, 39, 0.06);
+  color: var(--aj-color-muted-2);
+}
+
+.regBadge--ok {
+  background: rgba(14, 165, 164, 0.14);
+  color: var(--aj-color-ink);
+}
+
+.regBadge--warn {
+  background: rgba(245, 158, 11, 0.14);
+  color: var(--aj-color-ink);
+}
+
+.regSection {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--aj-color-border);
+  display: grid;
+  gap: 8px;
+}
+
+.regDone {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(14, 165, 164, 0.14), transparent 46%),
+    radial-gradient(circle at 90% 0%, rgba(17, 24, 39, 0.06), transparent 54%),
+    var(--aj-color-surface);
+}
+
+.regDoneHeader {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.regDoneIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--aj-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 1000;
+  color: var(--aj-color-ink);
+  background: rgba(14, 165, 164, 0.16);
+  border: 1px solid rgba(14, 165, 164, 0.25);
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
+  flex: 0 0 auto;
+}
+
+.regDoneText {
+  min-width: 0;
+}
+
+.regDoneBadges {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.regDone .btn:focus-visible {
+  outline: 3px solid var(--aj-color-focus);
+  outline-offset: 2px;
+}
+

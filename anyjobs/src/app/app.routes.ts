@@ -11,6 +11,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/home/home/home').then((m) => m.Home),
       },
       {
+        path: 'registro',
+        loadChildren: () =>
+          import('./features/auth/registration/registration.routes').then((m) => m.registrationRoutes),
+      },
+      {
         path: 'solicitudes',
         children: [
           {

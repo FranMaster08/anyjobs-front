@@ -1,0 +1,388 @@
+<section class="page regPage">
+  <header class="regHeader">
+    <div>
+      <h1 class="regTitle">{{ t('reg.title') }}</h1>
+      <p class="regSubtitle">{{ t('reg.subtitle') }}</p>
+    </div>
+    <a class="btn btn--link btn--sm" routerLink="/home">{{ t('btn.return') }}</a>
+  </header>
+
+  <nav class="regSteps" [attr.aria-label]="t('reg.progress')">
+    <ol class="regStepsList">
+      @for (s of stages; track s) {
+        <li class="regStep" [class.regStep--active]="stage() === s">{{ t(stageLabelKey[s]) }}</li>
+      }
+    </ol>
+  </nav>
+
+  @if (stage() === 'ACCOUNT') {
+    <form class="regCard" [formGroup]="accountForm" (ngSubmit)="onAccountContinue()">
+      <div class="regGrid">
+        <div class="regField">
+          <label class="fieldLabel" for="fullName">{{ t('field.fullName') }}</label>
+          <input id="fullName" class="fieldControl" formControlName="fullName" autocomplete="name" />
+          @if (accountForm.controls.fullName.touched && accountForm.controls.fullName.invalid) {
+            <p class="regError">{{ t('error.fullNameMin') }}</p>
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="email">{{ t('field.email') }}</label>
+          <input id="email" class="fieldControl" formControlName="email" autocomplete="email" />
+          @if (accountForm.controls.email.touched && accountForm.controls.email.invalid) {
+            @if (accountForm.controls.email.errors?.['email']) {
+              <p class="regError">{{ t('error.emailInvalid') }}</p>
+            }
+            @if (accountForm.controls.email.errors?.['emailTaken']) {
+              <p class="regError">{{ t('error.emailTaken') }}</p>
+            }
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="phoneNumber">{{ t('field.phone') }}</label>
+          <input
+            id="phoneNumber"
+            class="fieldControl"
+            formControlName="phoneNumber"
+            placeholder="+34123456789"
+            autocomplete="tel"
+          />
+          @if (accountForm.controls.phoneNumber.touched && accountForm.controls.phoneNumber.invalid) {
+            @if (accountForm.controls.phoneNumber.errors?.['e164Phone']) {
+              <p class="regError">{{ t('error.phoneE164') }}</p>
+            }
+            @if (accountForm.controls.phoneNumber.errors?.['phoneTaken']) {
+              <p class="regError">{{ t('error.phoneTaken') }}</p>
+            }
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="password">{{ t('field.password') }}</label>
+          <input id="password" type="password" class="fieldControl" formControlName="password" />
+          @if (accountForm.controls.password.touched && accountForm.controls.password.invalid) {
+            <p class="regError">{{ t('error.passwordWeak') }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="regRoles">
+        <p class="fieldLabel">{{ t('field.roles') }}</p>
+        <div class="regRolesRow">
+          @for (r of roleOptions; track r) {
+            <button
+              type="button"
+              class="regChip"
+              [class.regChip--active]="roles().includes(r)"
+              (click)="toggleRole(r)"
+            >
+              {{ t(roleLabelKey[r]) }}
+            </button>
+          }
+        </div>
+        @if (accountForm.controls.selectedRoles.touched && accountForm.controls.selectedRoles.invalid) {
+          <p class="regError">{{ t('error.rolesRequired') }}</p>
+        }
+      </div>
+
+      <div class="regTerms">
+        <label class="regCheck">
+          <input type="checkbox" formControlName="acceptTerms" />
+          <span>{{ t('field.terms') }}</span>
+        </label>
+        @if (accountForm.controls.acceptTerms.touched && accountForm.controls.acceptTerms.invalid) {
+          <p class="regError">{{ t('error.termsRequired') }}</p>
+        }
+      </div>
+
+      @if (accountForm.errors?.['api']) {
+        <p class="regError">{{ accountForm.errors?.['api'] }}</p>
+      }
+
+      <footer class="regActions">
+        <button class="btn" type="submit" [disabled]="accountForm.invalid || isBusy()">{{ t('btn.continue') }}</button>
+      </footer>
+    </form>
+  }
+
+  @if (stage() === 'VERIFY') {
+    <section class="regCard">
+      <header class="regCardHeader">
+        <h2 class="regH2">{{ t('verify.title') }}</h2>
+        <p class="regHint">
+          @if (isWorker()) {
+            {{ t('verify.hint.worker') }}
+          } @else {
+            {{ t('verify.hint.client') }}
+          }
+        </p>
+      </header>
+
+      <div class="regGrid" [formGroup]="verifyForm">
+        <div class="regField">
+          <label class="fieldLabel" for="emailOtp">{{ t('verify.otp.email') }}</label>
+          <input id="emailOtp" class="fieldControl" formControlName="emailOtp" inputmode="numeric" />
+          <div class="regInlineActions">
+            <button type="button" class="btn btn--secondary btn--sm" [disabled]="isBusy()" (click)="verifyEmail()">
+              {{ t('btn.verifyEmail') }}
+            </button>
+            <span class="regBadge" [class.regBadge--ok]="vm().emailVerified">
+              {{ vm().emailVerified ? t('verify.status.verified') : t('verify.status.pending') }}
+            </span>
+          </div>
+          @if (verifyForm.controls.emailOtp.touched && verifyForm.controls.emailOtp.errors?.['otpInvalid']) {
+            <p class="regError">{{ t('error.otpInvalid') }}</p>
+          }
+          @if (verifyForm.controls.emailOtp.touched && verifyForm.controls.emailOtp.errors?.['api']) {
+            <p class="regError">{{ verifyForm.controls.emailOtp.errors?.['api'] }}</p>
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="smsOtp">{{ t('verify.otp.sms') }}</label>
+          <input id="smsOtp" class="fieldControl" formControlName="smsOtp" inputmode="numeric" />
+          <div class="regInlineActions">
+            <button type="button" class="btn btn--secondary btn--sm" [disabled]="isBusy()" (click)="verifyPhone()">
+              {{ t('btn.verifyPhone') }}
+            </button>
+            <span class="regBadge" [class.regBadge--ok]="vm().phoneVerified">
+              {{ vm().phoneVerified ? t('verify.status.verified') : t('verify.status.pending') }}
+            </span>
+          </div>
+          @if (verifyForm.controls.smsOtp.touched && verifyForm.controls.smsOtp.errors?.['otpInvalid']) {
+            <p class="regError">{{ t('error.otpInvalid') }}</p>
+          }
+          @if (verifyForm.controls.smsOtp.touched && verifyForm.controls.smsOtp.errors?.['api']) {
+            <p class="regError">{{ verifyForm.controls.smsOtp.errors?.['api'] }}</p>
+          }
+        </div>
+      </div>
+
+      <footer class="regActions regActions--split">
+        <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
+        <button class="btn" type="button" [disabled]="!canContinueVerify() || isBusy()" (click)="onVerifyContinue()">
+          {{ t('btn.continue') }}
+        </button>
+      </footer>
+    </section>
+  }
+
+  @if (stage() === 'LOCATION') {
+    <form class="regCard" [formGroup]="locationForm" (ngSubmit)="onLocationContinue()">
+      <header class="regCardHeader">
+        <h2 class="regH2">{{ t('location.title') }}</h2>
+        <p class="regHint">{{ t('location.hint') }}</p>
+      </header>
+
+      <div class="regGrid">
+        <div class="regField">
+          <label class="fieldLabel" for="city">{{ t('location.city') }}</label>
+          <input id="city" class="fieldControl" formControlName="city" />
+          @if (locationForm.controls.city.touched && locationForm.controls.city.invalid) {
+            <p class="regError">{{ t('error.cityRequired') }}</p>
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="area">{{ t('location.areaOptional') }}</label>
+          <input id="area" class="fieldControl" formControlName="area" />
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="countryCode">{{ t('location.countryOptional') }}</label>
+          <input id="countryCode" class="fieldControl" formControlName="countryCode" placeholder="ES" />
+        </div>
+
+        @if (isWorker()) {
+          <div class="regField">
+            <label class="fieldLabel" for="coverageRadiusKm">{{ t('location.coverageOptional') }}</label>
+            <input
+              id="coverageRadiusKm"
+              class="fieldControl"
+              type="number"
+              min="1"
+              formControlName="coverageRadiusKm"
+            />
+          </div>
+        }
+      </div>
+
+      <footer class="regActions regActions--split">
+        <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
+        <button class="btn" type="submit" [disabled]="locationForm.invalid || isBusy()">{{ t('btn.continue') }}</button>
+      </footer>
+    </form>
+  }
+
+  @if (stage() === 'ROLE_PROFILE') {
+    <section class="regCard">
+      <header class="regCardHeader">
+        <h2 class="regH2">{{ t('profile.title') }}</h2>
+        <p class="regHint">{{ t('profile.hint') }}</p>
+      </header>
+
+      @if (isWorker()) {
+        <div class="regSection" [formGroup]="workerProfileForm">
+          <p class="fieldLabel">{{ t('profile.categories') }}</p>
+          <div class="regRolesRow">
+            @for (c of categoryOptions; track c) {
+              <button
+                type="button"
+                class="regChip"
+                [class.regChip--active]="workerProfileForm.controls.categories.value.includes(c)"
+                (click)="toggleCategory(c)"
+              >
+                {{ t(categoryLabelKey[c]) }}
+              </button>
+            }
+          </div>
+          <p class="regHint">
+            {{ t('profile.categoriesSelected') }}:
+            {{ workerProfileForm.controls.categories.value.join(', ') || '—' }}
+          </p>
+          @if (workerProfileForm.controls.categories.touched && workerProfileForm.controls.categories.invalid) {
+            <p class="regError">{{ t('error.categoriesRequired') }}</p>
+          }
+        </div>
+      }
+
+      @if (isClient()) {
+        <div class="regSection" [formGroup]="clientProfileForm">
+          <label class="fieldLabel" for="preferredPaymentMethod">{{ t('profile.paymentMethodOptional') }}</label>
+          <select id="preferredPaymentMethod" class="fieldControl" formControlName="preferredPaymentMethod">
+            <option value="">—</option>
+            @for (p of paymentOptions; track p) {
+              <option [value]="p">{{ t(paymentLabelKey[p]) }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      @if (workerProfileForm.errors?.['api']) {
+        <p class="regError">{{ workerProfileForm.errors?.['api'] }}</p>
+      }
+
+      <footer class="regActions regActions--split">
+        <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
+        <button class="btn" type="button" [disabled]="isBusy()" (click)="finish()">{{ t('btn.finish') }}</button>
+      </footer>
+    </section>
+  }
+
+  @if (stage() === 'PERSONAL_INFO') {
+    <form class="regCard" [formGroup]="personalForm" (ngSubmit)="onPersonalContinue()">
+      <header class="regCardHeader">
+        <h2 class="regH2">{{ t('personal.title') }}</h2>
+        <p class="regHint">
+          {{ t('personal.hint') }}
+          @if (isWorker()) {
+            <span class="regBadge regBadge--warn">{{ t('personal.docRequiredWorker') }}</span>
+          }
+        </p>
+      </header>
+
+      <div class="regGrid">
+        <div class="regField">
+          <label class="fieldLabel" for="documentType">{{ t('personal.docType') }}</label>
+          <select id="documentType" class="fieldControl" formControlName="documentType">
+            <option value="">—</option>
+            @for (d of documentTypeOptions; track d) {
+              <option [value]="d">{{ t(documentTypeLabelKey[d]) }}</option>
+            }
+          </select>
+          @if (personalForm.controls.documentType.touched && personalForm.controls.documentType.invalid) {
+            <p class="regError">{{ t('error.docTypeRequired') }}</p>
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="documentNumber">{{ t('personal.docNumber') }}</label>
+          <input id="documentNumber" class="fieldControl" formControlName="documentNumber" autocomplete="off" />
+          @if (personalForm.controls.documentNumber.touched && personalForm.controls.documentNumber.invalid) {
+            <p class="regError">{{ t('error.docNumberRequired') }}</p>
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="birthDate">{{ t('personal.birthDate') }}</label>
+          <input id="birthDate" type="date" class="fieldControl" formControlName="birthDate" />
+          @if (personalForm.controls.birthDate.touched && personalForm.controls.birthDate.invalid) {
+            <p class="regError">{{ t('error.birthDateRequired') }}</p>
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="gender">{{ t('personal.gender') }}</label>
+          <select id="gender" class="fieldControl" formControlName="gender">
+            <option value="">—</option>
+            @for (g of genderOptions; track g) {
+              <option [value]="g">{{ t(genderLabelKey[g]) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="nationality">{{ t('personal.nationality') }}</label>
+          <input id="nationality" class="fieldControl" formControlName="nationality" placeholder="ES" />
+        </div>
+      </div>
+
+      @if (personalForm.errors?.['api']) {
+        <p class="regError">{{ personalForm.errors?.['api'] }}</p>
+      }
+
+      <footer class="regActions regActions--split">
+        <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
+        <button
+          class="btn"
+          type="submit"
+          [disabled]="(isWorker() && personalForm.invalid) || isBusy()"
+        >
+          {{ t('btn.continue') }}
+        </button>
+      </footer>
+    </form>
+  }
+
+  @if (stage() === 'DONE') {
+    <section class="regCard regDone">
+      <header class="regDoneHeader">
+        <div class="regDoneIcon" aria-hidden="true">✓</div>
+        <div class="regDoneText">
+          <h2 class="regH2">{{ t('done.title') }}</h2>
+          <p class="regHint">{{ t('done.subtitle') }}</p>
+        </div>
+      </header>
+
+      <ul class="regDoneBadges" aria-label="Resumen de estado">
+        <li>
+          <span class="regBadge regBadge--ok">{{ t('done.status') }}: {{ vm().status }}</span>
+        </li>
+        <li>
+          <span class="regBadge" [class.regBadge--ok]="vm().emailVerified">
+            {{ t('done.emailVerified') }}: {{ vm().emailVerified ? t('common.yes') : t('common.no') }}
+          </span>
+        </li>
+        <li>
+          <span class="regBadge" [class.regBadge--ok]="vm().phoneVerified">
+            {{ t('done.phoneVerified') }}: {{ vm().phoneVerified ? t('common.yes') : t('common.no') }}
+          </span>
+        </li>
+        @if (isWorker()) {
+          <li>
+            <span class="regBadge" [class.regBadge--ok]="vm().listable">
+              {{ t('done.listable') }}: {{ vm().listable ? t('common.yes') : t('common.no') }}
+            </span>
+          </li>
+        }
+      </ul>
+
+      <footer class="regActions regActions--split">
+        <a class="btn btn--secondary" routerLink="/solicitudes">{{ t('btn.goRequests') }}</a>
+        <a class="btn" routerLink="/home">{{ t('btn.goHome') }}</a>
+      </footer>
+    </section>
+  }
+</section>
+
