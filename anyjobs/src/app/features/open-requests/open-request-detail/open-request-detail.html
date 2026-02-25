@@ -1,0 +1,183 @@
+<section class="page openRequestDetail">
+  <div class="container">
+    <a class="back" [routerLink]="['/solicitudes']">← Volver a solicitudes</a>
+
+    <ng-container [ngSwitch]="state()">
+      <div *ngSwitchCase="'loading'" class="state" aria-busy="true">
+        <div class="skeletonTitle"></div>
+        <div class="skeletonLine"></div>
+        <div class="skeletonLine"></div>
+      </div>
+
+      <div *ngSwitchCase="'error'" class="state state--error" role="status">
+        <p class="state__title">No se pudo cargar el detalle.</p>
+        <p class="state__hint">Intenta de nuevo en unos segundos.</p>
+        <button type="button" class="btn" (click)="retry()">Reintentar</button>
+        <p class="muted">ID: {{ requestId() || '—' }}</p>
+      </div>
+
+      <ng-container *ngSwitchCase="'success'">
+        <ng-container *ngIf="detail() as d">
+          <header class="detailHeader">
+            <div class="headerLeft">
+              <p class="kicker">DETALLE</p>
+              <h1 class="title">{{ d.title }}</h1>
+              <p class="subtitle">{{ d.excerpt }}</p>
+
+              <div class="meta" *ngIf="d.locationLabel || d.publishedAtLabel || d.budgetLabel">
+                <span class="metaItem" *ngIf="d.publishedAtLabel">{{ d.publishedAtLabel }}</span>
+                <span class="metaSep" *ngIf="d.publishedAtLabel && d.locationLabel">·</span>
+                <span class="metaItem" *ngIf="d.locationLabel">{{ d.locationLabel }}</span>
+                <span class="metaSep" *ngIf="(d.publishedAtLabel || d.locationLabel) && d.budgetLabel">·</span>
+                <span class="metaItem" *ngIf="d.budgetLabel">{{ d.budgetLabel }}</span>
+              </div>
+
+              <div class="tags" *ngIf="d.tags?.length">
+                <span class="tag" *ngFor="let t of d.tags; let i = index" [hidden]="i > 3">{{ t }}</span>
+              </div>
+            </div>
+
+            <div class="headerActions">
+              <button type="button" class="btn btn--secondary btn--sm" (click)="scrollToApply()">Postular</button>
+              <button type="button" class="btn btn--sm" (click)="scrollToApply()">Contactar</button>
+            </div>
+          </header>
+
+          <div class="layout">
+            <section class="main">
+              <section class="gallery" *ngIf="d.images.length > 0">
+                <button
+                  type="button"
+                  class="mainImageBtn"
+                  (click)="openGallery(activeImageIndex())"
+                  aria-label="Abrir galería"
+                >
+                  <img
+                    class="mainImage"
+                    [src]="d.images[activeImageIndex()].url"
+                    [alt]="d.images[activeImageIndex()].alt ?? ''"
+                  />
+                </button>
+
+                <div class="thumbs" *ngIf="d.images.length > 1" aria-label="Miniaturas">
+                  <button
+                    type="button"
+                    class="thumbBtn"
+                    *ngFor="let img of d.images; let i = index"
+                    [class.is-active]="i === activeImageIndex()"
+                    (click)="selectImage(i)"
+                    (dblclick)="openGallery(i)"
+                    [attr.aria-label]="'Seleccionar imagen ' + (i + 1)"
+                  >
+                    <img class="thumb" [src]="img.url" [alt]="img.alt ?? ''" />
+                  </button>
+                </div>
+              </section>
+
+              <section class="contentCard">
+                <h2 class="sectionTitle">Descripción</h2>
+                <p class="paragraph">{{ d.description ?? d.excerpt }}</p>
+                <p class="muted">ID: {{ d.id }}</p>
+              </section>
+
+              <section class="providerCard" *ngIf="d.provider">
+                <div class="providerHeader">
+                  <h2 class="sectionTitle">Ofrecido por</h2>
+                  <div class="providerHeaderRight">
+                    <span class="providerBadge" *ngIf="d.provider.badge">{{ d.provider.badge }}</span>
+
+                    <div class="ratingInline" *ngIf="d.reputation !== undefined" aria-label="Reputación del oferente">
+                      <span class="ratingInlineStar" aria-hidden="true">★</span>
+                      <span class="ratingInlineValue">{{ d.reputation | number: '1.1-2' }}</span>
+                      <span class="ratingInlineSep" *ngIf="d.reviewsCount !== undefined" aria-hidden="true">·</span>
+                      <span class="ratingInlineSub" *ngIf="d.reviewsCount !== undefined">{{ d.reviewsCount }} reseñas</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="providerRow">
+                  <div class="providerAvatar" aria-hidden="true">{{ d.provider.name.slice(0, 1) }}</div>
+                  <div class="providerBody">
+                    <p class="providerName">{{ d.provider.name }}</p>
+                    <p class="providerSubtitle" *ngIf="d.provider.subtitle">{{ d.provider.subtitle }}</p>
+                  </div>
+                </div>
+
+                <div class="providerReviews" *ngIf="d.providerReviews?.length">
+                  <h3 class="providerReviewsTitle">Comentarios</h3>
+                  <ul class="providerReviewsList" aria-label="Comentarios de usuarios">
+                    <li class="providerReview" *ngFor="let r of d.providerReviews">
+                      <div class="providerReviewAvatar" aria-hidden="true">{{ r.author.slice(0, 1) }}</div>
+                      <div class="providerReviewBody">
+                        <div class="providerReviewTop">
+                          <p class="providerReviewAuthor">{{ r.author }}</p>
+                          <p class="providerReviewMeta">
+                            <span *ngIf="r.rating !== undefined" class="providerReviewRating" aria-label="Calificación del comentario">
+                              <span class="providerReviewStar" aria-hidden="true">★</span>
+                              <span class="providerReviewRatingValue">{{ r.rating | number: '1.1-2' }}</span>
+                            </span>
+                            <span *ngIf="r.dateLabel" class="providerReviewDate">{{ r.dateLabel }}</span>
+                          </p>
+                        </div>
+                        <p class="providerReviewText">{{ r.text }}</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <aside class="sidebar" aria-label="Acción principal">
+              <div class="sidebarCard" id="applyCard">
+                <p class="sidebarTitle">Postular</p>
+                <p class="authHint">Para contactar y postularte necesitas una cuenta con nosotros.</p>
+
+                <div class="authActions" role="group" aria-label="Acciones de cuenta">
+                  <button type="button" class="btn btn--secondary" disabled aria-disabled="true">Iniciar sesión</button>
+                  <button type="button" class="btn" disabled aria-disabled="true">Crear cuenta</button>
+                </div>
+
+                <p class="authNote">
+                  Inicia sesión o crea tu cuenta para enviar mensajes dentro de Anyjobs.
+                </p>
+              </div>
+            </aside>
+          </div>
+
+          <app-modal [open]="isGalleryOpen()" title="Galería" (closed)="closeGallery()">
+            <div class="galleryModal" *ngIf="d.images.length > 0">
+              <div class="galleryModalTop">
+                <button type="button" class="btn btn--secondary" (click)="prevImage()" [disabled]="d.images.length < 2">
+                  ← Anterior
+                </button>
+                <p class="galleryCount">{{ activeImageIndex() + 1 }} / {{ d.images.length }}</p>
+                <button type="button" class="btn btn--secondary" (click)="nextImage()" [disabled]="d.images.length < 2">
+                  Siguiente →
+                </button>
+              </div>
+
+              <img
+                class="galleryModalImage"
+                [src]="d.images[activeImageIndex()].url"
+                [alt]="d.images[activeImageIndex()].alt ?? ''"
+              />
+
+              <div class="galleryModalThumbs" *ngIf="d.images.length > 1" aria-label="Miniaturas de galería">
+                <button
+                  type="button"
+                  class="thumbBtn thumbBtn--sm"
+                  *ngFor="let img of d.images; let i = index"
+                  [class.is-active]="i === activeImageIndex()"
+                  (click)="selectImage(i)"
+                >
+                  <img class="thumb" [src]="img.url" [alt]="img.alt ?? ''" />
+                </button>
+              </div>
+            </div>
+          </app-modal>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+  </div>
+</section>
+

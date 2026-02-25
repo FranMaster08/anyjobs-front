@@ -1,0 +1,44 @@
+{
+  "brandName": "Anyjobs",
+  "hero": {
+    "title": "Tu trabajo ideal te espera",
+    "subtitle": "Explora solicitudes abiertas, filtra rápido y conecta con clientes en minutos."
+  },
+  "sections": {
+    "requests": {
+      "label": "SOLICITUDES",
+      "title": "Selección destacada",
+      "cta": "Publicar / Consultar"
+    },
+    "location": {
+      "label": "UBICACIÓN",
+      "title": "Trabajos en tu zona",
+      "body": "Activa tu ubicación y revisa solicitudes abiertas cerca de ti. También puedes explorar el mapa para ver más.",
+      "openMap": "Abrir mapa",
+      "viewMap": "Ver mapa",
+      "preview": {
+        "title": "Ubicación y solicitudes cercanas",
+        "hintNoLocation": "Activa tu ubicación para ver el mapa con marcadores reales.",
+        "hintWithLocation": "Mostrando marcadores cerca de ti (ejemplo)."
+      }
+    },
+    "contact": {
+      "label": "CONTACTO",
+      "title": "¿Hablamos?",
+      "intro": "Responde a una solicitud en minutos. Si necesitas ayuda, contáctanos por el canal que prefieras.",
+      "phone": {
+        "label": "TELÉFONO",
+        "value": "+34 000 000 000",
+        "hint": "Ideal para dudas rápidas.",
+        "href": "tel:+34000000000"
+      },
+      "email": {
+        "label": "EMAIL",
+        "value": "hola@anyjobs.local",
+        "hint": "Te respondemos con detalles.",
+        "href": "mailto:hola@anyjobs.local"
+      }
+    }
+  }
+}
+

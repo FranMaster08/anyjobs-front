@@ -1,0 +1,24 @@
+---
+description: Angular (UI library): componentes por carpeta + API limpia y documentada
+globs: "design-system/projects/ui/src/lib/components/**/*.{ts,html,scss,css}"
+alwaysApply: false
+---
+
+# Angular UI library (`projects/ui`): componentes por carpeta
+
+- **Estructura**: cada componente vive en `projects/ui/src/lib/components/<kebab-name>/`.
+  - Archivos esperados: `<name>.ts`, `<name>.html`, `<name>.css`/`.scss`, `<name>.spec.ts` (si aplica).
+- **Naming / selector**:
+  - Carpeta/archivo en **kebab-case** y consistentes.
+  - `selector` con prefijo `aj-` (p. ej. `aj-button`).
+- **API pública**:
+  - Inputs/Outputs **tipados** y con defaults seguros; evita exponer estado interno.
+  - No acoples el componente a rutas, entorno o servicios de una app (la lib debe ser portable).
+  - Si el componente es parte del API, **exporta** desde `projects/ui/src/public-api.ts`.
+- **Buenas prácticas Angular/TS**:
+  - `imports: [...]` mínimos; evita dependencias transitivas no usadas.
+  - Prefiere `ChangeDetectionStrategy.OnPush` y plantillas simples (sin lógica pesada).
+- **Comentarios documentales (breves)**:
+  - Añade JSDoc/TSDoc arriba de la clase explicando **objetivo**, **qué garantiza**, y **cómo se usa** (1–4 líneas).
+  - Documenta restricciones no obvias (a11y, contrato de inputs, compatibilidad).
+

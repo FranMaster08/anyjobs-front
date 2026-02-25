@@ -1,1 +1,619 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global UI primitives (shared across features) */
+
+:root {
+  --aj-font-sans: Roboto, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+
+  --aj-color-primary: #0ea5a4;
+  --aj-color-ink: #111827;
+  --aj-color-muted: #6b7280;
+  --aj-color-subtle: #9ca3af;
+  --aj-color-muted-2: #4b5563;
+
+  --aj-color-surface: #ffffff;
+  --aj-color-bg: #f6f7f8;
+  --aj-color-skeleton-1: #f3f4f6;
+  --aj-color-skeleton-2: #e5e7eb;
+  --aj-color-chip: #eef2f3;
+
+  --aj-color-border: rgba(17, 24, 39, 0.08);
+  --aj-color-border-strong: rgba(17, 24, 39, 0.12);
+  --aj-color-focus: rgba(59, 130, 246, 0.6);
+  --aj-color-warning: #f59e0b;
+
+  --aj-skeleton-gradient: linear-gradient(
+    90deg,
+    var(--aj-color-skeleton-1) 0%,
+    var(--aj-color-skeleton-2) 50%,
+    var(--aj-color-skeleton-1) 100%
+  );
+
+  --aj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --aj-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.25);
+
+  --aj-radius-sm: 10px;
+  --aj-radius-md: 16px;
+  --aj-radius-lg: 18px;
+  --aj-radius-pill: 999px;
+}
+
+html,
+body {
+  font-family: var(--aj-font-sans);
+}
+
+@import 'leaflet/dist/leaflet.css';
+
+body {
+  margin: 0;
+  color: var(--aj-color-ink);
+  background: var(--aj-color-surface);
+}
+
+.btn {
+  border: 0;
+  border-radius: var(--aj-radius-sm);
+  padding: 10px 12px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  background: var(--aj-color-primary);
+  color: var(--aj-color-surface);
+}
+
+.btn--secondary {
+  background: var(--aj-color-ink);
+  color: var(--aj-color-surface);
+}
+
+.btn--link {
+  background: transparent;
+  color: var(--aj-color-muted);
+  padding: 10px 6px;
+}
+
+.btn--link:hover {
+  color: var(--aj-color-ink);
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.btn--sm {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  color: var(--aj-color-muted);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.fieldControl {
+  border: 1px solid var(--aj-color-skeleton-2);
+  border-radius: var(--aj-radius-sm);
+  padding: 10px 12px;
+  background: var(--aj-color-surface);
+  font: inherit;
+}
+
+/* Map demo primitives (pins + legend) */
+
+.mapCanvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  background:
+    radial-gradient(circle at 18% 35%, rgba(14, 165, 164, 0.18), transparent 40%),
+    radial-gradient(circle at 78% 65%, rgba(17, 24, 39, 0.08), transparent 45%),
+    linear-gradient(135deg, rgba(14, 165, 164, 0.1), rgba(17, 24, 39, 0.04));
+}
+
+.mapCanvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(17, 24, 39, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.mapCanvas--preview .mapPinLabel {
+  display: none;
+}
+
+.mapCanvas--modal {
+  min-height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.mapCanvas--modal .mapPinLabel {
+  display: inline-flex;
+}
+
+.mapPin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  z-index: 1;
+}
+
+.mapPinDot {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--aj-radius-pill);
+  background: var(--aj-color-primary);
+  border: 3px solid var(--aj-color-surface);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.mapPin--user .mapPinDot {
+  background: var(--aj-color-ink);
+}
+
+.mapPinLabel {
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: var(--aj-radius-pill);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--aj-color-ink);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+}
+
+.mapModal {
+  display: grid;
+  gap: 12px;
+}
+
+.mapAddress {
+  margin: 0;
+  color: #374151;
+}
+
+.mapLegend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--aj-radius-pill);
+  border: 2px solid var(--aj-color-surface);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+.legendDot--user {
+  background: var(--aj-color-ink);
+}
+
+.legendDot--request {
+  background: var(--aj-color-primary);
+}
+
+/* Leaflet custom markers */
+
+.leaflet-div-icon {
+  background: transparent;
+  border: 0;
+}
+
+.anyjobsMarker {
+  transform: translate(-50%, -50%);
+}
+
+.anyjobsMarkerDot {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--aj-radius-pill);
+  background: var(--aj-color-primary);
+  border: 3px solid var(--aj-color-surface);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.anyjobsMarkerDot--user {
+  background: var(--aj-color-ink);
+}
+
+/* Map modal status */
+
+.mapStatus {
+  border-radius: 12px;
+  background: var(--aj-color-skeleton-1);
+  padding: 12px;
+  color: var(--aj-color-muted);
+  font-weight: 800;
+}
+
+.mapStatus--error {
+  background: rgba(239, 68, 68, 0.08);
+  color: #991b1b;
+}
+
+/* Map preview overlay + nearby list */
+
+.mapPreviewOverlay {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 12px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  max-width: 320px;
+}
+
+.mapPreviewTitle {
+  margin: 0;
+  font-weight: 900;
+  color: var(--aj-color-ink);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.mapPreviewHint {
+  margin: 6px 0 0;
+  color: var(--aj-color-muted);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.nearbyList {
+  display: grid;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  background: var(--aj-color-surface);
+  border: 1px solid var(--aj-color-border);
+}
+
+.nearbyItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nearbyDot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--aj-radius-pill);
+  background: var(--aj-color-primary);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.nearbyText {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.nearbyText strong {
+  color: var(--aj-color-ink);
+}
+
+/* Generic section card wrapper */
+
+.sectionCard {
+  border-radius: var(--aj-radius-lg);
+  background: var(--aj-color-surface);
+  border: 1px solid var(--aj-color-border);
+  box-shadow: var(--aj-shadow-sm);
+  padding: 16px;
+}
+
+.sectionCardHeader {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+/* Contact section helpers */
+
+.contactIntro {
+  margin: 0;
+  color: var(--aj-color-muted);
+}
+
+.contactTop {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.contactIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  background: rgba(14, 165, 164, 0.12);
+  color: #0f766e;
+}
+
+.contactHint {
+  margin: 6px 0 0;
+  color: var(--aj-color-muted);
+  font-size: 13px;
+}
+
+.contactMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(17, 24, 39, 0.06);
+  color: var(--aj-color-muted);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.contactMetaText {
+  min-height: 1px;
+}
+
+.contactChevron {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--aj-color-subtle);
+}
+
+/* Open request detail: provider + rating */
+
+.openRequestDetail .providerCard {
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.openRequestDetail .providerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.openRequestDetail .providerHeaderRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+
+.openRequestDetail .providerBadge {
+  padding: 4px 10px;
+  border-radius: var(--aj-radius-pill);
+  background: rgba(14, 165, 164, 0.14);
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.openRequestDetail .ratingInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--aj-radius-pill);
+  background: rgba(17, 24, 39, 0.04);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  color: var(--aj-color-ink);
+  font-weight: 900;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.openRequestDetail .ratingInlineStar {
+  color: var(--aj-color-warning);
+}
+
+.openRequestDetail .ratingInlineValue {
+  color: #111827;
+}
+
+.openRequestDetail .ratingInlineSep {
+  color: var(--aj-color-subtle);
+  font-weight: 900;
+}
+
+.openRequestDetail .ratingInlineSub {
+  color: var(--aj-color-muted);
+  font-weight: 900;
+}
+
+.openRequestDetail .providerRow {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.openRequestDetail .providerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--aj-radius-pill);
+  display: grid;
+  place-items: center;
+  background: rgba(17, 24, 39, 0.06);
+  color: var(--aj-color-ink);
+  font-weight: 900;
+}
+
+.openRequestDetail .providerName {
+  margin: 0;
+  font-weight: 900;
+  color: var(--aj-color-ink);
+}
+
+.openRequestDetail .providerSubtitle {
+  margin: 4px 0 0;
+  color: var(--aj-color-muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.openRequestDetail .providerReviews {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.openRequestDetail .providerReviewsTitle {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--aj-color-ink);
+}
+
+.openRequestDetail .providerReviewsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.openRequestDetail .providerReview {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(17, 24, 39, 0.02);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.openRequestDetail .providerReviewAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--aj-radius-pill);
+  display: grid;
+  place-items: center;
+  background: rgba(17, 24, 39, 0.06);
+  color: var(--aj-color-ink);
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.openRequestDetail .providerReviewTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.openRequestDetail .providerReviewAuthor {
+  margin: 0;
+  color: var(--aj-color-ink);
+  font-weight: 900;
+}
+
+.openRequestDetail .providerReviewMeta {
+  margin: 0;
+  display: inline-flex;
+  gap: 10px;
+  align-items: baseline;
+  color: var(--aj-color-muted);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.openRequestDetail .providerReviewRating {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-weight: 900;
+}
+
+.openRequestDetail .providerReviewStar {
+  color: var(--aj-color-warning);
+}
+
+.openRequestDetail .providerReviewRatingValue {
+  color: var(--aj-color-ink);
+}
+
+.openRequestDetail .providerReviewDate {
+  color: var(--aj-color-subtle);
+  font-weight: 900;
+}
+
+.openRequestDetail .providerReviewText {
+  margin: 6px 0 0;
+  color: #374151;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.openRequestDetail .authHint {
+  margin: 0;
+  color: var(--aj-color-muted);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.openRequestDetail .authActions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.openRequestDetail .authActions .btn {
+  width: 100%;
+}
+
+.openRequestDetail .authNote {
+  margin: 2px 0 0;
+  color: var(--aj-color-muted);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+

@@ -1,0 +1,262 @@
+<section class="page">
+  <div class="container">
+  <ng-container [ngSwitch]="state()">
+    <div *ngSwitchCase="'loading'" class="grid" aria-busy="true">
+      <div class="card-skeleton" *ngFor="let _ of skeletons; let i = index"></div>
+    </div>
+
+    <div *ngSwitchCase="'error'" class="state state--error" role="status">
+      <p class="state__title">No se pudieron cargar las solicitudes.</p>
+      <p class="state__hint">Revisa tu conexión e inténtalo de nuevo.</p>
+      <button type="button" class="btn" (click)="retry()">Reintentar</button>
+    </div>
+
+    <ng-container *ngSwitchCase="'success'">
+      <ng-container *ngIf="items().length > 0; else empty">
+        <section id="inicio" class="heroLayout">
+          <div class="heroLeft">
+            <div class="chips">
+              <span class="chip" *ngIf="featured()!.locationLabel">{{ featured()!.locationLabel }}</span>
+              <span class="chip" *ngIf="featured()!.budgetLabel">{{ featured()!.budgetLabel }}</span>
+              <span class="chip" *ngIf="featured()!.publishedAtLabel">{{ featured()!.publishedAtLabel }}</span>
+            </div>
+
+            <h1 class="heroTitle">{{ site.config()?.hero?.title ?? 'Tu trabajo ideal te espera' }}</h1>
+            <p class="heroSubtitle">
+              {{ site.config()?.hero?.subtitle ?? 'Explora solicitudes abiertas, filtra rápido y conecta con clientes en minutos.' }}
+            </p>
+
+            <div class="ratingRow" aria-label="Resumen">
+              <span class="ratingText">
+                <strong>{{ items().length }}</strong> solicitudes abiertas
+              </span>
+              <span class="ratingText">· Actualizado recientemente</span>
+            </div>
+
+            <div class="filters" aria-label="Filtros (próximamente)">
+              <label class="field">
+                <span class="fieldLabel">Ubicación</span>
+                <input class="fieldControl" type="text" placeholder="Ciudad o zona" />
+              </label>
+              <label class="field">
+                <span class="fieldLabel">Tipo</span>
+                <select class="fieldControl">
+                  <option value="">Cualquiera</option>
+                  <option value="hogar">Hogar</option>
+                  <option value="oficio">Oficio</option>
+                  <option value="servicio">Servicio</option>
+                </select>
+              </label>
+              <label class="field field--full">
+                <span class="fieldLabel">Necesidad</span>
+                <input class="fieldControl" type="text" placeholder="Ej. electricista, pintura, mudanza" />
+              </label>
+            </div>
+
+            <div class="heroActions">
+              <a *ngIf="featured()" class="btn btnLink" [routerLink]="['/solicitudes', featured()!.id]">
+                Ver solicitudes
+              </a>
+              <button type="button" class="btn btn--link">Solicitar info</button>
+            </div>
+          </div>
+
+          <div class="heroRight">
+            <div class="mediaHero">
+              <span class="badge">Galería destacada</span>
+              <ng-container *ngIf="featured()!.imageUrl; else heroPlaceholder">
+                <img
+                  class="mediaHeroImg"
+                  [src]="featured()!.imageUrl"
+                  [alt]="featured()!.imageAlt ?? ''"
+                  loading="lazy"
+                />
+              </ng-container>
+              <ng-template #heroPlaceholder>
+                <div class="mediaHeroPlaceholder" aria-hidden="true"></div>
+              </ng-template>
+            </div>
+          </div>
+        </section>
+
+        <section id="solicitudes" class="section">
+          <div class="sectionHeader">
+            <div>
+              <p class="sectionLabel">{{ site.config()?.sections?.requests?.label ?? 'SOLICITUDES' }}</p>
+              <h2 class="sectionTitle">{{ site.config()?.sections?.requests?.title ?? 'Selección destacada' }}</h2>
+            </div>
+            <button type="button" class="btn btn--secondary btn--sm">
+              {{ site.config()?.sections?.requests?.cta ?? 'Publicar / Consultar' }}
+            </button>
+          </div>
+
+          <div class="grid">
+            <app-open-request-card
+              *ngFor="let item of listItems(); trackBy: trackById"
+              [request]="item"
+            ></app-open-request-card>
+          </div>
+
+          <div class="footer" *ngIf="hasMore()">
+            <button type="button" class="btn btn--secondary" (click)="loadMore()" [disabled]="isLoadingMore()">
+              {{ isLoadingMore() ? 'Cargando…' : 'Ver más' }}
+            </button>
+            <p class="inline-error" *ngIf="loadMoreError()">No se pudo cargar más. Intenta de nuevo.</p>
+          </div>
+        </section>
+
+        <section id="ubicacion" class="section" #locationSection>
+          <div class="sectionHeader">
+            <div>
+              <p class="sectionLabel">{{ site.config()?.sections?.location?.label ?? 'UBICACIÓN' }}</p>
+              <h2 class="sectionTitle">{{ site.config()?.sections?.location?.title ?? 'Trabajos en tu zona' }}</h2>
+            </div>
+            <button type="button" class="btn btn--secondary btn--sm" (click)="openMap()">
+              {{ site.config()?.sections?.location?.viewMap ?? 'Ver mapa' }}
+            </button>
+          </div>
+
+          <div class="locationCard">
+            <div class="locationMedia" role="img" aria-label="Sección de mapa">
+              <div class="mapCanvas mapCanvas--preview" aria-hidden="true">
+                <div
+                  class="mapPin"
+                  *ngFor="let p of previewPins(); trackBy: trackByPreviewPinId"
+                  [class.mapPin--user]="p.kind === 'user'"
+                  [style.left.%]="p.x"
+                  [style.top.%]="p.y"
+                >
+                  <span class="mapPinDot" aria-hidden="true"></span>
+                  <span class="mapPinLabel">{{ p.label }}</span>
+                </div>
+
+                <div class="mapPreviewOverlay">
+                  <p class="mapPreviewTitle">
+                    {{ site.config()?.sections?.location?.preview?.title ?? 'Ubicación y solicitudes cercanas' }}
+                  </p>
+                  <p class="mapPreviewHint" *ngIf="!userLocation()">
+                    {{ site.config()?.sections?.location?.preview?.hintNoLocation ?? 'Activa tu ubicación para ver el mapa con marcadores reales.' }}
+                  </p>
+                  <p class="mapPreviewHint" *ngIf="userLocation()">
+                    {{ site.config()?.sections?.location?.preview?.hintWithLocation ?? 'Mostrando marcadores cerca de ti (ejemplo).' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="locationBody">
+              <p class="locationText">
+                {{ site.config()?.sections?.location?.body ?? 'Activa tu ubicación y revisa solicitudes abiertas cerca de ti. También puedes explorar el mapa para ver más.' }}
+              </p>
+
+              <div class="nearbyList" *ngIf="nearbyWithDistance().length" aria-label="Solicitudes cercanas (demo)">
+                <div class="nearbyItem" *ngFor="let it of nearbyWithDistance(); trackBy: trackByNearbyId">
+                  <span class="nearbyDot" aria-hidden="true"></span>
+                  <span class="nearbyText">
+                    <strong>{{ it.item.id }}</strong>
+                    <span *ngIf="it.item.locationLabel">· {{ it.item.locationLabel }}</span>
+                    <span *ngIf="it.distanceKm !== null">· ~{{ it.distanceKm | number: '1.0-1' }} km</span>
+                  </span>
+                </div>
+              </div>
+
+              <button type="button" class="btn" (click)="openMap()">
+                {{ site.config()?.sections?.location?.openMap ?? 'Abrir mapa' }}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section id="contacto" class="section">
+          <div class="sectionCard">
+            <div class="sectionCardHeader">
+              <p class="sectionLabel">{{ site.config()?.sections?.contact?.label ?? 'CONTACTO' }}</p>
+              <h2 class="sectionTitle">{{ site.config()?.sections?.contact?.title ?? '¿Hablamos?' }}</h2>
+              <p class="contactIntro">
+                {{ site.config()?.sections?.contact?.intro ?? 'Responde a una solicitud en minutos. Si necesitas ayuda, contáctanos por el canal que prefieras.' }}
+              </p>
+            </div>
+
+            <div class="contactGrid" aria-label="Acciones de contacto">
+              <a
+                class="contactCard"
+                [href]="site.config()?.sections?.contact?.phone?.href ?? 'tel:+34000000000'"
+                aria-label="Llamar por teléfono"
+              >
+                <div class="contactTop">
+                  <div class="contactIcon" aria-hidden="true">☎</div>
+                  <div>
+                    <p class="contactTitle">{{ site.config()?.sections?.contact?.phone?.label ?? 'TELÉFONO' }}</p>
+                    <p class="contactValue">{{ site.config()?.sections?.contact?.phone?.value ?? '+34 000 000 000' }}</p>
+                    <p class="contactHint">{{ site.config()?.sections?.contact?.phone?.hint ?? 'Ideal para dudas rápidas.' }}</p>
+                  </div>
+                </div>
+                <div class="contactMeta">
+                  <span class="contactMetaText" aria-hidden="true"></span>
+                  <span class="contactChevron" aria-hidden="true">›</span>
+                </div>
+              </a>
+
+              <a
+                class="contactCard"
+                [href]="site.config()?.sections?.contact?.email?.href ?? 'mailto:hola@anyjobs.local'"
+                aria-label="Enviar email"
+              >
+                <div class="contactTop">
+                  <div class="contactIcon" aria-hidden="true">✉</div>
+                  <div>
+                    <p class="contactTitle">{{ site.config()?.sections?.contact?.email?.label ?? 'EMAIL' }}</p>
+                    <p class="contactValue">{{ site.config()?.sections?.contact?.email?.value ?? 'hola@anyjobs.local' }}</p>
+                    <p class="contactHint">{{ site.config()?.sections?.contact?.email?.hint ?? 'Te respondemos con detalles.' }}</p>
+                  </div>
+                </div>
+                <div class="contactMeta">
+                  <span class="contactMetaText" aria-hidden="true"></span>
+                  <span class="contactChevron" aria-hidden="true">›</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <app-modal [open]="isMapOpen()" title="Mapa" (closed)="closeMap()">
+          <div class="mapModal">
+            <p class="mapAddress">
+              {{ userAddressLabel() }}: <strong>{{ userAddressValue() }}</strong>
+            </p>
+
+            <div class="mapStatus" *ngIf="isLocating()">Obteniendo tu ubicación…</div>
+            <div class="mapStatus mapStatus--error" *ngIf="locationError()" role="status">
+              {{ locationError() }}
+            </div>
+
+            <app-requests-map
+              *ngIf="userLocation()"
+              [center]="userLocation()"
+              [markers]="mapMarkers()"
+            ></app-requests-map>
+
+            <div class="mapLegend" aria-label="Leyenda">
+              <div class="legendItem">
+                <span class="legendDot legendDot--user" aria-hidden="true"></span>
+                <span>Tu dirección</span>
+              </div>
+              <div class="legendItem">
+                <span class="legendDot legendDot--request" aria-hidden="true"></span>
+                <span>Solicitudes abiertas</span>
+              </div>
+            </div>
+          </div>
+        </app-modal>
+      </ng-container>
+
+      <ng-template #empty>
+        <div class="state" role="status">
+          <p class="state__title">No hay solicitudes abiertas por ahora.</p>
+          <p class="state__hint">Vuelve más tarde para ver nuevas publicaciones.</p>
+        </div>
+      </ng-template>
+    </ng-container>
+  </ng-container>
+  </div>
+</section>
+

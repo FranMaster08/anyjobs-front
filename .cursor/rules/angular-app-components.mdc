@@ -1,0 +1,37 @@
+---
+description: Angular (apps): estructura de componentes + doc breve y legible
+globs: "**/src/app/**/*.{ts,html,scss,css}"
+alwaysApply: false
+---
+
+# Angular (apps): Componentes en `components/` + buenas prácticas
+
+- **Estructura (por defecto)**: crea componentes en `src/app/components/<kebab-name>/`.
+  - Archivos esperados: `<name>.ts`, `<name>.html`, `<name>.scss` (o `.css`), `<name>.spec.ts` (si hay tests).
+  - Un componente por carpeta; evita mezclar variantes no relacionadas.
+- **Excepciones permitidas**:
+  - Componentes “pantalla”/route-level: `src/app/features/<feature>/<kebab-name>/`.
+  - Layout/host: `src/app/shell/<kebab-name>/`.
+- **Naming**:
+  - Carpeta/archivo en **kebab-case** y consistentes (p. ej. `user-card/user-card.ts`).
+  - `selector` con prefijo `app-` y nombre kebab (`app-user-card`).
+- **Buenas prácticas Angular/TS**:
+  - Importa solo lo que uses en `imports: [...]`.
+  - Usa `ChangeDetectionStrategy.OnPush` por defecto; si no, justifica con una razón técnica.
+  - Tipado estricto (sin `any`), `readonly` cuando aplique, APIs públicas mínimas (`protected` para lo usado por template).
+  - Mantén lógica compleja fuera del template (mueve a métodos/servicios/pipes) y evita side-effects en getters.
+  - Accesibilidad: `type="button"` en botones no-submit, `aria-*` cuando corresponda, etiquetas asociadas en inputs.
+- **Comentarios documentales (breves, no verbosos)**:
+  - Cada componente debe tener un bloque JSDoc/TSDoc explicando **objetivo**, **responsabilidades** y **no-objetivos** (si evita mal uso).
+  - Documenta solo lo no obvio (supuestos, restricciones, trade-offs); evita comentarios narrativos.
+
+Ejemplo mínimo recomendado:
+
+```ts
+/**
+ * Muestra un resumen de usuario para listas (avatar + nombre + estado).
+ * Responsabilidad: render UI y emitir eventos de interacción.
+ * No hace: llamadas a API ni lógica de autorización.
+ */
+```
+

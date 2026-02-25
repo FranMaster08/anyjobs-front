@@ -1,0 +1,23 @@
+<ng-container *ngIf="open">
+  <div class="overlay" (click)="onOverlayClick($event)" role="presentation">
+    <div
+      class="panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="title ? titleId : null"
+      [attr.aria-label]="!title ? ariaLabel : null"
+    >
+      <header class="header">
+        <h2 class="title" *ngIf="title" [id]="titleId">{{ title }}</h2>
+        <button type="button" class="closeBtn" (click)="requestClose()" aria-label="Cerrar">
+          ✕
+        </button>
+      </header>
+
+      <div class="content">
+        <ng-content />
+      </div>
+    </div>
+  </div>
+</ng-container>
+

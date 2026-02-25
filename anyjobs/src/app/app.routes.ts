@@ -10,6 +10,25 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () => import('./features/home/home/home').then((m) => m.Home),
       },
+      {
+        path: 'solicitudes',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/open-requests/open-requests-landing/open-requests-landing').then(
+                (m) => m.OpenRequestsLanding,
+              ),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/open-requests/open-request-detail/open-request-detail').then(
+                (m) => m.OpenRequestDetail,
+              ),
+          },
+        ],
+      },
     ],
   },
   { path: '**', redirectTo: '' },

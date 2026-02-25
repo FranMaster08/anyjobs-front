@@ -1,7 +1,54 @@
 <header class="app-header">
-  <div class="app-brand">Anyjobs</div>
+  <div class="headerInner">
+    <a class="brand" [routerLink]="['/solicitudes']" fragment="inicio">
+      {{ site.config()?.brandName ?? t('brand.name') }}
+    </a>
+
+    <nav class="nav" aria-label="Navegación principal">
+      <a class="navLink" [routerLink]="['/solicitudes']" fragment="inicio">
+        {{ t('nav.inicio') }}
+      </a>
+      <a class="navLink" [routerLink]="['/solicitudes']" fragment="solicitudes">
+        {{ t('nav.solicitudes') }}
+      </a>
+      <a class="navLink" [routerLink]="['/solicitudes']" fragment="ubicacion">
+        {{ t('nav.ubicacion') }}
+      </a>
+      <a class="navLink" [routerLink]="['/solicitudes']" fragment="contacto">
+        {{ t('nav.contacto') }}
+      </a>
+    </nav>
+
+    <div class="headerActions">
+      <select
+        class="langSelect"
+        [value]="i18n.lang()"
+        (change)="onLangChange($event)"
+        aria-label="Idioma"
+      >
+        <option value="es">{{ t('lang.es') }}</option>
+        <option value="en">{{ t('lang.en') }}</option>
+      </select>
+
+      <a class="cta" [routerLink]="['/solicitudes']" fragment="contacto">
+        {{ site.config()?.sections?.requests?.cta ?? t('cta.publicar') }}
+      </a>
+    </div>
+  </div>
 </header>
 
 <main class="app-main">
   <router-outlet />
 </main>
+
+<footer class="app-footer" aria-label="Footer">
+  <div class="footerInner">
+    <div class="footerBrand">{{ site.config()?.brandName ?? t('brand.name') }}</div>
+    <div class="footerLinks">
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="inicio">{{ t('nav.inicio') }}</a>
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="solicitudes">{{ t('nav.solicitudes') }}</a>
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="ubicacion">{{ t('nav.ubicacion') }}</a>
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="contacto">{{ t('nav.contacto') }}</a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,37 @@
+---
+description: UI Anyjobs: paleta y tipografía consistentes (tokens CSS)
+globs: anyjobs/src/**/*.{scss,css,html}
+alwaysApply: false
+---
+
+# Anyjobs UI: tokens (colores + tipografía)
+
+- Usa **solo tokens** (CSS variables) para colores, sombras, radios y tipografía. Evita hex/rgba “sueltos” en componentes.
+- La fuente base es **Roboto** (sin redefinir `font-family` en componentes).
+- Mantén una jerarquía simple de pesos: 900 (títulos), 800 (labels/CTAs), 700 (texto), 600 (chips/badges).
+
+## Tokens (en `anyjobs/src/styles.scss`)
+
+- `--aj-color-primary`, `--aj-color-ink`, `--aj-color-muted`, `--aj-color-subtle`
+- `--aj-color-surface`, `--aj-color-bg`, `--aj-color-border`
+- `--aj-color-focus`, `--aj-color-warning`
+- `--aj-shadow-sm`, `--aj-shadow-lg`, `--aj-radius-md`, `--aj-radius-pill`
+
+## Ejemplos
+
+```scss
+/* ✅ bien */
+.card {
+  background: var(--aj-color-surface);
+  border: 1px solid var(--aj-color-border);
+  box-shadow: var(--aj-shadow-sm);
+  border-radius: var(--aj-radius-md);
+}
+
+/* ❌ mal */
+.card {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+```
+

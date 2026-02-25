@@ -1,0 +1,229 @@
+{
+  "pages": {
+    "1": {
+      "items": [
+        {
+          "id": "req-1001",
+          "imageUrl": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1920,fit=crop/mePxX4BPDOi311E9/img_8176-Y4LD3W5wRNtGVlRQ.JPG",
+          "imageAlt": "Imagen de referencia (hero)",
+          "excerpt": "Necesito electricista para cambiar tablero y revisar térmicas.",
+          "tags": ["Urgente", "Domicilio", "Privado"],
+          "locationLabel": "Jois, Burgenland",
+          "publishedAtLabel": "Hoy",
+          "budgetLabel": "€80–€120"
+        },
+        {
+          "id": "req-1002",
+          "imageUrl": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=588,h=531,fit=crop/mePxX4BPDOi311E9/penultimo2-m7V38JE22VtpyN5O.jpg",
+          "imageAlt": "Imagen de referencia (galería)",
+          "excerpt": "Arreglo de grifería en cocina y reemplazo de flexible.",
+          "tags": ["Cocina", "Nuevo"],
+          "locationLabel": "Vienna",
+          "publishedAtLabel": "Ayer",
+          "budgetLabel": "€40–€60"
+        },
+        {
+          "id": "req-1003",
+          "imageUrl": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=581,h=522,fit=crop/mePxX4BPDOi311E9/img_0471-Y4LDlv140nUxzlDQ.jpeg",
+          "imageAlt": "Imagen de referencia (interior)",
+          "excerpt": "Pintura interior para 2 ambientes. Material incluido.",
+          "tags": ["Pintura", "Interior"],
+          "locationLabel": "Graz",
+          "publishedAtLabel": "Hace 2 días",
+          "budgetLabel": "A convenir"
+        }
+      ],
+      "nextPage": 2,
+      "hasMore": true
+    },
+    "2": {
+      "items": [
+        {
+          "id": "req-1004",
+          "imageUrl": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=589,h=415,fit=crop/mePxX4BPDOi311E9/penultimo3-Y4LDONO0PKfrj4LM.jpg",
+          "imageAlt": "Imagen de referencia (exterior)",
+          "excerpt": "Mudanza de 1 habitación, 5 km de distancia. Ideal furgón.",
+          "tags": ["Mudanza"],
+          "locationLabel": "Salzburg",
+          "publishedAtLabel": "Hace 3 días",
+          "budgetLabel": "€70"
+        },
+        {
+          "id": "req-1005",
+          "excerpt": "Instalación de aire acondicionado split. Ya tengo el equipo.",
+          "tags": ["Aire acondicionado"],
+          "locationLabel": "Linz",
+          "publishedAtLabel": "Hace 5 días",
+          "budgetLabel": "€150–€220"
+        }
+      ],
+      "nextPage": null,
+      "hasMore": false
+    }
+  },
+  "details": {
+    "req-1001": {
+      "id": "req-1001",
+      "title": "Electricista para tablero",
+      "excerpt": "Necesito electricista para cambiar tablero y revisar térmicas.",
+      "description": "Necesito un electricista matriculado para revisar el tablero, cambiar térmicas si corresponde y dejar todo seguro. Hay cortes esporádicos en la cocina y quiero diagnóstico, materiales recomendados y presupuesto antes de comenzar. Preferible visita por la tarde.",
+      "providerName": "Karen Leyba",
+      "providerBadge": "Respuesta rápida",
+      "providerSubtitle": "Cliente verificado · 3 años publicando",
+      "reputation": 4.88,
+      "reviewsCount": 273,
+      "providerReviews": [
+        {
+          "author": "Carlos R.",
+          "rating": 5.0,
+          "dateLabel": "Hace 1 semana",
+          "text": "Karen explicó todo con claridad y coordinó horarios sin vueltas. Muy recomendable."
+        },
+        {
+          "author": "Sofía M.",
+          "rating": 4.7,
+          "dateLabel": "Hace 3 semanas",
+          "text": "La comunicación fue rápida y precisa. El trabajo se publicó con todos los detalles."
+        },
+        {
+          "author": "Javier L.",
+          "rating": 4.9,
+          "dateLabel": "Hace 1 mes",
+          "text": "Seria y puntual. Me gustó que respondió casi al instante y resolvió dudas."
+        }
+      ],
+      "contactPhone": "+34000000000",
+      "contactEmail": "hola@anyjobs.local",
+      "images": [
+        {
+          "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1920,fit=crop/mePxX4BPDOi311E9/img_8176-Y4LD3W5wRNtGVlRQ.JPG",
+          "alt": "Imagen de referencia (hero)"
+        },
+        {
+          "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=593,h=468,fit=crop/mePxX4BPDOi311E9/penultimo-1-AVL736Dg5zsJp3BO.jpg",
+          "alt": "Imagen de referencia (galería)"
+        }
+      ]
+    },
+    "req-1002": {
+      "id": "req-1002",
+      "title": "Arreglo de grifería",
+      "excerpt": "Arreglo de grifería en cocina y reemplazo de flexible.",
+      "description": "La canilla de la cocina pierde agua por la base y el flexible está viejo. Necesito reemplazar flexible, revisar juntas/sellos y dejar todo sin pérdidas. Cuento con acceso al bajo mesada, pero es un espacio reducido. Ideal si puedes traer repuestos estándar y confirmar medidas en la visita.",
+      "providerName": "Ana Gómez",
+      "providerBadge": "Verificado",
+      "providerSubtitle": "Cliente verificado",
+      "reputation": 4.35,
+      "reviewsCount": 41,
+      "providerReviews": [
+        {
+          "author": "María P.",
+          "rating": 4.8,
+          "dateLabel": "Hace 2 días",
+          "text": "Ana fue muy amable y detalló exactamente lo que necesitaba. Facilita mucho presupuestar."
+        },
+        {
+          "author": "Nicolás G.",
+          "rating": 4.2,
+          "dateLabel": "Hace 1 semana",
+          "text": "Respondió rápido y dejó fotos del problema. Se coordinó en el mismo día."
+        },
+        {
+          "author": "Valentina S.",
+          "rating": 4.1,
+          "dateLabel": "Hace 3 semanas",
+          "text": "Todo claro: ubicación, horarios y alcance. Muy buena experiencia."
+        }
+      ],
+      "contactPhone": "+34000000000",
+      "contactEmail": "hola@anyjobs.local",
+      "images": [
+        {
+          "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=588,h=531,fit=crop/mePxX4BPDOi311E9/penultimo2-m7V38JE22VtpyN5O.jpg",
+          "alt": "Imagen de referencia (galería)"
+        }
+      ]
+    },
+    "req-1004": {
+      "id": "req-1004",
+      "title": "Mudanza pequeña",
+      "excerpt": "Mudanza de 1 habitación, 5 km de distancia. Ideal furgón.",
+      "description": "Mudanza de una habitación: cama de 2 plazas desarmable, una cómoda y 6 cajas medianas. Distancia aproximada 5 km. Hay ascensor en origen y en destino, pero necesito ayuda para cargar/descargar y asegurar los muebles. Busco coordinación para fin de semana y confirmar si incluyes mantas/cintas.",
+      "providerName": "Miguel Fernández",
+      "providerBadge": "Nuevo",
+      "providerSubtitle": "Cliente nuevo",
+      "reputation": 4.10,
+      "reviewsCount": 8,
+      "providerReviews": [
+        {
+          "author": "Lucía T.",
+          "rating": 4.0,
+          "dateLabel": "Hace 5 días",
+          "text": "Miguel fue directo y con buena disposición para coordinar. Publicación clara."
+        },
+        {
+          "author": "Diego A.",
+          "rating": 4.3,
+          "dateLabel": "Hace 2 semanas",
+          "text": "La info estaba completa y el contacto fue rápido. Bien para ser nuevo."
+        }
+      ],
+      "contactPhone": "+34000000000",
+      "contactEmail": "hola@anyjobs.local",
+      "images": [
+        {
+          "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=589,h=415,fit=crop/mePxX4BPDOi311E9/penultimo3-Y4LDONO0PKfrj4LM.jpg",
+          "alt": "Imagen de referencia (exterior)"
+        },
+        {
+          "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=586,h=468,fit=crop/mePxX4BPDOi311E9/img-20250402-wa0014-dWxvMKE1jQukLQ13.jpg",
+          "alt": "Imagen de referencia (galería)"
+        }
+      ]
+    },
+    "req-1003": {
+      "id": "req-1003",
+      "title": "Pintura interior",
+      "excerpt": "Pintura interior para 2 ambientes. Material incluido.",
+      "description": "Pintura interior de dos ambientes (living y dormitorio). Las paredes están en buen estado, pero quiero cambiar a un tono más claro y prolijo. Necesito preparación mínima, cubrir muebles y proteger pisos. Incluye materiales si puedes, y dime cuántas manos recomiendas y tiempos estimados de secado.",
+      "providerName": "Laura Pérez",
+      "providerBadge": "Respuesta rápida",
+      "providerSubtitle": "Cliente verificado · 1 año publicando",
+      "reputation": 4.92,
+      "reviewsCount": 118,
+      "providerReviews": [
+        {
+          "author": "Camila V.",
+          "rating": 5.0,
+          "dateLabel": "Ayer",
+          "text": "Laura especificó medidas y acabados. Así da gusto cotizar, todo muy ordenado."
+        },
+        {
+          "author": "Andrés P.",
+          "rating": 4.9,
+          "dateLabel": "Hace 2 semanas",
+          "text": "Buena comunicación y flexibilidad de horarios. Recomendable."
+        },
+        {
+          "author": "Paula C.",
+          "rating": 4.8,
+          "dateLabel": "Hace 1 mes",
+          "text": "Detalle completo y respuesta rápida. Me resolvió dudas en minutos."
+        }
+      ],
+      "contactPhone": "+34000000000",
+      "contactEmail": "hola@anyjobs.local",
+      "images": [
+        {
+          "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=581,h=522,fit=crop/mePxX4BPDOi311E9/img_0471-Y4LDlv140nUxzlDQ.jpeg",
+          "alt": "Imagen de referencia (interior)"
+        },
+        {
+          "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=583,h=544,fit=crop/mePxX4BPDOi311E9/img_0466-d951M4Lgwjs9BePw.jpeg",
+          "alt": "Imagen de referencia (detalle)"
+        }
+      ]
+    }
+  }
+}
+

@@ -1,0 +1,23 @@
+---
+description: Landing de solicitudes abiertas debe seguir estructura de referencia (hero + destacados)
+globs: "anyjobs/src/app/features/open-requests/open-requests-landing/**/*.{ts,html,scss,css}"
+alwaysApply: true
+---
+
+# Open Requests Landing: estructura basada en @reference
+
+Cuando edites `open-requests-landing`, **la landing debe basarse en la estructura de referencia**:
+
+- **Hero (2 columnas)**:
+  - **Columna izquierda**: chips/badges + título grande + descripción corta + (opcional) resumen de métricas + formulario de “filtros” (aunque sea no funcional) + CTAs.
+  - **Columna derecha**: media/imagen destacada con un badge tipo “Galería destacada”.
+- **Sección inferior**:
+  - Título tipo “Selección destacada”
+  - Grid de cards con acciones (p. ej. ver detalle/consultar)
+
+Reglas de implementación:
+- Mantén el componente **route-level** como orquestador (fetch/estados) y UI compuesta.
+- Conserva estados UX: **skeleton**, **empty**, **error + reintento**, y **paginación**.
+- Accesibilidad: foco visible, `type="button"` en botones, `aria-*` cuando aplique, `alt` útil si la imagen es informativa.
+- Evita acoplar la landing a dependencias externas; usa CSS/SCSS local y componentes existentes.
+
