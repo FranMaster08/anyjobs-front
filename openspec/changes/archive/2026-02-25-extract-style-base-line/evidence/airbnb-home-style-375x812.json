@@ -1,0 +1,1983 @@
+{
+  "meta": {
+    "url": "https://www.airbnb.com.ar/?gclsrc=aw.ds&&c=.pi0.pk220135635_19506907875&ghost=true&gad_source=1&gad_campaignid=220135635&gbraid=0AAAAADz55LkGXUGoi3XSG5CkRvS-f0wFT&gclid=CjwKCAiA2PrMBhA4EiwAwpHyC_PS39Ygpc4n32akQo6QJskX2u7xjalUBSYJwWxad7UsM5QeuIg4ixoCXgMQAvD_BwE",
+    "capturedAt": "2026-02-25T13:50:56.775Z",
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "notes": [
+      {
+        "type": "raw.cssVariables.truncated",
+        "message": "raw.cssVariables fue truncado a 250 entradas por límites de tamaño de salida; los tokens se derivan principalmente de estilos computados.",
+        "originalCount": 1733,
+        "keptCount": 250
+      },
+      {
+        "type": "sampling.missingElements",
+        "message": "No se encontró un input/combobox visible para muestrear."
+      },
+      {
+        "type": "breakpoints.unresolved",
+        "message": "No se pudieron inferir breakpoints (media queries/vars) de forma confiable desde el DOM/CSS accesible; se dejan en null."
+      },
+      {
+        "type": "network.observedResources",
+        "cssCount": 1,
+        "fontCount": 1,
+        "sampleCssUrls": [
+          "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+        ],
+        "sampleFontUrls": [
+          "https://a0.muscache.com/airbnb/static/airbnb-dls-web/build/fonts/cereal-variable/AirbnbCerealVF_W_Wght.8816d9e5c3b6a860636193e36b6ac4e4.woff2"
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "stylesheets": [
+      {
+        "href": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css",
+        "inline": false,
+        "sizeBytes": 0
+      },
+      {
+        "href": "inline:<style#1>",
+        "inline": true,
+        "sizeBytes": 0
+      },
+      {
+        "href": "inline:<style#2>",
+        "inline": true,
+        "sizeBytes": 6820
+      },
+      {
+        "href": "inline:<style#3>",
+        "inline": true,
+        "sizeBytes": 0
+      },
+      {
+        "href": "inline:<style#4>",
+        "inline": true,
+        "sizeBytes": 38
+      }
+    ],
+    "fonts": [
+      {
+        "family": "-webkit-standard",
+        "source": "unknown",
+        "weights": [
+          "700",
+          "400",
+          "500"
+        ],
+        "styles": []
+      },
+      {
+        "family": "Airbnb Cereal VF",
+        "source": "self-hosted",
+        "weights": [
+          "700",
+          "400",
+          "500"
+        ],
+        "styles": []
+      },
+      {
+        "family": "Circular",
+        "source": "unknown",
+        "weights": [
+          "700",
+          "400",
+          "500"
+        ],
+        "styles": []
+      },
+      {
+        "family": "-apple-system",
+        "source": "unknown",
+        "weights": [
+          "700",
+          "400",
+          "500"
+        ],
+        "styles": []
+      },
+      {
+        "family": "BlinkMacSystemFont",
+        "source": "unknown",
+        "weights": [
+          "700",
+          "400",
+          "500"
+        ],
+        "styles": []
+      },
+      {
+        "family": "Roboto",
+        "source": "unknown",
+        "weights": [
+          "700",
+          "400",
+          "500"
+        ],
+        "styles": []
+      }
+    ]
+  },
+  "tokens": {
+    "color": {
+      "palette": {
+        "neutrals": [
+          {
+            "name": "neutral.1",
+            "value": "#000000"
+          },
+          {
+            "name": "neutral.2",
+            "value": "#222222"
+          },
+          {
+            "name": "neutral.3",
+            "value": "#FFFFFF"
+          },
+          {
+            "name": "neutral.4",
+            "value": "#DDDDDD"
+          },
+          {
+            "name": "neutral.5",
+            "value": "#F7F7F7"
+          }
+        ],
+        "brand": [
+          {
+            "name": "palette.rausch",
+            "value": "#FF385C"
+          },
+          {
+            "name": "palette.productRausch",
+            "value": "#E00B41"
+          },
+          {
+            "name": "palette.plus",
+            "value": "#92174D"
+          },
+          {
+            "name": "palette.luxe",
+            "value": "#460479"
+          }
+        ],
+        "semantic": [
+          {
+            "name": "text.primary",
+            "value": "rgb(34, 34, 34)"
+          },
+          {
+            "name": "bg.page",
+            "value": "rgb(255, 255, 255)"
+          },
+          {
+            "name": "border.default",
+            "value": null
+          },
+          {
+            "name": "action.primary",
+            "value": "#FF385C"
+          },
+          {
+            "name": "danger",
+            "value": null
+          }
+        ]
+      },
+      "usageRules": []
+    },
+    "typography": {
+      "scale": [
+        {
+          "token": "text.h1",
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "28px",
+          "fontWeight": "700",
+          "lineHeight": "40.040001px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "evidence": [
+            {
+              "selector": "h1",
+              "computedFrom": "computed",
+              "snippet": "{\"display\":\"block\",\"position\":\"absolute\",\"flexDirection\":\"row\",\"alignItems\":\"normal\",\"justifyContent\":\"normal\",\"gap\":\"normal\",\"width\":\"1px\",\"maxWidth\":\"none\",\"height\":\"1px\",\"padding\":\"0px\",\"margin\":\"0px 0px 15px\",\"border\":\"0px none rgb(34, 34, 34)\",\"borderTop\":\"0px none rgb(34, 34, 34)\",\"borderRadius\":\"0px\",\"background\":\"rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(34, 34, 34)\",\"boxShadow\":\"none\",\"opacity\":\"1\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"28px\",\"fontWeight\":\"700\",\"lineHeight\":\"40.040001px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\",\"outline\":\"3px none rgb(34, 34, 34)\",\"outlineOffset\":\"0px\",\"transitionProperty\":\"all\",\"transitionDuration\":\"0s\",\"transitionTimingFunction\":\"ease\",\"fontSmoothing\":\"antialiased\"}"
+            }
+          ]
+        },
+        {
+          "token": "text.h2",
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20.02px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "evidence": [
+            {
+              "selector": "h2",
+              "computedFrom": "computed",
+              "snippet": "{\"display\":\"block\",\"position\":\"static\",\"flexDirection\":\"row\",\"alignItems\":\"normal\",\"justifyContent\":\"normal\",\"gap\":\"normal\",\"width\":\"281px\",\"maxWidth\":\"none\",\"height\":\"48px\",\"padding\":\"0px\",\"margin\":\"0px\",\"border\":\"0px none rgb(34, 34, 34)\",\"borderTop\":\"0px none rgb(34, 34, 34)\",\"borderRadius\":\"0px\",\"background\":\"rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(34, 34, 34)\",\"boxShadow\":\"none\",\"opacity\":\"1\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"400\",\"lineHeight\":\"20.02px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\",\"outline\":\"3px none rgb(34, 34, 34)\",\"outlineOffset\":\"0px\",\"transitionProperty\":\"all\",\"transitionDuration\":\"0s\",\"transitionTimingFunction\":\"ease\",\"fontSmoothing\":\"antialiased\"}"
+            }
+          ]
+        },
+        {
+          "token": "text.h3",
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "evidence": [
+            {
+              "selector": "h3",
+              "computedFrom": "computed",
+              "snippet": "{\"display\":\"block\",\"position\":\"static\",\"flexDirection\":\"row\",\"alignItems\":\"normal\",\"justifyContent\":\"normal\",\"gap\":\"normal\",\"width\":\"327px\",\"maxWidth\":\"none\",\"height\":\"18px\",\"padding\":\"0px\",\"margin\":\"0px 0px 16px\",\"border\":\"0px none rgb(34, 34, 34)\",\"borderTop\":\"0px none rgb(34, 34, 34)\",\"borderRadius\":\"0px\",\"background\":\"rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(34, 34, 34)\",\"boxShadow\":\"none\",\"opacity\":\"1\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"500\",\"lineHeight\":\"18px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\",\"outline\":\"3px none rgb(34, 34, 34)\",\"outlineOffset\":\"0px\",\"transitionProperty\":\"all\",\"transitionDuration\":\"0s\",\"transitionTimingFunction\":\"ease\",\"fontSmoothing\":\"antialiased\"}"
+            }
+          ]
+        }
+      ],
+      "body": {
+        "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+        "fontSize": "14px",
+        "lineHeight": "20.02px"
+      }
+    },
+    "radius": {
+      "scale": [
+        {
+          "token": "radius.sm",
+          "value": "20px",
+          "evidence": [
+            {
+              "selector": "[data-style-extractor-id=\"button\"]",
+              "computedFrom": "computed",
+              "snippet": ""
+            }
+          ]
+        },
+        {
+          "token": "radius.md",
+          "value": "40px",
+          "evidence": []
+        },
+        {
+          "token": "radius.lg",
+          "value": "40px",
+          "evidence": [
+            {
+              "selector": "[data-style-extractor-id=\"card\"]",
+              "computedFrom": "computed",
+              "snippet": ""
+            }
+          ]
+        },
+        {
+          "token": "radius.pill",
+          "value": null,
+          "evidence": []
+        }
+      ]
+    },
+    "spacing": {
+      "scale": [
+        {
+          "token": "space.1",
+          "value": "8px",
+          "evidence": [
+            {
+              "selector": "[data-style-extractor-id=\"button\"]",
+              "computedFrom": "computed",
+              "snippet": ""
+            }
+          ]
+        },
+        {
+          "token": "space.2",
+          "value": "10px",
+          "evidence": []
+        }
+      ]
+    },
+    "shadow": {
+      "scale": [
+        {
+          "token": "shadow.sm",
+          "value": "rgba(0, 0, 0, 0.1) 0px 6px 20px 0px",
+          "evidence": [
+            {
+              "selector": "[data-style-extractor-id=\"card\"]",
+              "computedFrom": "computed",
+              "snippet": ""
+            }
+          ]
+        },
+        {
+          "token": "shadow.md",
+          "value": "rgba(0, 0, 0, 0.1) 0px 6px 20px 0px",
+          "evidence": [
+            {
+              "selector": "[data-style-extractor-id=\"card\"]",
+              "computedFrom": "computed",
+              "snippet": ""
+            }
+          ]
+        },
+        {
+          "token": "shadow.lg",
+          "value": null,
+          "evidence": [
+            {
+              "selector": "[data-style-extractor-id=\"card\"]",
+              "computedFrom": "computed",
+              "snippet": ""
+            }
+          ]
+        }
+      ]
+    },
+    "border": {
+      "widths": [
+        {
+          "token": "border.1",
+          "value": "1px"
+        }
+      ],
+      "styles": [
+        {
+          "token": "border.solid",
+          "value": "solid"
+        }
+      ]
+    },
+    "motion": {
+      "durations": [
+        {
+          "token": "duration.fast",
+          "value": "0.2s, 0.1s"
+        }
+      ],
+      "easings": [
+        {
+          "token": "ease.standard",
+          "value": "cubic-bezier(0.2, 0, 0, 1), cubic-bezier(0.2, 0, 0, 1)"
+        }
+      ]
+    },
+    "breakpoints": {
+      "values": [
+        {
+          "token": "bp.sm",
+          "value": null
+        },
+        {
+          "token": "bp.md",
+          "value": null
+        },
+        {
+          "token": "bp.lg",
+          "value": null
+        }
+      ]
+    }
+  },
+  "layout": {
+    "page": {
+      "background": "rgb(255, 255, 255)",
+      "maxWidth": null,
+      "gutter": null,
+      "containerSelectors": [],
+      "evidence": []
+    },
+    "gridAndFlexPatterns": []
+  },
+  "components": [
+    {
+      "id": "component.button.1",
+      "name": "Button",
+      "selectors": [
+        "[data-style-extractor-id=\"button\"]"
+      ],
+      "base": {
+        "display": "flex",
+        "padding": "10px 19px",
+        "borderRadius": "40px",
+        "border": "1px solid rgb(221, 221, 221)",
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(34, 34, 34)",
+        "font": {
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "normal",
+          "textTransform": "none"
+        },
+        "shadow": "rgba(0, 0, 0, 0.1) 0px 6px 20px 0px",
+        "gap": "normal"
+      },
+      "states": {
+        "hover": {
+          "display": "flex",
+          "padding": "10px 19px",
+          "border": "1px solid rgb(0, 0, 0)",
+          "borderRadius": "40px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(0, 0, 0)",
+          "boxShadow": "rgba(0, 0, 0, 0.1) 0px 6px 20px 0px",
+          "outline": "3px none rgb(0, 0, 0)",
+          "transitionProperty": "box-shadow, transform",
+          "transitionDuration": "0.2s, 0.1s",
+          "transitionTimingFunction": "cubic-bezier(0.2, 0, 0, 1), cubic-bezier(0.2, 0, 0, 1)",
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "textDecoration": "none"
+        },
+        "active": null,
+        "focus": {
+          "display": "flex",
+          "padding": "10px 19px",
+          "border": "1px solid rgb(0, 0, 0)",
+          "borderRadius": "40px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(0, 0, 0)",
+          "boxShadow": "rgba(255, 255, 255, 0.996) 0px 0.030987px 0.103291px 1.989671px, rgba(34, 34, 34, 0.996) 0px 0px 0px 3.979342px",
+          "outline": "3px none rgb(0, 0, 0)",
+          "transitionProperty": "box-shadow",
+          "transitionDuration": "0.2s",
+          "transitionTimingFunction": "cubic-bezier(0.2, 0, 0, 1)",
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "lineHeight": "18px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "textDecoration": "none"
+        },
+        "disabled": null
+      },
+      "tokensUsed": [],
+      "evidence": [
+        {
+          "selector": "[data-style-extractor-id=\"button\"]",
+          "computedFrom": "computed",
+          "snippet": "{\"base\":{\"display\":\"flex\",\"padding\":\"10px 19px\",\"border\":\"1px solid rgb(221, 221, 221)\",\"borderRadius\":\"40px\",\"backgroundColor\":\"rgb(255, 255, 255)\",\"color\":\"rgb(34, 34, 34)\",\"boxShadow\":\"rgba(0, 0, 0, 0.1) 0px 6px 20px 0px\",\"outline\":\"3px none rgb(34, 34, 34)\",\"transitionProperty\":\"box-shadow, transform\",\"transitionDuration\":\"0.2s, 0.1s\",\"transitionTimingFunction\":\"cubic-bezier(0.2, 0, 0, 1), cubic-bezier(0.2, 0, 0, 1)\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"500\",\"lineHeight\":\"18px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\"},\"hover\":{\"display\":\"flex\",\"padding\":\"10px 19px\",\"border\":\"1px solid rgb(0, 0, 0)\",\"borderRadius\":\"40px\",\"backgroundColor\":\"rgb(255, 255, 255)\",\"color\":\"rgb(0, 0, 0)\",\"boxShadow\":\"rgba(0, 0, 0, 0.1) 0px 6px 20px 0px\",\"outline\":\"3px none rgb(0, 0, 0)\",\"transitionProperty\":\"box-shadow, transform\",\"transitionDuration\":\"0.2s, 0.1s\",\"transitionTimingFunction\":\"cubic-bezier(0.2, 0, 0, 1), cubic-bezier(0.2, 0, 0, 1)\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"500\",\"lineHeight\":\"18px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\"},\"focus\":{\"display\":\"flex\",\"padding\":\"10px 19px\",\"border\":\"1px solid rgb(0, 0, 0)\",\"borderRadius\":\"40px\",\"backgroundColor\":\"rgb(255, 255, 255)\",\"color\":\"rgb(0, 0, 0)\",\"boxShadow\":\"rgba(255, 255, 255, 0.996) 0px 0.030987px 0.103291px 1.989671px, rgba(34, 34, 34, 0.996) 0px 0px 0px 3.979342px\",\"outline\":\"3px none rgb(0, 0, 0)\",\"transitionProperty\":\"box-shadow\",\"transitionDuration\":\"0.2s\",\"transitionTimingFunction\":\"cubic-bezier(0.2, 0, 0, 1)\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"500\",\"lineHeight\":\"18px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\"}}"
+        }
+      ]
+    },
+    {
+      "id": "component.link.1",
+      "name": "Link",
+      "selectors": [
+        "[data-style-extractor-id=\"link\"]"
+      ],
+      "base": {
+        "display": "flex",
+        "padding": "0px",
+        "borderRadius": "0px",
+        "border": "0px none rgb(34, 34, 34)",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(34, 34, 34)",
+        "font": {
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20.02px",
+          "letterSpacing": "normal",
+          "textTransform": "none"
+        },
+        "shadow": "none",
+        "gap": "normal"
+      },
+      "states": {
+        "hover": {
+          "display": "flex",
+          "padding": "0px",
+          "border": "0px none rgb(34, 34, 34)",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(34, 34, 34)",
+          "boxShadow": "none",
+          "outline": "3px none rgb(34, 34, 34)",
+          "transitionProperty": "all",
+          "transitionDuration": "0s",
+          "transitionTimingFunction": "ease",
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20.02px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "textDecoration": "none"
+        },
+        "active": null,
+        "focus": {
+          "display": "flex",
+          "padding": "0px",
+          "border": "0px none rgb(34, 34, 34)",
+          "borderRadius": "8px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(34, 34, 34)",
+          "boxShadow": "rgba(34, 34, 34, 0.996) 0px 0px 0px 1.992167px, rgba(255, 255, 255, 0.796) 0px 0px 0px 3.984335px",
+          "outline": "2px solid rgb(34, 34, 34)",
+          "transitionProperty": "box-shadow",
+          "transitionDuration": "0.2s",
+          "transitionTimingFunction": "cubic-bezier(0.2, 0, 0, 1)",
+          "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20.02px",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "textDecoration": "none"
+        },
+        "disabled": null
+      },
+      "tokensUsed": [],
+      "evidence": [
+        {
+          "selector": "[data-style-extractor-id=\"link\"]",
+          "computedFrom": "computed",
+          "snippet": "{\"base\":{\"display\":\"flex\",\"padding\":\"0px\",\"border\":\"0px none rgb(34, 34, 34)\",\"borderRadius\":\"0px\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(34, 34, 34)\",\"boxShadow\":\"none\",\"outline\":\"3px none rgb(34, 34, 34)\",\"transitionProperty\":\"all\",\"transitionDuration\":\"0s\",\"transitionTimingFunction\":\"ease\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"400\",\"lineHeight\":\"20.02px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\"},\"hover\":{\"display\":\"flex\",\"padding\":\"0px\",\"border\":\"0px none rgb(34, 34, 34)\",\"borderRadius\":\"0px\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(34, 34, 34)\",\"boxShadow\":\"none\",\"outline\":\"3px none rgb(34, 34, 34)\",\"transitionProperty\":\"all\",\"transitionDuration\":\"0s\",\"transitionTimingFunction\":\"ease\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"400\",\"lineHeight\":\"20.02px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\"},\"focus\":{\"display\":\"flex\",\"padding\":\"0px\",\"border\":\"0px none rgb(34, 34, 34)\",\"borderRadius\":\"8px\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(34, 34, 34)\",\"boxShadow\":\"rgba(34, 34, 34, 0.996) 0px 0px 0px 1.992167px, rgba(255, 255, 255, 0.796) 0px 0px 0px 3.984335px\",\"outline\":\"2px solid rgb(34, 34, 34)\",\"transitionProperty\":\"box-shadow\",\"transitionDuration\":\"0.2s\",\"transitionTimingFunction\":\"cubic-bezier(0.2, 0, 0, 1)\",\"fontFamily\":\"\\\"Airbnb Cereal VF\\\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \\\"Helvetica Neue\\\", sans-serif\",\"fontSize\":\"14px\",\"fontWeight\":\"400\",\"lineHeight\":\"20.02px\",\"letterSpacing\":\"normal\",\"textTransform\":\"none\",\"textDecoration\":\"none\"}}"
+        }
+      ]
+    },
+    {
+      "id": "component.input.1",
+      "name": "Input",
+      "selectors": [],
+      "base": {
+        "display": null,
+        "padding": null,
+        "borderRadius": null,
+        "border": null,
+        "background": null,
+        "color": null,
+        "font": {
+          "fontFamily": null,
+          "fontSize": null,
+          "fontWeight": null,
+          "lineHeight": null,
+          "letterSpacing": null,
+          "textTransform": null
+        },
+        "shadow": null,
+        "gap": null
+      },
+      "states": {
+        "hover": null,
+        "active": null,
+        "focus": null,
+        "disabled": null
+      },
+      "tokensUsed": [],
+      "evidence": [
+        {
+          "selector": "",
+          "computedFrom": "computed",
+          "snippet": "{\"base\":null,\"focus\":null}"
+        }
+      ]
+    }
+  ],
+  "global": {
+    "htmlBody": {
+      "fontSmoothing": "antialiased",
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(34, 34, 34)"
+    },
+    "links": {
+      "default": {
+        "display": "flex",
+        "padding": "0px",
+        "border": "0px none rgb(34, 34, 34)",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(34, 34, 34)",
+        "boxShadow": "none",
+        "outline": "3px none rgb(34, 34, 34)",
+        "transitionProperty": "all",
+        "transitionDuration": "0s",
+        "transitionTimingFunction": "ease",
+        "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "20.02px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "textDecoration": "none"
+      },
+      "hover": {
+        "display": "flex",
+        "padding": "0px",
+        "border": "0px none rgb(34, 34, 34)",
+        "borderRadius": "0px",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(34, 34, 34)",
+        "boxShadow": "none",
+        "outline": "3px none rgb(34, 34, 34)",
+        "transitionProperty": "all",
+        "transitionDuration": "0s",
+        "transitionTimingFunction": "ease",
+        "fontFamily": "\"Airbnb Cereal VF\", Circular, -apple-system, BlinkMacSystemFont, Roboto, \"Helvetica Neue\", sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "20.02px",
+        "letterSpacing": "normal",
+        "textTransform": "none",
+        "textDecoration": "none"
+      }
+    },
+    "forms": {
+      "inputs": {},
+      "labels": {}
+    }
+  },
+  "raw": {
+    "cssVariables": [
+      {
+        "name": "--corner-radius-tiny4px-border-radius",
+        "value": "4px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--corner-radius-small8px-border-radius",
+        "value": "8px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--corner-radius-medium12px-border-radius",
+        "value": "12px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--corner-radius-large16px-border-radius",
+        "value": "16px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--corner-radius-xlarge20px-border-radius",
+        "value": "20px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--corner-radius-xxlarge24px-border-radius",
+        "value": "24px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--corner-radius-xxlarge28px-border-radius",
+        "value": "28px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--corner-radius-xxxlarge32px-border-radius",
+        "value": "32px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-high-box-shadow",
+        "value": "0 8px 28px rgba(0,0,0,0.28)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-high-border",
+        "value": "1px solid rgba(0,0,0,0.04)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-primary-box-shadow",
+        "value": "0 6px 20px rgba(0,0,0,0.2)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-primary-border",
+        "value": "1px solid rgba(0,0,0,0.04)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-secondary-box-shadow",
+        "value": "0 6px 16px rgba(0,0,0,0.12)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-secondary-border",
+        "value": "1px solid rgba(0,0,0,0.04)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-sharp-edge-background",
+        "value": "rgba(0,0,0,0.08)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-tertiary-box-shadow",
+        "value": "0 2px 4px rgba(0,0,0,0.18)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-tertiary-border",
+        "value": "1px solid rgba(0,0,0,0.08)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-elevation0-box-shadow",
+        "value": "0px 0px 0px 1px #DDDDDD inset",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-elevation1-box-shadow",
+        "value": "0px 0px 0px 1px rgba(0,0,0,0.02),0px 2px 4px 0px rgba(0,0,0,0.16)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-elevation2-box-shadow",
+        "value": "0px 0px 0px 1px rgba(0,0,0,0.02),0px 2px 6px 0px rgba(0,0,0,0.04),0px 4px 8px 0px rgba(0,0,0,0.10)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-elevation3-box-shadow",
+        "value": "0px 0px 0px 1px rgba(0,0,0,0.02),0px 8px 24px 0px rgba(0,0,0,0.10)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-elevation4-box-shadow",
+        "value": "0px 0px 0px 1px rgba(0,0,0,0.02),0px 4px 8px 0px rgba(0,0,0,0.08),0px 12px 30px 0px rgba(0,0,0,0.12)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--elevation-elevation5-box-shadow",
+        "value": "0px 0px 0px 1px rgba(0,0,0,0.02),0px 6px 8px 0px rgba(0,0,0,0.10),0px 16px 56px 0px rgba(0,0,0,0.18)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-duration",
+        "value": "451.75438596491193ms",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-easing",
+        "value": "linear(0,0.18557241650572898,0.46530560393651493,0.6823338821577483,0.8223254801509006,0.9049744175651648,0.951288850000914,0.9763638545339052,0.9896118636450829,0.9964846505475399,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-source-mass",
+        "value": "1px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-source-damping",
+        "value": "35px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-source-stiffness",
+        "value": "300px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-standard-duration",
+        "value": "583.7719298245607ms",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-standard-easing",
+        "value": "linear(0,0.15794349142280711,0.4146686698630492,0.6303103850844771,0.7802275692100804,0.8751011408890221,0.9317564666924485,0.9642434451985746,0.9823049252758026,0.992097579596505,0.9972943925635941,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-standard-source-mass",
+        "value": "1px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-standard-source-damping",
+        "value": "26px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-standard-source-stiffness",
+        "value": "175px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-medium-bounce-duration",
+        "value": "574.1228070175433ms",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-medium-bounce-easing",
+        "value": "linear(0,0.17056804830171035,0.47921259292635127,0.749704997553311,0.9261583179716212,1.0149357719696455,1.0442328379057395,1.042269832870079,1.028981085732054,1.0152861473492045,1.0054622129208994,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-medium-bounce-source-mass",
+        "value": "1px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-medium-bounce-source-damping",
+        "value": "18.5px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-medium-bounce-source-stiffness",
+        "value": "175px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-bounce-duration",
+        "value": "449.12280701754327ms",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-bounce-easing",
+        "value": "linear(0,0.25484239226416866,0.643483807710504,0.9061742021274407,1.0208040643586513,1.043750765143047,1.0303012036555117,1.0119725530453332,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-bounce-source-mass",
+        "value": "1px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-bounce-source-damping",
+        "value": "22px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-fast-bounce-source-stiffness",
+        "value": "250px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-duration",
+        "value": "745.6140350877179ms",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-easing",
+        "value": "linear(0,0.1726495179466309,0.44139132340393467,0.6575338740242772,0.8021357455779029,0.890693569261087,0.9421755177398626,0.9710919896728034,0.9869420351097642,0.9954729340379553,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-source-mass",
+        "value": "1px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-source-damping",
+        "value": "20px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-source-stiffness",
+        "value": "100px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-bounce-duration",
+        "value": "762.2807017543847ms",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-bounce-easing",
+        "value": "linear(0,0.17157063121773947,0.4812770425544863,0.7518340186858384,0.9276145377206974,1.0155374835651005,1.0441834344763297,1.0418987538382922,1.028565879063093,1.0149848580762686,1.005322404392434,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-bounce-source-mass",
+        "value": "1px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-bounce-source-damping",
+        "value": "14px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-springs-slow-bounce-source-stiffness",
+        "value": "100px",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-standard-curve-animation-timing-function",
+        "value": "cubic-bezier(0.2,0,0,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-enter-curve-animation-timing-function",
+        "value": "cubic-bezier(0.1,0.9,0.2,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-exit-curve-animation-timing-function",
+        "value": "cubic-bezier(0.4,0,1,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--motion-linear-curve-animation-timing-function",
+        "value": "cubic-bezier(0,0,1,1)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-black",
+        "value": "#000000",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-hof",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-foggy",
+        "value": "#6A6A6A",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bobo",
+        "value": "#B0B0B0",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-deco",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bebe",
+        "value": "#EBEBEB",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-faint",
+        "value": "#F7F7F7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-white",
+        "value": "#FFFFFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-arches",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-arches2",
+        "value": "#B32505",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-arches12",
+        "value": "#FFF8F6",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-capiz",
+        "value": "#F7F6F2",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-hapuna",
+        "value": "#F5F1EA",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-mykonou5",
+        "value": "#428BFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-ondo",
+        "value": "#E07912",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-spruce",
+        "value": "#008A05",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch",
+        "value": "#FF385C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-product-rausch",
+        "value": "#E00B41",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-plus",
+        "value": "#92174D",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-luxe",
+        "value": "#460479",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch-gradient-linear-gradient",
+        "value": "linear-gradient(to right,#E61E4D 0%,#E31C5F 50%,#D70466 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch-gradient-linear-gradient-rtl",
+        "value": "linear-gradient(to left,#E61E4D 0%,#E31C5F 50%,#D70466 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch-gradient-radial-gradient",
+        "value": "radial-gradient(circle at center,#FF385C 0%,#E61E4D 27.5%,#E31C5F 40%,#D70466 57.5%,#BD1E59 75%,#BD1E59 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-plus-gradient-linear-gradient",
+        "value": "linear-gradient(to right,#BD1E59 0%,#92174D 50%,#861453 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-plus-gradient-linear-gradient-rtl",
+        "value": "linear-gradient(to left,#BD1E59 0%,#92174D 50%,#861453 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-plus-gradient-radial-gradient",
+        "value": "radial-gradient(circle at center,#D70466 0%,#BD1E59 30%,#92174D 55%,#861453 72.5%,#6C0D63 90%,#6C0D63 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-luxe-gradient-linear-gradient",
+        "value": "linear-gradient(to right,#59086E 0%,#460479 50%,#440589 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-luxe-gradient-linear-gradient-rtl",
+        "value": "linear-gradient(to left,#59086E 0%,#460479 50%,#440589 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-luxe-gradient-radial-gradient",
+        "value": "radial-gradient(circle at center,#6C0D63 0%,#59086E 30%,#460479 55%,#440589 72.5%,#3B07BB 90%,#3B07BB 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary",
+        "value": "#FFFFFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-disabled",
+        "value": "#F7F7F7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-hover",
+        "value": "#F7F7F7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-selected",
+        "value": "#F7F7F7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-error",
+        "value": "#FFF8F6",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-core",
+        "value": "#FF385C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-luxe",
+        "value": "#460479",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-plus",
+        "value": "#92174D",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-inverse",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-inverse-hover",
+        "value": "#000000",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-inverse-disabled",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-inverse-error",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-primary-inverse-error-hover",
+        "value": "#B32505",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary",
+        "value": "#F7F7F7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-core",
+        "value": "linear-gradient(to right,#E61E4D 0%,#E31C5F 50%,#D70466 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-core-rtl",
+        "value": "linear-gradient(to left,#E61E4D 0%,#E31C5F 50%,#D70466 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-plus",
+        "value": "linear-gradient(to right,#BD1E59 0%,#92174D 50%,#861453 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-plus-rtl",
+        "value": "linear-gradient(to left,#BD1E59 0%,#92174D 50%,#861453 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-luxe",
+        "value": "linear-gradient(to right,#59086E 0%,#460479 50%,#440589 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-luxe-rtl",
+        "value": "linear-gradient(to left,#59086E 0%,#460479 50%,#440589 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-core-hover",
+        "value": "radial-gradient(circle at center,#FF385C 0%,#E61E4D 27.5%,#E31C5F 40%,#D70466 57.5%,#BD1E59 75%,#BD1E59 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-plus-hover",
+        "value": "radial-gradient(circle at center,#D70466 0%,#BD1E59 30%,#92174D 55%,#861453 72.5%,#6C0D63 90%,#6C0D63 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-secondary-luxe-hover",
+        "value": "radial-gradient(circle at center,#6C0D63 0%,#59086E 30%,#460479 55%,#440589 72.5%,#3B07BB 90%,#3B07BB 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-tertiary",
+        "value": "#B0B0B0",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-tertiary-hover",
+        "value": "#6A6A6A",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-tertiary-disabled",
+        "value": "#EBEBEB",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-tertiary-core",
+        "value": "#E00B41",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-quaternary",
+        "value": "#F2F2F2",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-bg-quaternary-hover",
+        "value": "#EBEBEB",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-primary",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-primary-disabled",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-primary-hover",
+        "value": "#000000",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-primary-error",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-primary-error-hover",
+        "value": "#B32505",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-primary-inverse",
+        "value": "#FFFFFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-primary-core",
+        "value": "linear-gradient(to right,#E61E4D 0%,#E31C5F 50%,#D70466 100%)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-secondary",
+        "value": "#6A6A6A",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-secondary-disabled",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-secondary-error",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-secondary-error-hover",
+        "value": "#B32505",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-legal",
+        "value": "#428BFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-link-disabled",
+        "value": "#929292",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-focused",
+        "value": "#3F3F3F",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-text-material-disabled",
+        "value": "rgba(0,0,0,0.24)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-primary",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-primary-disabled",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-primary-hover",
+        "value": "#000000",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-primary-error",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-primary-error-hover",
+        "value": "#B32505",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-primary-inverse",
+        "value": "#FFFFFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-secondary",
+        "value": "#6A6A6A",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-secondary-hover",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-secondary-selected",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-secondary-disabled",
+        "value": "#F7F7F7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-tertiary",
+        "value": "#8C8C8C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-error",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-warning",
+        "value": "#E07912",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-info",
+        "value": "#428BFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-icon-success",
+        "value": "#008A05",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-primary",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-primary-hover",
+        "value": "#000000",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-primary-disabled",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-primary-inverse",
+        "value": "#FFFFFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-secondary",
+        "value": "#B0B0B0",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-secondary-hover",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-secondary-selected",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-secondary-disabled",
+        "value": "#EBEBEB",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-secondary-error",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-tertiary",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-tertiary-hover",
+        "value": "#000000",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-tertiary-selected",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-tertiary-error",
+        "value": "#C13515",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-tertiary-error-hover",
+        "value": "#B32505",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-border-quarternary",
+        "value": "#8C8C8C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow50",
+        "value": "rgba(0,0,0,0.04)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow100",
+        "value": "rgba(0,0,0,0.08)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow150",
+        "value": "rgba(0,0,0,0.12)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow200",
+        "value": "rgba(0,0,0,0.135)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow250",
+        "value": "rgba(0,0,0,0.18)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow300",
+        "value": "rgba(0,0,0,0.20)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow350",
+        "value": "rgba(0,0,0,0.28)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-shadow600",
+        "value": "rgba(0,0,0,0.60)",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey0",
+        "value": "#FFFFFF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey100",
+        "value": "#F7F7F7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey200",
+        "value": "#F2F2F2",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey300",
+        "value": "#EBEBEB",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey400",
+        "value": "#DDDDDD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey500",
+        "value": "#C1C1C1",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey600",
+        "value": "#8C8C8C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey700",
+        "value": "#6C6C6C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey800",
+        "value": "#515151",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey900",
+        "value": "#3F3F3F",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey1000",
+        "value": "#222222",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-grey1100",
+        "value": "#000000",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red100",
+        "value": "#FFF5F3",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red200",
+        "value": "#FFEFEC",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red300",
+        "value": "#FFE6E2",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red400",
+        "value": "#FFD3CD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red500",
+        "value": "#FFACA5",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red600",
+        "value": "#F84A43",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red700",
+        "value": "#D7251C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red800",
+        "value": "#A3150F",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red900",
+        "value": "#772320",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-red1000",
+        "value": "#381918",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green100",
+        "value": "#F1FAF2",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green200",
+        "value": "#E6F6E9",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green300",
+        "value": "#DCF1E1",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green400",
+        "value": "#C3E6CC",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green500",
+        "value": "#8DD19E",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green600",
+        "value": "#12A139",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green700",
+        "value": "#038026",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green800",
+        "value": "#015F1A",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green900",
+        "value": "#104B20",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-green1000",
+        "value": "#112716",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue100",
+        "value": "#F0F8FF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue200",
+        "value": "#E8F3FE",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue300",
+        "value": "#DDEDFE",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue400",
+        "value": "#C6E0FE",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue500",
+        "value": "#94C5FD",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue600",
+        "value": "#318CF7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue700",
+        "value": "#166BD8",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue800",
+        "value": "#0D4DAA",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue900",
+        "value": "#173F7F",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-blue1000",
+        "value": "#162339",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange100",
+        "value": "#FEF6EC",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange200",
+        "value": "#FDF0E1",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange300",
+        "value": "#FDE8D4",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange400",
+        "value": "#FBD8BB",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange500",
+        "value": "#F7B383",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange600",
+        "value": "#EB6100",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange700",
+        "value": "#BE4900",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange800",
+        "value": "#8F3400",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange900",
+        "value": "#712A05",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-orange1000",
+        "value": "#371C10",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple100",
+        "value": "#F7F6FF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple200",
+        "value": "#F3F1FF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple300",
+        "value": "#ECE9FE",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple400",
+        "value": "#DED9FE",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple500",
+        "value": "#C2B9FE",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple600",
+        "value": "#8C78FF",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple700",
+        "value": "#6E57E4",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple800",
+        "value": "#503EB2",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple900",
+        "value": "#413582",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-purple1000",
+        "value": "#221F38",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta100",
+        "value": "#FDF5FB",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta200",
+        "value": "#FBEFF8",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta300",
+        "value": "#FAE6F5",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta400",
+        "value": "#F5D3EC",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta500",
+        "value": "#EFADDE",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta600",
+        "value": "#E54EC1",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta700",
+        "value": "#BD31A1",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta800",
+        "value": "#901E7C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta900",
+        "value": "#6A255E",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-magenta1000",
+        "value": "#311B2D",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch100",
+        "value": "#FFF5F6",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch200",
+        "value": "#FFEEF0",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch300",
+        "value": "#FEE5E7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch400",
+        "value": "#FFD2D7",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch500",
+        "value": "#FFABB6",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch600",
+        "value": "#FF385C",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch700",
+        "value": "#DA1249",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch800",
+        "value": "#A21039",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch900",
+        "value": "#732139",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      },
+      {
+        "name": "--palette-rausch1000",
+        "value": "#361A21",
+        "definedIn": "https://a0.muscache.com/airbnb/static/packages/web/common/frontend/core-guest-loop/apps/core-guest-spa/client.1b9a53dce8.css"
+      }
+    ],
+    "keySelectorsSample": [
+      ".dir.atm_l8_42b97a",
+      ":root",
+      ".c12bynq4.c12bynq4.c12bynq4",
+      ".dir.c12bynq4.c12bynq4.c12bynq4",
+      ".cjz5kiq.cjz5kiq.cjz5kiq",
+      ".c1r7ywgw.c1r7ywgw.c1r7ywgw",
+      ".atm_mj_glywfm",
+      ".atm_vb_glywfm",
+      ".dir.atm_67_1vxf4dh:not(.\\\\)",
+      ".dir.atm_lo_nl2biu:not(.\\\\)",
+      ".dir.atm_le_1crhfsv:not(.\\\\)",
+      ".atm_s4dbp1_10q1dht",
+      ".atm_1e5l29k_19yutfr",
+      ".atm_9s_1ulexfb",
+      ".atm_mk_h2mmj6",
+      ".atm_mk_stnw88",
+      ".atm_tk_idpfg4",
+      ".dir-ltr.atm_fq_idpfg4",
+      ".dir-rtl.atm_fq_idpfg4",
+      ".dir-ltr.atm_n3_idpfg4",
+      ".dir-rtl.atm_n3_idpfg4",
+      ".atm_6i_idpfg4",
+      ".atm_vy_1osqo2v",
+      ".atm_e2_1osqo2v",
+      ".atm_ks_15vqwwr",
+      ".atm_ib_1yr6ypa",
+      ".atm_ia_1yr6ypa:not(.\\\\)",
+      ".dir.atm_5j_echehs",
+      ".atm_jb_uuw12j",
+      ".dir.atm_2w_1egmwxu:not(.\\\\)",
+      ".atm_k4_idpfg4",
+      ".dir.atm_uc_kn5pbq",
+      ".dir-ltr.atm_2g_1talpdj:not(.\\\\)",
+      ".dir-rtl.atm_2g_1talpdj:not(.\\\\)",
+      ".dir.atm_2g_1fk1jtk:not(.\\\\)",
+      ".atm_npmupv_14b5rvc_10saat9.dir-rtl.dir-rtl.dir-rtl",
+      ".atm_4s4swg_18xq13z_10saat9.dir-rtl.dir-rtl.dir-rtl",
+      ".atm_u9em2p_1r3889l_10saat9.dir-rtl.dir-rtl.dir-rtl",
+      ".atm_1ezpcqw_1u41vd9_10saat9.dir-rtl.dir-rtl.dir-rtl",
+      ".atm_fyjbsv_c4n71i_10saat9.dir-rtl.dir-rtl.dir-rtl",
+      ".atm_1rna0z7_1uk391_10saat9.dir-rtl.dir-rtl.dir-rtl",
+      ".dir.atm_9j_tlke0l",
+      ".atm_9s_1o8liyq",
+      ".dir.atm_gi_idpfg4",
+      ".dir.atm_r3_1h6ojuz",
+      ".atm_rd_glywfm",
+      ".dir.atm_3f_11akh3i",
+      ".dir.atm_70_5j5alw",
+      ".atm_vy_1wugsn5",
+      ".dir.atm_l8_1cudcw5",
+      ".dir.atm_26_15wdnsd",
+      ".atm_7l_hfv0h6",
+      ".atm_c8_dlk8xv:not(.\\\\)",
+      ".atm_bx_1kw7nm4:not(.\\\\)",
+      ".atm_tl_1gw4zv3",
+      ".atm_bx_nm7nsd:not(.\\\\)",
+      ".atm_c8_eyeb2l:not(.\\\\)",
+      ".atm_g3_k6hx5t:not(.\\\\)",
+      ".atm_cs_1mexzig:not(.\\\\)",
+      ".dir.atm_26_1i7d4jj",
+      ".atm_20_13viflf",
+      ".atm_7l_1ca5zq3",
+      ".dir.atm_5j_15khq9x",
+      ".dir.atm_4b_1oq6qme:not(.\\\\)",
+      ".dir.atm_6h_dpi2ty:not(.\\\\)",
+      ".dir.atm_66_nqa18y:not(.\\\\)",
+      ".atm_kd_glywfm",
+      ".dir.atm_lo_1rkbgn1:not(.\\\\)",
+      ".dir-ltr.atm_ll_1whkk1i:not(.\\\\)",
+      ".dir-rtl.atm_ll_1whkk1i:not(.\\\\)",
+      ".dir.atm_le_aum3fz:not(.\\\\)",
+      ".dir-ltr.atm_lk_nw3rbs:not(.\\\\)",
+      ".dir-rtl.atm_lk_nw3rbs:not(.\\\\)",
+      ".atm_jb_16cl52u",
+      ".dir.atm_uc_krjvw",
+      ".atm_r2_1j28jx2",
+      ".atm_8w_1t7jgwy",
+      ".dir.atm_uc_dvte3h_wc6gzy [data-button-content]",
+      ".dir.atm_3f_idpfg4_1r63tcj:not(:focus)",
+      ".atm_7h_hxbz6r_1r63tcj:not(:focus)"
+    ]
+  }
+}

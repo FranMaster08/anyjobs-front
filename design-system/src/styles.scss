@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './ds-tokens.css';
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    background: rgb(255, 255, 255);
+    color: rgb(34, 34, 34);
+    font-family: theme('fontFamily.sans');
+    font-size: 14px;
+    line-height: 20.02px;
+  }
+
+  body {
+    margin: 0;
+  }
+}

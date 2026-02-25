@@ -1,0 +1,28 @@
+# Ignora artefactos generados dentro de tools/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Builds / outputs
+dist/
+build/
+out/
+tmp/
+coverage/
+.nyc_output/
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+
+# Misc
+*.log
+.DS_Store
+Thumbs.db
+

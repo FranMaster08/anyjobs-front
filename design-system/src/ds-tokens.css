@@ -1,0 +1,21 @@
+:root {
+  /* Semantic colors (from evidence) */
+  --ds-color-text-primary: rgb(34, 34, 34);
+  --ds-color-bg-page: rgb(255, 255, 255);
+  --ds-color-action-primary: #FF385C;
+
+  /* Radius scale (from evidence css variables) */
+  --ds-radius-tiny: 4px;
+  --ds-radius-sm: 8px;
+  --ds-radius-md: 12px;
+  --ds-radius-lg: 16px;
+  --ds-radius-xl: 20px;
+  --ds-radius-2xl: 28px;
+  --ds-radius-3xl: 32px;
+
+  /* Elevation (from evidence css variables) */
+  --ds-shadow-elevation0: 0px 0px 0px 1px #DDDDDD inset;
+  --ds-shadow-primary: 0 6px 20px rgba(0, 0, 0, 0.2);
+  --ds-shadow-high: 0 8px 28px rgba(0, 0, 0, 0.28);
+}
+

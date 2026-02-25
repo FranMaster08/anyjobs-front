@@ -1,0 +1,21 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+}
+
+.app-brand {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.app-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}

@@ -1,0 +1,58 @@
+<div class="mx-auto max-w-4xl px-6 py-10">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="text-h1">Design system playground</div>
+      <div class="mt-1 text-h3 text-neutral-neutral-2">
+        Tokens derivados de evidencia + componentes Angular (Tailwind preset).
+      </div>
+    </div>
+
+    <aj-link href="https://tailwindcss.com" target="_blank" rel="noopener">
+      Tailwind docs
+    </aj-link>
+  </div>
+
+  <div class="mt-10 grid gap-6">
+    <section class="rounded-[var(--ds-radius-lg)] border border-neutral-neutral-2/10 p-6 shadow-elevation1">
+      <div class="text-h3">Colores semánticos</div>
+
+      <div class="mt-4 grid grid-cols-3 gap-4">
+        <div class="rounded-[var(--ds-radius-md)] border border-neutral-neutral-2/10 p-4">
+          <div class="h-10 rounded-[var(--ds-radius-md)] bg-action-primary"></div>
+          <div class="mt-2 text-h3">action-primary</div>
+        </div>
+
+        <div class="rounded-[var(--ds-radius-md)] border border-neutral-neutral-2/10 p-4">
+          <div class="h-10 rounded-[var(--ds-radius-md)] bg-bg-page"></div>
+          <div class="mt-2 text-h3">bg-page</div>
+        </div>
+
+        <div class="rounded-[var(--ds-radius-md)] border border-neutral-neutral-2/10 p-4">
+          <div class="h-10 rounded-[var(--ds-radius-md)] bg-neutral-neutral-5"></div>
+          <div class="mt-2 text-h3">neutral-5</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-[var(--ds-radius-lg)] border border-neutral-neutral-2/10 p-6 shadow-elevation1">
+      <div class="text-h3">Componentes</div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <aj-button>Default</aj-button>
+        <aj-button variant="primary">Primary</aj-button>
+        <aj-button [disabled]="true">Disabled</aj-button>
+        <aj-link href="#">Link</aj-link>
+      </div>
+
+      <div class="mt-6 max-w-md">
+        <aj-input
+          type="search"
+          placeholder="Buscar…"
+          [formControl]="query"
+        />
+        <div class="mt-2 text-h3 text-neutral-neutral-2">Valor: {{ query.value ?? '' }}</div>
+      </div>
+    </section>
+  </div>
+</div>
+
