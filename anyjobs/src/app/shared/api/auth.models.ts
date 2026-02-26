@@ -1,4 +1,5 @@
 import { RegistrationStage, RegistrationStatus, UserRole } from '../../features/auth/registration/registration.models';
+import { AuthUser } from '../auth/auth.models';
 
 export interface RegisterRequest {
   fullName: string;
@@ -18,5 +19,15 @@ export interface RegisterResponse {
 
 export interface VerifyOtpRequest {
   otpCode: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: AuthUser;
 }
 

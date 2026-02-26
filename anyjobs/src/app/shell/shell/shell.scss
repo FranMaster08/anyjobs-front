@@ -61,6 +61,171 @@
   gap: 10px;
 }
 
+.accountWrap {
+  position: relative;
+}
+
+.accountBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+}
+
+.accountBtn {
+  border: 1px solid var(--aj-color-border-strong);
+  background: var(--aj-color-surface);
+  border-radius: 999px;
+  padding: 6px 10px 6px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+  z-index: 910;
+}
+
+.accountBtn:hover {
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.accountAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 1000;
+  color: var(--aj-color-ink);
+  background: rgba(14, 165, 164, 0.16);
+  border: 1px solid rgba(14, 165, 164, 0.25);
+}
+
+.accountName {
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--aj-color-ink);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountCaret {
+  color: var(--aj-color-muted);
+  font-weight: 900;
+}
+
+.accountMenuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+}
+
+.accountMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(260px, calc(100vw - 36px));
+  border-radius: 14px;
+  background: var(--aj-color-surface);
+  border: 1px solid var(--aj-color-border);
+  box-shadow: var(--aj-shadow-lg);
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  z-index: 920;
+}
+
+.accountMenuItem {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  text-decoration: none;
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-weight: 900;
+  color: var(--aj-color-ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accountMenuItem:hover {
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.accountMenuItem:focus-visible {
+  outline: 3px solid var(--aj-color-focus);
+  outline-offset: 2px;
+}
+
+.headerBtn {
+  border: 1px solid var(--aj-color-border-strong);
+  background: var(--aj-color-surface);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--aj-color-ink);
+  cursor: pointer;
+}
+
+.headerBtn:hover {
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.loginForm {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.loginForm .fieldControl {
+  width: 100%;
+}
+
+@media (max-width: 520px) {
+  .loginForm {
+    max-width: 340px;
+  }
+}
+
+.loginError {
+  margin: 0;
+  color: #b91c1c;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.loginHint {
+  margin: 2px 0 0;
+  color: var(--aj-color-muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.loginLink {
+  color: var(--aj-color-primary);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
+.loginActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
 .langSelect {
   border: 1px solid var(--aj-color-border-strong);
   background: var(--aj-color-surface);

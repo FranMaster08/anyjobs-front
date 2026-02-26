@@ -16,6 +16,16 @@ const DICTIONARIES: Record<AppLang, Dictionary> = {
     'lang.es': 'ES',
     'lang.en': 'EN',
 
+    // Auth
+    'auth.login': 'Iniciar sesión',
+    'auth.logout': 'Logout',
+    'auth.myProfile': 'Mi perfil',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.cancel': 'Cancelar',
+    'auth.emailInvalid': 'Email inválido.',
+    'auth.passwordInvalid': 'Introduce una contraseña (mín. 4).',
+
     // Registration
     'reg.title': 'Registro',
     'reg.subtitle': 'Onboarding por etapas (MVP).',
@@ -127,6 +137,16 @@ const DICTIONARIES: Record<AppLang, Dictionary> = {
     'cta.publicar': 'Post / Contact',
     'lang.es': 'ES',
     'lang.en': 'EN',
+
+    // Auth
+    'auth.login': 'Sign in',
+    'auth.logout': 'Logout',
+    'auth.myProfile': 'My profile',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.cancel': 'Cancel',
+    'auth.emailInvalid': 'Invalid email.',
+    'auth.passwordInvalid': 'Enter a password (min. 4).',
 
     // Registration
     'reg.title': 'Sign up',

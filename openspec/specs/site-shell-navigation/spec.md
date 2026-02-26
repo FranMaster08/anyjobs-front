@@ -1,6 +1,6 @@
 ## Purpose
 
-Definir el shell global (header/footer) y navegación por secciones (anchors) con scroll-to-top.
+Definir el shell global (header/footer) y navegación por secciones (anchors) con scroll-to-top, incluyendo acciones de cuenta en el header (login, acceso a “Mi perfil” y logout) y su comportamiento dependiente de sesión.
 
 ## ADDED Requirements
 

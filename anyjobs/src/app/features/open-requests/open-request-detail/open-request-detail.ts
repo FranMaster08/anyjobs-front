@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ModalComponent } from '../../../components/modal/modal';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
+import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 
 /**
  * Pantalla de detalle de solicitud abierta.
@@ -25,6 +26,7 @@ export class OpenRequestDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
+  protected readonly authVm = inject(AuthSessionService).vm;
 
   protected readonly requestId = toSignal(
     this.route.paramMap.pipe(map((pm) => pm.get('id') ?? '')),
@@ -36,6 +38,7 @@ export class OpenRequestDetail {
 
   protected readonly activeImageIndex = signal(0);
   protected readonly isGalleryOpen = signal(false);
+  protected readonly isPostulateOpen = signal(false);
 
   constructor() {
     this.route.paramMap
@@ -67,6 +70,14 @@ export class OpenRequestDetail {
     this.isGalleryOpen.set(false);
   }
 
+  protected openPostulate(): void {
+    this.isPostulateOpen.set(true);
+  }
+
+  protected closePostulate(): void {
+    this.isPostulateOpen.set(false);
+  }
+
   protected prevImage(): void {
     const images = this.detail()?.images ?? [];
     if (images.length === 0) return;
@@ -86,6 +97,11 @@ export class OpenRequestDetail {
     const el = document.getElementById('applyCard');
     if (!el) return;
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  protected scrollToTop(): void {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }
 
   private load(id: string): void {

@@ -1,6 +1,6 @@
 ## Purpose
 
-Definir el comportamiento y requisitos de la página de detalle de una solicitud abierta (galería, sidebar de acción y sección de oferente).
+Definir el comportamiento y requisitos de la página de detalle de una solicitud abierta (galería, sidebar de acción y sección de oferente), incluyendo CTA de postulación contextual según estado de sesión.
 
 ## ADDED Requirements
 
@@ -38,6 +38,10 @@ El detalle MUST mostrar un sidebar “sticky” con el módulo de acción princi
 #### Scenario: Usuario ve el sidebar sticky
 - **WHEN** el usuario hace scroll en desktop dentro del detalle
 - **THEN** el sistema MUST mantener visible el sidebar de acción mientras sea posible (sticky)
+
+#### Scenario: Usuario con sesión ve CTA de Postular
+- **WHEN** existe una sesión activa de usuario
+- **THEN** el sidebar MUST mostrar un CTA principal equivalente a “Postular” (sin pedir login/registro)
 
 ### Requirement: Sección “Ofrecido por” con reputación y comentarios
 El detalle MUST mostrar una sección “Ofrecido por” con la identidad del oferente (nombre, badge/subtítulo si existen), reputación \(0.0–5.0\), cantidad de reseñas y comentarios ficticios.

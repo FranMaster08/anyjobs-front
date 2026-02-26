@@ -1,0 +1,133 @@
+<section class="page profilePage">
+  @if (!vm().isLoggedIn) {
+    <section class="profileCard profileCard--empty" role="status">
+      <h1 class="profileTitle">No hay sesión activa</h1>
+      <p class="profileHint">Inicia sesión desde el header para ver tu perfil.</p>
+      <a class="btn" routerLink="/home">Ir a Home</a>
+    </section>
+  } @else {
+    <section class="profileHero">
+      <div class="profileHeroTop">
+        <div class="profileAvatar" aria-hidden="true">{{ initials() }}</div>
+        <div class="profileHeroText">
+          <h1 class="profileTitle">{{ vm().user?.fullName }}</h1>
+          <p class="profileHint">{{ vm().user?.email }}</p>
+
+          <div class="profileBadges" aria-label="Estado de cuenta">
+            <span class="profileBadge profileBadge--ok">Status: {{ vm().user?.status ?? '—' }}</span>
+            <span class="profileBadge" [class.profileBadge--ok]="vm().user?.emailVerified">
+              Email: {{ vm().user?.emailVerified ? 'sí' : 'no' }}
+            </span>
+            <span class="profileBadge" [class.profileBadge--ok]="vm().user?.phoneVerified">
+              Tel: {{ vm().user?.phoneVerified ? 'sí' : 'no' }}
+            </span>
+            <span class="profileBadge" *ngIf="vm().user?.roles?.length">
+              Roles: {{ vm().user?.roles?.join(', ') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="profileActions">
+        <a class="btn btn--secondary" routerLink="/solicitudes">Ver solicitudes</a>
+        <button type="button" class="btn" (click)="logout()">{{ t('auth.logout') }}</button>
+      </footer>
+    </section>
+
+    <section class="profileGrid">
+      <section class="profileCard">
+        <h2 class="profileSectionTitle">Cuenta</h2>
+        <div class="profileList">
+          <p class="profileRow"><span class="profileLabel">ID</span> <span class="profileValue">{{ vm().user?.id }}</span></p>
+          <p class="profileRow">
+            <span class="profileLabel">Token</span> <span class="profileValue">{{ tokenPreview() }}</span>
+          </p>
+          <p class="profileRow">
+            <span class="profileLabel">Creado</span> <span class="profileValue">{{ vm().user?.createdAt ?? '—' }}</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="profileCard">
+        <h2 class="profileSectionTitle">Contacto</h2>
+        <div class="profileList">
+          <p class="profileRow">
+            <span class="profileLabel">Email</span> <span class="profileValue">{{ vm().user?.email }}</span>
+          </p>
+          <p class="profileRow">
+            <span class="profileLabel">Teléfono</span> <span class="profileValue">{{ vm().user?.phoneNumber ?? '—' }}</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="profileCard">
+        <h2 class="profileSectionTitle">Ubicación</h2>
+        <div class="profileList">
+          <p class="profileRow">
+            <span class="profileLabel">País</span> <span class="profileValue">{{ vm().user?.countryCode ?? '—' }}</span>
+          </p>
+          <p class="profileRow">
+            <span class="profileLabel">Ciudad</span> <span class="profileValue">{{ vm().user?.city ?? '—' }}</span>
+          </p>
+          <p class="profileRow">
+            <span class="profileLabel">Zona</span> <span class="profileValue">{{ vm().user?.area ?? '—' }}</span>
+          </p>
+          <p class="profileRow" *ngIf="vm().user?.coverageRadiusKm !== undefined">
+            <span class="profileLabel">Radio (km)</span>
+            <span class="profileValue">{{ vm().user?.coverageRadiusKm }}</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="profileCard">
+        <h2 class="profileSectionTitle">Identidad</h2>
+        <div class="profileList">
+          <p class="profileRow">
+            <span class="profileLabel">Documento</span>
+            <span class="profileValue">
+              {{ vm().user?.documentType ?? '—' }} {{ vm().user?.documentNumber ?? '' }}
+            </span>
+          </p>
+          <p class="profileRow">
+            <span class="profileLabel">Nacimiento</span> <span class="profileValue">{{ vm().user?.birthDate ?? '—' }}</span>
+          </p>
+          <p class="profileRow">
+            <span class="profileLabel">Género</span> <span class="profileValue">{{ vm().user?.gender ?? '—' }}</span>
+          </p>
+          <p class="profileRow">
+            <span class="profileLabel">Nacionalidad</span> <span class="profileValue">{{ vm().user?.nationality ?? '—' }}</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="profileCard" *ngIf="vm().user?.preferredPaymentMethod">
+        <h2 class="profileSectionTitle">Preferencias</h2>
+        <div class="profileList">
+          <p class="profileRow">
+            <span class="profileLabel">Pago</span>
+            <span class="profileValue">{{ vm().user?.preferredPaymentMethod }}</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="profileCard" *ngIf="vm().user?.workerCategories?.length">
+        <h2 class="profileSectionTitle">Worker</h2>
+        <div class="profileList">
+          <p class="profileRow">
+            <span class="profileLabel">Categorías</span>
+            <span class="profileValue">{{ vm().user?.workerCategories?.join(', ') }}</span>
+          </p>
+          <p class="profileRow" *ngIf="vm().user?.workerHeadline">
+            <span class="profileLabel">Headline</span>
+            <span class="profileValue">{{ vm().user?.workerHeadline }}</span>
+          </p>
+          <p class="profileRow" *ngIf="vm().user?.workerBio">
+            <span class="profileLabel">Bio</span>
+            <span class="profileValue">{{ vm().user?.workerBio }}</span>
+          </p>
+        </div>
+      </section>
+    </section>
+  }
+</section>
+

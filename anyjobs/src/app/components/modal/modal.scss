@@ -17,6 +17,18 @@
   box-shadow: var(--aj-shadow-lg);
 }
 
+.panel--sm {
+  width: min(520px, 100%);
+}
+
+.panel--md {
+  width: min(920px, 100%);
+}
+
+.panel--lg {
+  width: min(1120px, 100%);
+}
+
 .header {
   display: flex;
   align-items: center;

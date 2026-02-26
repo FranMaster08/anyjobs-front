@@ -130,11 +130,23 @@
             <aside class="sidebar" aria-label="Acción principal">
               <div class="sidebarCard" id="applyCard">
                 <p class="sidebarTitle">Postular</p>
-                <p class="authHint">Para contactar y postularte necesitas una cuenta con nosotros.</p>
+                <p class="authHint">
+                  <ng-container *ngIf="authVm().isLoggedIn; else needAccount">
+                    Ya tienes sesión iniciada. Puedes postularte ahora.
+                  </ng-container>
+                  <ng-template #needAccount>
+                    Para contactar y postularte necesitas una cuenta con nosotros.
+                  </ng-template>
+                </p>
 
                 <div class="authActions" role="group" aria-label="Acciones de cuenta">
-                  <button type="button" class="btn btn--secondary" disabled aria-disabled="true">Iniciar sesión</button>
-                  <a class="btn" routerLink="/registro">Crear cuenta</a>
+                  <ng-container *ngIf="authVm().isLoggedIn; else authCtas">
+                    <button type="button" class="btn" (click)="openPostulate()">Postular</button>
+                  </ng-container>
+                  <ng-template #authCtas>
+                    <button type="button" class="btn btn--secondary" (click)="scrollToTop()">Iniciar sesión</button>
+                    <a class="btn" routerLink="/registro">Crear cuenta</a>
+                  </ng-template>
                 </div>
 
                 <p class="authNote">
@@ -173,6 +185,16 @@
                   <img class="thumb" [src]="img.url" [alt]="img.alt ?? ''" />
                 </button>
               </div>
+            </div>
+          </app-modal>
+
+          <app-modal [open]="isPostulateOpen()" title="Postular" size="sm" (closed)="closePostulate()">
+            <div class="state" role="status">
+              <p class="state__title">Postulación (simulada)</p>
+              <p class="state__hint">
+                Esta acción está en MVP: ya detectamos tu sesión y aquí iría el flujo real de postulación/contacto.
+              </p>
+              <button type="button" class="btn" (click)="closePostulate()">Entendido</button>
             </div>
           </app-modal>
         </ng-container>

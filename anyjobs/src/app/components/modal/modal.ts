@@ -16,11 +16,16 @@ export class ModalComponent {
   @Input({ required: true }) open = false;
   @Input() title = '';
   @Input() ariaLabel = 'Modal';
+  @Input() size: 'sm' | 'md' | 'lg' = 'md';
 
   @Output() closed = new EventEmitter<void>();
 
   protected readonly titleId = `app-modal-title-${++nextModalId}`;
   private previousBodyOverflow: string | null = null;
+
+  protected get panelClass(): string {
+    return `panel panel--${this.size}`;
+  }
 
   ngOnChanges(): void {
     if (this.open) this.lockScroll();

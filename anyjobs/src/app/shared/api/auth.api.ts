@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { delay, map, Observable, of } from 'rxjs';
 
-import { RegisterRequest, RegisterResponse, VerifyOtpRequest } from './auth.models';
+import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, VerifyOtpRequest } from './auth.models';
 import { createMockId } from './api.utils';
 
 export const AUTH_API_URL = new InjectionToken<string>('AUTH_API_URL', {
@@ -80,6 +80,41 @@ export class AuthApi {
     return this.http
       .get<{ available: boolean }>(`${this.apiUrl}/phone-available`, { params: { phoneNumber: trimmed } })
       .pipe(map((res) => Boolean(res.available)));
+  }
+
+  login(req: LoginRequest): Observable<LoginResponse> {
+    const email = req.email.trim().toLowerCase();
+    const password = req.password;
+
+    if (this.apiUrl.includes('/mock/')) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.trim().length < 4) {
+        return new Observable<LoginResponse>((sub) => sub.error(new Error('Credenciales inválidas')));
+      }
+
+      const userId = createMockId('user');
+      const token = createMockId('token');
+      const fullName = email.split('@')[0]?.replace(/[._-]+/g, ' ')?.trim() || 'Usuario';
+
+      return of<LoginResponse>({
+        token,
+        user: {
+          id: userId,
+          fullName,
+          email,
+          roles: ['CLIENT'],
+          phoneNumber: '+34123456789',
+          emailVerified: true,
+          phoneVerified: false,
+          status: 'ACTIVE',
+          countryCode: 'ES',
+          city: 'Madrid',
+          area: 'Centro',
+          createdAt: new Date().toISOString(),
+        },
+      }).pipe(delay(250));
+    }
+
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { email, password });
   }
 }
 
