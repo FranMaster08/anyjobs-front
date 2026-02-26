@@ -9,6 +9,7 @@ import { ModalComponent } from '../../../components/modal/modal';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
+import { Router } from '@angular/router';
 
 /**
  * Pantalla de detalle de solicitud abierta.
@@ -24,6 +25,7 @@ import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 })
 export class OpenRequestDetail {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
   protected readonly authVm = inject(AuthSessionService).vm;
@@ -38,7 +40,6 @@ export class OpenRequestDetail {
 
   protected readonly activeImageIndex = signal(0);
   protected readonly isGalleryOpen = signal(false);
-  protected readonly isPostulateOpen = signal(false);
 
   constructor() {
     this.route.paramMap
@@ -70,12 +71,14 @@ export class OpenRequestDetail {
     this.isGalleryOpen.set(false);
   }
 
-  protected openPostulate(): void {
-    this.isPostulateOpen.set(true);
+  protected goToProposal(): void {
+    const id = this.requestId();
+    if (!id) return;
+    this.router.navigate(['/solicitudes', id, 'propuesta']);
   }
 
-  protected closePostulate(): void {
-    this.isPostulateOpen.set(false);
+  protected openLogin(): void {
+    this.router.navigate([], { queryParams: { login: 1 }, queryParamsHandling: 'merge' });
   }
 
   protected prevImage(): void {

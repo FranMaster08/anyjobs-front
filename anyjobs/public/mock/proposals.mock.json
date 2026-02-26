@@ -1,0 +1,98 @@
+{
+  "templates": [
+    {
+      "requestId": "req-1001",
+      "candidates": [
+        {
+          "authorName": "Tú",
+          "whoAmI": "Soy técnico electricista con 8 años de experiencia.",
+          "message": "Puedo revisar el tablero, identificar la causa de los cortes y dejar una propuesta clara de materiales + mano de obra. Trabajo prolijo y con garantía. Disponibilidad esta semana por la tarde.",
+          "estimate": "€110–€140"
+        },
+        {
+          "userId": "worker_demo_1",
+          "authorName": "Luis Martínez",
+          "authorSubtitle": "Electricista matriculado · Respuesta rápida",
+          "rating": 4.86,
+          "reviewsCount": 129,
+          "whoAmI": "Electricista matriculado. Experiencia en tableros y normativa.",
+          "message": "Puedo pasar hoy a revisar, te dejo diagnóstico y presupuesto antes de ejecutar. Incluyo materiales y prueba final con garantía.",
+          "estimate": "€130"
+        },
+        {
+          "userId": "worker_demo_2",
+          "authorName": "Sofía Rivas",
+          "authorSubtitle": "Servicios de hogar · Verificada",
+          "rating": 4.72,
+          "reviewsCount": 64,
+          "whoAmI": "Trabajo con equipos de medida y dejo todo documentado.",
+          "message": "Reviso térmicas, derivaciones y cableado. Propongo la solución más segura y rápida. Disponibilidad mañana por la mañana.",
+          "estimate": "€120–€150"
+        },
+        {
+          "userId": "worker_demo_6",
+          "authorName": "Carlos Vega",
+          "authorSubtitle": "Electricidad · 10 años",
+          "rating": 4.93,
+          "reviewsCount": 312,
+          "whoAmI": "Especialista en tableros y automatizaciones. Trabajo con checklist de seguridad.",
+          "message": "Puedo hacer una visita de diagnóstico y, si estás de acuerdo, ejecutar el cambio de térmicas/tablero en el mismo día. Te dejo fotos del antes/después y garantía escrita.",
+          "estimate": "€140–€180"
+        }
+      ]
+    },
+    {
+      "requestId": "req-1003",
+      "candidates": [
+        {
+          "authorName": "Tú",
+          "whoAmI": "Pintor profesional (interiores) y reparación de paredes.",
+          "message": "Incluyo preparación (sellador si aplica), protección de muebles/pisos y 2 manos para acabado uniforme. Te paso tiempos estimados y te ayudo a elegir el tono. Puedo empezar el fin de semana.",
+          "estimate": "A convenir"
+        },
+        {
+          "userId": "worker_demo_3",
+          "authorName": "Diego Álvarez",
+          "authorSubtitle": "Pintura interior · 5 años",
+          "rating": 4.91,
+          "reviewsCount": 88,
+          "whoAmI": "Pintura interior y pequeños arreglos de pared.",
+          "message": "Puedo hacer living + dormitorio en 2 días. Incluye preparación y terminación prolija. Si quieres, te paso muestras de color.",
+          "estimate": "€240–€320"
+        },
+        {
+          "userId": "worker_demo_4",
+          "authorName": "María Gómez",
+          "authorSubtitle": "Acabados premium",
+          "rating": 4.79,
+          "reviewsCount": 41,
+          "whoAmI": "Me enfoco en terminaciones finas y protección del espacio.",
+          "message": "Trabajo con cubrepisos y protecciones completas. Te indico materiales recomendados y tiempos de secado por ambiente.",
+          "estimate": "€280"
+        }
+      ]
+    },
+    {
+      "requestId": "req-1004",
+      "candidates": [
+        {
+          "authorName": "Tú",
+          "whoAmI": "Equipo de mudanzas (2 personas + furgón).",
+          "message": "Coordinamos en el día y llevamos mantas/cintas. Cargamos/descargamos y aseguramos cama/cómoda para que no se dañen. Confírmame piso/ascensor y horario preferido.",
+          "estimate": "€90"
+        },
+        {
+          "userId": "worker_demo_5",
+          "authorName": "Mudanzas Express",
+          "authorSubtitle": "2 personas + furgón",
+          "rating": 4.66,
+          "reviewsCount": 203,
+          "whoAmI": "Equipo rápido y cuidadoso. Incluye mantas.",
+          "message": "Podemos hacerlo el sábado. Cargamos/descargamos y aseguramos con mantas/cintas. Confirmame si hay ascensor en ambos puntos.",
+          "estimate": "€110"
+        }
+      ]
+    }
+  ]
+}
+

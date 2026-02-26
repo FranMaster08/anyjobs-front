@@ -20,6 +20,13 @@ export const routes: Routes = [
         loadComponent: () => import('./features/auth/profile/profile').then((m) => m.Profile),
       },
       {
+        path: 'mis-solicitudes',
+        loadComponent: () =>
+          import('./features/my-requests/my-requests-dashboard/my-requests-dashboard').then(
+            (m) => m.MyRequestsDashboard,
+          ),
+      },
+      {
         path: 'solicitudes',
         children: [
           {
@@ -27,6 +34,13 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/open-requests/open-requests-landing/open-requests-landing').then(
                 (m) => m.OpenRequestsLanding,
+              ),
+          },
+          {
+            path: ':id/propuesta',
+            loadComponent: () =>
+              import('./features/open-requests/open-request-proposal-compose/open-request-proposal-compose').then(
+                (m) => m.OpenRequestProposalCompose,
               ),
           },
           {

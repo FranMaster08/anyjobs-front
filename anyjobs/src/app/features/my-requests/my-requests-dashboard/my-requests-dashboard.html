@@ -1,0 +1,172 @@
+<section class="page myRequests">
+  <div class="container">
+    <header class="header">
+      <p class="kicker">CUENTA</p>
+      <h1 class="title">Mis solicitudes</h1>
+      <p class="subtitle">Revisa dónde postulaste y lo que propusiste.</p>
+    </header>
+
+    <ng-container *ngIf="!authVm().isLoggedIn; else logged">
+      <div class="state" role="status">
+        <p class="state__title">Inicia sesión para ver tus solicitudes</p>
+        <p class="state__hint">Tus propuestas se guardan de forma local para esta demo.</p>
+        <div class="actions">
+          <button type="button" class="btn" (click)="openLogin()">Iniciar sesión</button>
+          <a class="btn btn--secondary" routerLink="/registro">Crear cuenta</a>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #logged>
+      <ng-container [ngSwitch]="state()">
+        <div *ngSwitchCase="'loading'" class="state" aria-busy="true">
+          <div class="skeletonTitle"></div>
+          <div class="skeletonLine"></div>
+          <div class="skeletonLine"></div>
+        </div>
+
+        <div *ngSwitchCase="'error'" class="state state--error" role="status">
+          <p class="state__title">No se pudieron cargar tus solicitudes.</p>
+          <p class="state__hint">Intenta de nuevo en unos segundos.</p>
+          <button type="button" class="btn" (click)="retry()">Reintentar</button>
+        </div>
+
+        <ng-container *ngSwitchCase="'success'">
+          <ng-container *ngIf="items().length > 0; else empty">
+            <div class="list" aria-label="Mis solicitudes">
+              <article class="item" *ngFor="let it of items()">
+                <div class="itemGrid">
+                  <div class="thumb" *ngIf="it.request?.images?.length">
+                    <img
+                      class="thumbImg"
+                      [src]="it.request!.images[0]!.url"
+                      [alt]="it.request!.images[0]!.alt ?? ''"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div class="itemMain">
+                    <div class="itemHeader">
+                      <div>
+                        <p class="itemTitle">{{ it.request?.title ?? ('Solicitud ' + it.proposal.requestId) }}</p>
+                        <p class="itemSubtitle">{{ it.request?.excerpt ?? 'Solicitud no disponible' }}</p>
+                      </div>
+
+                      <div class="chips" aria-label="Estado de propuesta">
+                        <span class="chip chip--status">Enviada</span>
+                        <span class="chip chip--estimate">Tu oferta: {{ it.proposal.estimate }}</span>
+                      </div>
+                    </div>
+
+                    <div class="metaPills" aria-label="Metadatos">
+                      <span class="pill" *ngIf="it.request?.locationLabel">{{ it.request?.locationLabel }}</span>
+                      <span class="pill" *ngIf="it.request?.budgetLabel">{{ it.request?.budgetLabel }}</span>
+                      <span class="pill pill--muted">ID: {{ it.proposal.requestId }}</span>
+                    </div>
+
+                    <div class="itemActions" role="group" aria-label="Acciones">
+                      <a class="btn btn--secondary btn--sm" [routerLink]="['/solicitudes', it.proposal.requestId]">
+                        Ver detalle
+                      </a>
+                      <button
+                        type="button"
+                        class="btn btn--sm"
+                      (click)="toggleExpanded(it.proposal.requestId)"
+                      [attr.aria-expanded]="isExpanded(it.proposal.requestId)"
+                      >
+                      {{ isExpanded(it.proposal.requestId) ? 'Ocultar propuestas' : 'Ver propuestas' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="proposal" *ngIf="isExpanded(it.proposal.requestId)">
+                  <p class="proposalListTitle">Propuestas recibidas</p>
+
+                  <ng-container *ngIf="proposalsForRequest(it.proposal.requestId) as ps">
+                    <div class="proposalComment" *ngFor="let p of ps">
+                      <header class="proposalHeader" aria-label="Autor de la propuesta">
+                        <div class="proposalHeaderLeft">
+                          <div class="proposalAvatar" aria-hidden="true">
+                            {{ (p.author?.name ?? 'U').slice(0, 1) }}
+                          </div>
+                          <div class="proposalHeaderBody">
+                            <p class="proposalAuthor">{{ p.author?.name ?? 'Postulante' }}</p>
+                            <p class="proposalAuthorSub" *ngIf="p.author?.subtitle">{{ p.author?.subtitle }}</p>
+
+                            <div class="proposalRating" *ngIf="p.author?.rating !== undefined">
+                              <span class="proposalStar" aria-hidden="true">★</span>
+                              <span class="proposalRatingValue">{{ p.author?.rating | number: '1.1-2' }}</span>
+                              <span class="proposalRatingSep" *ngIf="p.author?.reviewsCount !== undefined" aria-hidden="true">·</span>
+                              <span class="proposalRatingCount" *ngIf="p.author?.reviewsCount !== undefined">
+                                {{ p.author?.reviewsCount }} reseñas
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="proposalHeaderActions" role="group" aria-label="Acciones de propuesta">
+                          <button type="button" class="btn btn--secondary btn--sm" (click)="openProfileWip(p)">
+                            Ver perfil
+                          </button>
+                          <button type="button" class="btn btn--sm" (click)="openChooseWip(p)">
+                            Elegir
+                          </button>
+                        </div>
+                      </header>
+
+                      <div class="proposalBody" aria-label="Contenido de propuesta">
+                        <p class="proposalMessage">{{ p.message }}</p>
+
+                        <div class="proposalMeta" aria-label="Detalles de la propuesta">
+                          <div class="proposalMetaItem">
+                            <span class="proposalMetaLabel">¿Quién soy?</span>
+                            <span class="proposalMetaValue">{{ p.whoAmI }}</span>
+                          </div>
+
+                          <div class="proposalMetaItem proposalMetaItem--estimate">
+                            <span class="proposalMetaLabel">Estimación</span>
+                            <span class="proposalMetaValue proposalMetaValue--estimate">{{ p.estimate }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </article>
+            </div>
+          </ng-container>
+
+          <ng-template #empty>
+            <div class="state" role="status">
+              <p class="state__title">Todavía no postulaste a ninguna solicitud.</p>
+              <p class="state__hint">Explora solicitudes abiertas y envía tu primera propuesta.</p>
+              <a class="btn" routerLink="/solicitudes">Explorar solicitudes</a>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+    </ng-template>
+  </div>
+</section>
+
+<app-modal [open]="isProfileWipOpen()" title="Perfil (próximamente)" size="sm" (closed)="closeProfileWip()">
+  <div class="state" role="status">
+    <p class="state__title">Estamos trabajando en “Ver perfil”.</p>
+    <p class="state__hint">
+      Muy pronto podrás abrir el perfil de <strong>{{ profileWipName() }}</strong> desde aquí.
+    </p>
+    <button type="button" class="btn" (click)="closeProfileWip()">Entendido</button>
+  </div>
+</app-modal>
+
+<app-modal [open]="isChooseWipOpen()" title="Elegir (próximamente)" size="sm" (closed)="closeChooseWip()">
+  <div class="state" role="status">
+    <p class="state__title">Estamos trabajando en “Elegir”.</p>
+    <p class="state__hint">
+      Muy pronto podrás elegir a <strong>{{ chooseWipName() }}</strong> para esta solicitud desde aquí.
+    </p>
+    <button type="button" class="btn" (click)="closeChooseWip()">Entendido</button>
+  </div>
+</app-modal>
+

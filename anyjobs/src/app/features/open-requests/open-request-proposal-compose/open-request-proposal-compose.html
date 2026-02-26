@@ -1,0 +1,112 @@
+<section class="page proposalCompose">
+  <div class="container">
+    <a class="back" [routerLink]="['/solicitudes', requestId()]">← Volver al detalle</a>
+
+    <ng-container [ngSwitch]="state()">
+      <div *ngSwitchCase="'loading'" class="state" aria-busy="true">
+        <div class="skeletonTitle"></div>
+        <div class="skeletonLine"></div>
+        <div class="skeletonLine"></div>
+      </div>
+
+      <div *ngSwitchCase="'error'" class="state state--error" role="status">
+        <p class="state__title">No se pudo cargar la propuesta.</p>
+        <p class="state__hint">Intenta de nuevo en unos segundos.</p>
+        <button type="button" class="btn" (click)="retry()">Reintentar</button>
+        <a class="btn btn--secondary" [routerLink]="['/solicitudes']">Ver solicitudes</a>
+      </div>
+
+      <ng-container *ngSwitchCase="'success'">
+        <ng-container *ngIf="detail() as d">
+          <header class="header">
+            <p class="kicker">PROPUESTA</p>
+            <h1 class="title">{{ d.title }}</h1>
+            <p class="subtitle">{{ d.excerpt }}</p>
+
+            <div class="meta" *ngIf="d.locationLabel || d.publishedAtLabel || d.budgetLabel">
+              <span class="metaItem" *ngIf="d.publishedAtLabel">{{ d.publishedAtLabel }}</span>
+              <span class="metaSep" *ngIf="d.publishedAtLabel && d.locationLabel">·</span>
+              <span class="metaItem" *ngIf="d.locationLabel">{{ d.locationLabel }}</span>
+              <span class="metaSep" *ngIf="(d.publishedAtLabel || d.locationLabel) && d.budgetLabel">·</span>
+              <span class="metaItem" *ngIf="d.budgetLabel">{{ d.budgetLabel }}</span>
+            </div>
+          </header>
+
+          <ng-container *ngIf="authVm().isLoggedIn; else needLogin">
+            <ng-container *ngIf="sent(); else formView">
+              <div class="state" role="status">
+                <p class="state__title">Propuesta enviada (simulado)</p>
+                <p class="state__hint">
+                  Ya registramos tu mensaje y estimación de forma local. Podrás verlo en “Mis solicitudes”.
+                </p>
+
+                <div class="actions">
+                  <button type="button" class="btn" (click)="goToMyRequests()">Ir a Mis solicitudes</button>
+                  <button type="button" class="btn btn--secondary" (click)="cancel()">Volver al detalle</button>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #formView>
+              <form class="card" [formGroup]="form" (ngSubmit)="submit()">
+                <div class="field">
+                  <label class="fieldLabel" for="whoAmI">¿Quién soy?</label>
+                  <input id="whoAmI" class="fieldControl" formControlName="whoAmI" autocomplete="name" />
+                  <p class="error" *ngIf="form.controls.whoAmI.touched && form.controls.whoAmI.invalid">
+                    Escribe una presentación breve (mínimo 3 caracteres).
+                  </p>
+                </div>
+
+                <div class="field">
+                  <label class="fieldLabel" for="message">Propuesta / mensaje</label>
+                  <textarea
+                    id="message"
+                    class="fieldControl fieldControl--textarea"
+                    rows="6"
+                    formControlName="message"
+                  ></textarea>
+                  <p class="error" *ngIf="form.controls.message.touched && form.controls.message.invalid">
+                    Explica tu propuesta (mínimo 20 caracteres).
+                  </p>
+                </div>
+
+                <div class="field">
+                  <label class="fieldLabel" for="estimate">Estimación inicial</label>
+                  <input
+                    id="estimate"
+                    class="fieldControl"
+                    formControlName="estimate"
+                    placeholder="Ej. €120 / €80–€120 / A convenir"
+                  />
+                  <p class="error" *ngIf="form.controls.estimate.touched && form.controls.estimate.invalid">
+                    Indica una estimación (mínimo 2 caracteres).
+                  </p>
+                </div>
+
+                <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+
+                <footer class="actions">
+                  <button type="button" class="btn btn--secondary" (click)="cancel()">Cancelar</button>
+                  <button type="submit" class="btn" [disabled]="form.invalid">Enviar propuesta</button>
+                </footer>
+              </form>
+            </ng-template>
+          </ng-container>
+
+          <ng-template #needLogin>
+            <div class="state" role="status">
+              <p class="state__title">Necesitas una cuenta para postular</p>
+              <p class="state__hint">Inicia sesión o crea tu cuenta para enviar tu propuesta.</p>
+
+              <div class="actions">
+                <button type="button" class="btn" (click)="openLogin()">Iniciar sesión</button>
+                <a class="btn btn--secondary" routerLink="/registro">Crear cuenta</a>
+              </div>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+  </div>
+</section>
+

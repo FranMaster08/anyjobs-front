@@ -1,0 +1,210 @@
+.proposalCompose {
+  padding: 24px;
+  background: var(--aj-color-bg);
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--aj-color-primary);
+    text-decoration: none;
+    font-weight: 800;
+  }
+
+  .back:focus-visible {
+    outline: 3px solid var(--aj-color-focus);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+
+  .header {
+    border-radius: var(--aj-radius-md);
+    background: var(--aj-color-surface);
+    padding: 18px;
+    box-shadow: var(--aj-shadow-sm);
+    border: 1px solid var(--aj-color-border);
+    margin-bottom: 16px;
+  }
+
+  .kicker {
+    margin: 0;
+    color: var(--aj-color-subtle);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .title {
+    margin: 6px 0 0;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+
+  .subtitle {
+    margin: 8px 0 0;
+    color: var(--aj-color-muted);
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .meta {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    color: var(--aj-color-muted);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .card {
+    border-radius: var(--aj-radius-md);
+    background: var(--aj-color-surface);
+    padding: 16px;
+    box-shadow: var(--aj-shadow-sm);
+    border: 1px solid var(--aj-color-border);
+  }
+
+  .field {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .fieldControl {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 44px;
+    transition:
+      border-color 140ms ease,
+      box-shadow 140ms ease,
+      transform 140ms ease;
+  }
+
+  .fieldControl:focus-visible {
+    outline: 3px solid var(--aj-color-focus);
+    outline-offset: 2px;
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+
+  .fieldControl--textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.35;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    align-items: center;
+  }
+
+  .actions .btn {
+    min-height: 44px;
+    border: 1px solid transparent;
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease,
+      background-color 140ms ease,
+      color 140ms ease,
+      border-color 140ms ease;
+  }
+
+  .actions .btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px rgba(17, 24, 39, 0.12);
+  }
+
+  .actions .btn:focus-visible {
+    outline: 3px solid var(--aj-color-focus);
+    outline-offset: 2px;
+  }
+
+  .actions .btn--secondary {
+    background: rgba(17, 24, 39, 0.06);
+    color: var(--aj-color-ink);
+    border-color: rgba(17, 24, 39, 0.12);
+  }
+
+  .actions .btn--secondary:not(:disabled):hover {
+    background: rgba(17, 24, 39, 0.09);
+  }
+
+  .error {
+    margin: 2px 0 0;
+    color: #b42318;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .state {
+    border-radius: 12px;
+    background: var(--aj-color-surface);
+    padding: 16px;
+    box-shadow: var(--aj-shadow-sm);
+    border: 1px solid var(--aj-color-border);
+  }
+
+  .state--error {
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .state__title {
+    margin: 0 0 4px;
+    font-weight: 900;
+  }
+
+  .state__hint {
+    margin: 0 0 12px;
+    color: var(--aj-color-muted);
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .skeletonTitle {
+    height: 28px;
+    border-radius: 10px;
+    background: var(--aj-skeleton-gradient);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    width: min(560px, 100%);
+    margin-bottom: 12px;
+  }
+
+  .skeletonLine {
+    height: 14px;
+    border-radius: 10px;
+    background: var(--aj-skeleton-gradient);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 520px) {
+    .actions .btn {
+      flex: 1 1 160px;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: 0 0;
+    }
+  }
+}
+

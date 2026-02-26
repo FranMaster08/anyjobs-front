@@ -141,10 +141,10 @@
 
                 <div class="authActions" role="group" aria-label="Acciones de cuenta">
                   <ng-container *ngIf="authVm().isLoggedIn; else authCtas">
-                    <button type="button" class="btn" (click)="openPostulate()">Postular</button>
+                    <button type="button" class="btn" (click)="goToProposal()">Postular</button>
                   </ng-container>
                   <ng-template #authCtas>
-                    <button type="button" class="btn btn--secondary" (click)="scrollToTop()">Iniciar sesión</button>
+                    <button type="button" class="btn btn--secondary" (click)="openLogin()">Iniciar sesión</button>
                     <a class="btn" routerLink="/registro">Crear cuenta</a>
                   </ng-template>
                 </div>
@@ -185,16 +185,6 @@
                   <img class="thumb" [src]="img.url" [alt]="img.alt ?? ''" />
                 </button>
               </div>
-            </div>
-          </app-modal>
-
-          <app-modal [open]="isPostulateOpen()" title="Postular" size="sm" (closed)="closePostulate()">
-            <div class="state" role="status">
-              <p class="state__title">Postulación (simulada)</p>
-              <p class="state__hint">
-                Esta acción está en MVP: ya detectamos tu sesión y aquí iría el flujo real de postulación/contacto.
-              </p>
-              <button type="button" class="btn" (click)="closePostulate()">Entendido</button>
             </div>
           </app-modal>
         </ng-container>

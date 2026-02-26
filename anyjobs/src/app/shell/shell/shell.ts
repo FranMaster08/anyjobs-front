@@ -53,7 +53,14 @@ export class Shell {
       )
       .subscribe(() => {
         this.isAccountMenuOpen.set(false);
-        const fragment = this.router.parseUrl(this.router.url).fragment;
+        const urlTree = this.router.parseUrl(this.router.url);
+        const fragment = urlTree.fragment;
+
+        const loginParam = urlTree.queryParams?.['login'];
+        if (String(loginParam) === '1') {
+          this.openLogin();
+          this.router.navigate([], { queryParams: { login: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        }
 
         if (fragment) {
           // Wait one tick so the target element can render after route navigation.
