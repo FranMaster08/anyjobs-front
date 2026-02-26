@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { delay, map, Observable, of } from 'rxjs';
@@ -8,7 +9,10 @@ import { createMockId } from './api.utils';
 export const AUTH_API_URL = new InjectionToken<string>('AUTH_API_URL', {
   providedIn: 'root',
   // MVP: por defecto, mock en memoria (sin backend).
-  factory: () => '/mock/auth',
+  factory: () => {
+    const doc = inject(DOCUMENT);
+    return new URL('mock/auth', doc.baseURI).toString();
+  },
 });
 
 @Injectable({ providedIn: 'root' })

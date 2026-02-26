@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { catchError, delay, map, Observable, of, switchMap } from 'rxjs';
@@ -10,7 +11,10 @@ const STORAGE_KEY = 'anyjobs.proposals.v1';
 export const PROPOSALS_API_URL = new InjectionToken<string>('PROPOSALS_API_URL', {
   providedIn: 'root',
   // MVP: seed demo desde mock local (assets) hasta definir endpoint real.
-  factory: () => '/mock/proposals.mock.json',
+  factory: () => {
+    const doc = inject(DOCUMENT);
+    return new URL('mock/proposals.mock.json', doc.baseURI).toString();
+  },
 });
 
 type ProposalCandidateTemplate = {

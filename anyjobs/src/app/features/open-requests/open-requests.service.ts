@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { map, Observable } from 'rxjs';
@@ -14,7 +15,10 @@ import {
 export const OPEN_REQUESTS_API_URL = new InjectionToken<string>('OPEN_REQUESTS_API_URL', {
   providedIn: 'root',
   // Por ahora usamos mock local (assets) hasta definir el endpoint real.
-  factory: () => '/mock/open-requests.mock.json',
+  factory: () => {
+    const doc = inject(DOCUMENT);
+    return new URL('mock/open-requests.mock.json', doc.baseURI).toString();
+  },
 });
 
 interface OpenRequestsListResponseDto {

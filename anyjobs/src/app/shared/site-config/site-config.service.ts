@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, InjectionToken, signal } from '@angular/core';
 
@@ -5,7 +6,10 @@ import { SiteConfig } from './site-config.models';
 
 export const SITE_CONFIG_URL = new InjectionToken<string>('SITE_CONFIG_URL', {
   providedIn: 'root',
-  factory: () => '/mock/site.mock.json',
+  factory: () => {
+    const doc = inject(DOCUMENT);
+    return new URL('mock/site.mock.json', doc.baseURI).toString();
+  },
 });
 
 @Injectable({ providedIn: 'root' })
