@@ -12,10 +12,10 @@ import {
 
 export const USERS_API_URL = new InjectionToken<string>('USERS_API_URL', {
   providedIn: 'root',
-  // MVP: por defecto, mock en memoria (sin backend).
+  // Por defecto apunta al backend (vía same-origin / proxy en dev).
   factory: () => {
     const doc = inject(DOCUMENT);
-    return new URL('mock/users', doc.baseURI).toString();
+    return new URL('/users', doc.baseURI).toString();
   },
 });
 

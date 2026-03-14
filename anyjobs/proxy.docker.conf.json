@@ -1,0 +1,33 @@
+{
+  "/auth": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/users": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/open-requests": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/proposals": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/site-config": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/docs": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
+

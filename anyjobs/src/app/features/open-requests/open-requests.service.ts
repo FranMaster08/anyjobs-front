@@ -14,10 +14,10 @@ import {
 
 export const OPEN_REQUESTS_API_URL = new InjectionToken<string>('OPEN_REQUESTS_API_URL', {
   providedIn: 'root',
-  // Por ahora usamos mock local (assets) hasta definir el endpoint real.
+  // Por defecto apunta al backend (vía same-origin / proxy en dev).
   factory: () => {
     const doc = inject(DOCUMENT);
-    return new URL('mock/open-requests.mock.json', doc.baseURI).toString();
+    return new URL('/open-requests', doc.baseURI).toString();
   },
 });
 
@@ -57,9 +57,12 @@ interface OpenRequestDetailDto {
   locationLabel?: string | null;
   publishedAtLabel?: string | null;
   budgetLabel?: string | null;
+  // Compat (mock legacy)
   providerName?: string | null;
   providerBadge?: string | null;
   providerSubtitle?: string | null;
+  // Backend real
+  provider?: { name: string; badge?: string | null; subtitle?: string | null } | null;
   reputation?: number | null;
   reviewsCount?: number | null;
   providerReviews?: OpenRequestProviderReviewDto[] | null;
@@ -168,9 +171,10 @@ function normalizeDetail(dto: OpenRequestDetailDto, base: OpenRequestListItemDto
       ? rawImages.map((img) => normalizeImage(img)).filter((x): x is OpenRequestImage => x !== null)
       : normalizeFallbackImages(base);
 
-  const providerName = (dto.providerName ?? '').trim();
-  const providerBadge = (dto.providerBadge ?? '').trim();
-  const providerSubtitle = (dto.providerSubtitle ?? '').trim();
+  const providerFromObj = dto.provider && typeof dto.provider === 'object' ? dto.provider : null;
+  const providerName = (providerFromObj?.name ?? dto.providerName ?? '').trim();
+  const providerBadge = (providerFromObj?.badge ?? dto.providerBadge ?? '').trim();
+  const providerSubtitle = (providerFromObj?.subtitle ?? dto.providerSubtitle ?? '').trim();
 
   const rawReputation = dto.reputation ?? null;
   const reputation =

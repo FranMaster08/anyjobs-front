@@ -49,7 +49,7 @@
                 <button
                   type="button"
                   class="mainImageBtn"
-                  (click)="openGallery(activeImageIndex())"
+                  (click)="openGallery(activeImageIndex(), $event)"
                   aria-label="Abrir galería"
                 >
                   <img
@@ -66,7 +66,7 @@
                     *ngFor="let img of d.images; let i = index"
                     [class.is-active]="i === activeImageIndex()"
                     (click)="selectImage(i)"
-                    (dblclick)="openGallery(i)"
+                    (dblclick)="openGallery(i, $event)"
                     [attr.aria-label]="'Seleccionar imagen ' + (i + 1)"
                   >
                     <img class="thumb" [src]="img.url" [alt]="img.alt ?? ''" />
@@ -156,7 +156,7 @@
             </aside>
           </div>
 
-          <app-modal [open]="isGalleryOpen()" title="Galería" (closed)="closeGallery()">
+          <app-modal [open]="isGalleryOpen()" title="Galería" size="lg" (closed)="closeGallery()">
             <div class="galleryModal" *ngIf="d.images.length > 0">
               <div class="galleryModalTop">
                 <button type="button" class="btn btn--secondary" (click)="prevImage()" [disabled]="d.images.length < 2">

@@ -10,10 +10,10 @@ const STORAGE_KEY = 'anyjobs.proposals.v1';
 
 export const PROPOSALS_API_URL = new InjectionToken<string>('PROPOSALS_API_URL', {
   providedIn: 'root',
-  // MVP: seed demo desde mock local (assets) hasta definir endpoint real.
+  // Por defecto apunta al backend (vía same-origin / proxy en dev).
   factory: () => {
     const doc = inject(DOCUMENT);
-    return new URL('mock/proposals.mock.json', doc.baseURI).toString();
+    return new URL('/proposals', doc.baseURI).toString();
   },
 });
 
@@ -293,6 +293,15 @@ export class ProposalsService {
 
   listByUser(userId: string): Observable<readonly Proposal[]> {
     const uid = userId.trim();
+    if (uid.length === 0) return of([]);
+    if (!this.apiUrl.includes('/mock/')) {
+      return this.http
+        .get<{ items?: Proposal[] }>(this.apiUrl, { params: { userId: uid, page: 1, pageSize: 100 } })
+        .pipe(
+          map((res) => (res.items ?? []).slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))),
+        );
+    }
+
     return this.ensureSeededForUser(uid).pipe(
       switchMap(() => {
         const items = readAll()
@@ -307,6 +316,13 @@ export class ProposalsService {
   getByUserAndRequest(userId: string, requestId: string): Observable<Proposal | null> {
     const uid = userId.trim();
     const rid = requestId.trim();
+    if (uid.length === 0 || rid.length === 0) return of(null);
+    if (!this.apiUrl.includes('/mock/')) {
+      return this.http
+        .get<{ items?: Proposal[] }>(this.apiUrl, { params: { userId: uid, requestId: rid, page: 1, pageSize: 1 } })
+        .pipe(map((res) => (res.items ?? [])[0] ?? null));
+    }
+
     return this.ensureSeededForUser(uid).pipe(
       switchMap(() => {
         const found = readAll().find((p) => p.userId === uid && p.requestId === rid) ?? null;
@@ -318,6 +334,14 @@ export class ProposalsService {
   listByRequest(requestId: string, seedForUserId?: string): Observable<readonly Proposal[]> {
     const rid = requestId.trim();
     if (rid.length === 0) return of([]).pipe(delay(50));
+
+    if (!this.apiUrl.includes('/mock/')) {
+      return this.http
+        .get<{ items?: Proposal[] }>(this.apiUrl, { params: { requestId: rid, page: 1, pageSize: 100 } })
+        .pipe(
+          map((res) => (res.items ?? []).slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))),
+        );
+    }
 
     const seed$ = seedForUserId
       ? this.ensureSeededForUser(seedForUserId).pipe(switchMap(() => this.seedFromMockForRequest(rid, seedForUserId)))
@@ -343,6 +367,18 @@ export class ProposalsService {
 
     const authorName = (input.authorName ?? '').trim();
     const authorSubtitle = (input.authorSubtitle ?? '').trim();
+
+    if (!this.apiUrl.includes('/mock/')) {
+      return this.http.post<Proposal>(this.apiUrl, {
+        requestId,
+        userId,
+        authorName: authorName.length > 0 ? authorName : 'Usuario',
+        authorSubtitle: authorSubtitle.length > 0 ? authorSubtitle : 'Perfil',
+        whoAmI,
+        message,
+        estimate,
+      });
+    }
 
     const next: Proposal = {
       id: createMockId('proposal'),

@@ -1,0 +1,15 @@
+services:
+  anyjobs-dev:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "4200:4200"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./anyjobs:/app
+      - anyjobs-node-modules:/app/node_modules
+
+volumes:
+  anyjobs-node-modules:

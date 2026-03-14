@@ -8,10 +8,10 @@ import { createMockId } from './api.utils';
 
 export const AUTH_API_URL = new InjectionToken<string>('AUTH_API_URL', {
   providedIn: 'root',
-  // MVP: por defecto, mock en memoria (sin backend).
+  // Por defecto apunta al backend (vía same-origin / proxy en dev).
   factory: () => {
     const doc = inject(DOCUMENT);
-    return new URL('mock/auth', doc.baseURI).toString();
+    return new URL('/auth', doc.baseURI).toString();
   },
 });
 

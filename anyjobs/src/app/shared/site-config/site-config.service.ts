@@ -8,7 +8,7 @@ export const SITE_CONFIG_URL = new InjectionToken<string>('SITE_CONFIG_URL', {
   providedIn: 'root',
   factory: () => {
     const doc = inject(DOCUMENT);
-    return new URL('mock/site.mock.json', doc.baseURI).toString();
+    return new URL('/site-config', doc.baseURI).toString();
   },
 });
 

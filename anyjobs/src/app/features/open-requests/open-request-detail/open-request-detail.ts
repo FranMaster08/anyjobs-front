@@ -62,9 +62,17 @@ export class OpenRequestDetail {
     this.activeImageIndex.set(index);
   }
 
-  protected openGallery(index?: number): void {
+  protected openGallery(index?: number, event?: Event): void {
+    // Evitar que el mismo click/tap cierre el modal instantáneamente
+    // (especialmente en móviles, donde el click es sintético post-touch).
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
     if (typeof index === 'number') this.selectImage(index);
-    this.isGalleryOpen.set(true);
+
+    setTimeout(() => {
+      this.isGalleryOpen.set(true);
+    }, 0);
   }
 
   protected closeGallery(): void {

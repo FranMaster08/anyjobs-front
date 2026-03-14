@@ -67,7 +67,8 @@
               "buildTarget": "anyjobs:build:production"
             },
             "development": {
-              "buildTarget": "anyjobs:build:development"
+              "buildTarget": "anyjobs:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
