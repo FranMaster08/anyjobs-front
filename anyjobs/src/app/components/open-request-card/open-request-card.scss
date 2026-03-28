@@ -1,11 +1,13 @@
 .card {
-  display: block;
+  display: grid;
   overflow: hidden;
   border-radius: 14px;
   background: var(--aj-color-surface);
   text-decoration: none;
   color: inherit;
   box-shadow: var(--aj-shadow-sm);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  min-width: 0;
 }
 
 .mediaLink,
@@ -18,6 +20,7 @@
   position: relative;
   aspect-ratio: 16 / 10;
   background: var(--aj-color-skeleton-1);
+  min-width: 0;
 }
 
 .mediaLink:focus-visible {
@@ -25,13 +28,22 @@
   outline-offset: 2px;
 }
 
+.titleLink:focus-visible,
+.actions .btn:focus-visible {
+  outline: 3px solid var(--aj-color-focus);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
 .mediaBadges {
   position: absolute;
   top: 10px;
   left: 10px;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   z-index: 1;
+  max-width: calc(100% - 20px);
 }
 
 .badge {
@@ -60,9 +72,10 @@
 }
 
 .body {
-  padding: 12px 12px 14px;
+  padding: 14px 14px 16px;
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .titleLink {
@@ -73,6 +86,8 @@
   font-weight: 800;
   line-height: 1.3;
   color: var(--aj-color-ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .meta {
@@ -81,6 +96,7 @@
   gap: 6px;
   color: var(--aj-color-muted);
   font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 .meta__sep {
@@ -89,8 +105,39 @@
 
 .actions {
   display: flex;
-  gap: 10px;
-  align-items: center;
+  gap: 12px;
+  align-items: stretch;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.actions .btn {
+  flex: 0 1 calc(50% - 6px);
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 13px;
+  max-width: calc(50% - 6px);
+}
+
+@media (max-width: 700px) {
+  .card {
+    border-radius: 16px;
+  }
+
+  .media {
+    aspect-ratio: 16 / 11;
+  }
+
+  .actions {
+    gap: 10px;
+  }
+
+  .actions .btn {
+    flex-basis: calc(50% - 5px);
+    max-width: calc(50% - 5px);
+    min-height: 36px;
+    padding-inline: 8px;
+  }
 }
 
 .btn {
@@ -109,4 +156,3 @@
     background-position: 0 0;
   }
 }
-

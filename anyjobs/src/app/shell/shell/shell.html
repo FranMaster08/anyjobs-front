@@ -46,11 +46,26 @@
 
           @if (isAccountMenuOpen()) {
             <div class="accountBackdrop" (click)="closeAccountMenu()" role="presentation"></div>
-            <div class="accountMenu" (click)="$event.stopPropagation()" role="menu" aria-label="Cuenta">
-              <a class="accountMenuItem" role="menuitem" routerLink="/perfil" (click)="closeAccountMenu()">
+            <div
+              class="accountMenu"
+              (click)="$event.stopPropagation()"
+              role="menu"
+              aria-label="Cuenta"
+            >
+              <a
+                class="accountMenuItem"
+                role="menuitem"
+                routerLink="/perfil"
+                (click)="closeAccountMenu()"
+              >
                 {{ t('auth.myProfile') }}
               </a>
-              <a class="accountMenuItem" role="menuitem" routerLink="/mis-solicitudes" (click)="closeAccountMenu()">
+              <a
+                class="accountMenuItem"
+                role="menuitem"
+                routerLink="/mis-solicitudes"
+                (click)="closeAccountMenu()"
+              >
                 Mis solicitudes
               </a>
               <button type="button" class="accountMenuItem" role="menuitem" (click)="logout()">
@@ -67,10 +82,19 @@
 </header>
 
 <app-modal [open]="isLoginOpen()" [title]="t('auth.login')" size="sm" (closed)="closeLogin()">
-  <form class="loginForm" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+  <form class="loginForm" [formGroup]="loginForm" (ngSubmit)="submitLogin()" novalidate>
     <div class="field">
       <label class="fieldLabel" for="loginEmail">{{ t('auth.email') }}</label>
-      <input id="loginEmail" class="fieldControl" formControlName="email" autocomplete="email" />
+      <input
+        id="loginEmail"
+        type="email"
+        inputmode="email"
+        autocapitalize="none"
+        spellcheck="false"
+        class="fieldControl"
+        formControlName="email"
+        autocomplete="email"
+      />
       @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
         <p class="loginError">{{ t('auth.emailInvalid') }}</p>
       }
@@ -91,12 +115,16 @@
     </div>
 
     @if (loginError()) {
-      <p class="loginError">{{ loginError() }}</p>
+      <p class="loginError" role="status" aria-live="polite">{{ loginError() }}</p>
     }
 
     <footer class="loginActions">
-      <button type="button" class="btn btn--secondary" (click)="closeLogin()">{{ t('auth.cancel') }}</button>
-      <button type="submit" class="btn" [disabled]="loginForm.invalid || loginBusy()">{{ t('auth.login') }}</button>
+      <button type="button" class="btn btn--secondary" (click)="closeLogin()">
+        {{ t('auth.cancel') }}
+      </button>
+      <button type="submit" class="btn" [disabled]="loginForm.invalid || loginBusy()">
+        {{ t('auth.login') }}
+      </button>
     </footer>
 
     <p class="loginHint">
@@ -114,10 +142,18 @@
   <div class="footerInner">
     <div class="footerBrand">{{ site.config()?.brandName ?? t('brand.name') }}</div>
     <div class="footerLinks">
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="inicio">{{ t('nav.inicio') }}</a>
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="solicitudes">{{ t('nav.solicitudes') }}</a>
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="ubicacion">{{ t('nav.ubicacion') }}</a>
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="contacto">{{ t('nav.contacto') }}</a>
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="inicio">{{
+        t('nav.inicio')
+      }}</a>
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="solicitudes">{{
+        t('nav.solicitudes')
+      }}</a>
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="ubicacion">{{
+        t('nav.ubicacion')
+      }}</a>
+      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="contacto">{{
+        t('nav.contacto')
+      }}</a>
     </div>
   </div>
 </footer>

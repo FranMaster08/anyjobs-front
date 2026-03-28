@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { finalize, forkJoin, of, type Observable } from 'rxjs';
+import { finalize, forkJoin, of, switchMap, type Observable } from 'rxjs';
 
 import { RegistrationStateService } from '../registration-state.service';
 import {
@@ -33,7 +33,6 @@ import {
 import { e164PhoneValidator, rolesRequiredValidator, strongPasswordValidator } from '../registration.validators';
 import { emailTakenAsyncValidator, phoneTakenAsyncValidator } from '../registration.async-validators';
 import { AuthApi } from '../../../../shared/api/auth.api';
-import { UserApi } from '../../../../shared/api/user.api';
 import { clearApiError, setApiError } from '../../../../shared/api/api-error.utils';
 import { I18nService } from '../../../../shared/i18n/i18n.service';
 
@@ -50,7 +49,6 @@ export class Registration {
   protected readonly reg = inject(RegistrationStateService);
   protected readonly i18n = inject(I18nService);
   private readonly authApi = inject(AuthApi);
-  private readonly userApi = inject(UserApi);
 
   protected readonly vm = this.reg.vm;
   protected readonly stage = computed(() => this.vm().stage);
@@ -211,7 +209,6 @@ export class Registration {
       )
       .subscribe({
         next: (res) => {
-          this.reg.setUserId(res.userId);
           this.reg.setStatus(res.status);
           this.reg.setStage(res.nextStage);
         },
@@ -294,8 +291,8 @@ export class Registration {
     this.isBusy.set(true);
     clearApiError(this.locationForm);
 
-    this.userApi
-      .updateLocation(payload)
+    this.authApi
+      .updateRegistrationLocation(payload)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.isBusy.set(false)),
@@ -326,7 +323,7 @@ export class Registration {
     if (this.isWorker()) {
       const worker = this.workerProfileForm.getRawValue();
       ops.push(
-        this.userApi.updateWorkerProfile({
+        this.authApi.updateRegistrationWorkerProfile({
           categories: worker.categories,
           headline: worker.headline?.trim() ? worker.headline.trim() : undefined,
           bio: worker.bio?.trim() ? worker.bio.trim() : undefined,
@@ -335,11 +332,13 @@ export class Registration {
     }
     if (this.isClient()) {
       const client = this.clientProfileForm.getRawValue();
-      ops.push(
-        this.userApi.updateClientProfile({
-          preferredPaymentMethod: client.preferredPaymentMethod ? client.preferredPaymentMethod : undefined,
-        }),
-      );
+      if (client.preferredPaymentMethod) {
+        ops.push(
+          this.authApi.updateRegistrationClientProfile({
+            preferredPaymentMethod: client.preferredPaymentMethod,
+          }),
+        );
+      }
     }
 
     const done$ = ops.length > 0 ? forkJoin(ops) : of([]);
@@ -383,16 +382,35 @@ export class Registration {
 
     // Si no hay datos (CLIENT) no bloqueamos el flujo.
     if (!hasAny) {
-      this.reg.setStatus('ACTIVE');
-      this.reg.setStage('DONE');
+      this.completeRegistration();
       return;
     }
 
     this.isBusy.set(true);
     clearApiError(this.personalForm);
 
-    this.userApi
-      .updatePersonalInfo(payload)
+    this.authApi
+      .updateRegistrationPersonalInfo(payload)
+      .pipe(
+        switchMap(() => this.authApi.completeRegistration()),
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.isBusy.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.reg.setStatus('ACTIVE');
+          this.reg.setStage('DONE');
+        },
+        error: (err: unknown) => setApiError(this.personalForm, err),
+      });
+  }
+
+  private completeRegistration(): void {
+    this.isBusy.set(true);
+    clearApiError(this.personalForm);
+
+    this.authApi
+      .completeRegistration()
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.isBusy.set(false)),

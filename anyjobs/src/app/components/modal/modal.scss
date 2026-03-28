@@ -4,12 +4,13 @@
   background: rgba(17, 24, 39, 0.55);
   display: grid;
   place-items: center;
-  padding: 20px;
+  padding: 16px;
   z-index: 1000;
 }
 
 .panel {
   width: min(920px, 100%);
+  max-width: 100%;
   max-height: min(86vh, 900px);
   overflow: auto;
   border-radius: 16px;
@@ -18,7 +19,7 @@
 }
 
 .panel--sm {
-  width: min(520px, 100%);
+  width: min(420px, 100%);
 }
 
 .panel--md {
@@ -43,6 +44,7 @@
   font-size: 16px;
   font-weight: 800;
   color: var(--aj-color-ink);
+  min-width: 0;
 }
 
 .closeBtn {
@@ -53,6 +55,7 @@
   padding: 8px 10px;
   cursor: pointer;
   font-weight: 900;
+  flex: 0 0 auto;
 }
 
 .closeBtn:hover {
@@ -63,3 +66,21 @@
   padding: 16px;
 }
 
+@media (max-width: 520px) {
+  .overlay {
+    padding: 10px;
+  }
+
+  .panel {
+    max-height: min(92vh, 900px);
+    border-radius: 14px;
+  }
+
+  .header {
+    padding: 12px 14px;
+  }
+
+  .content {
+    padding: 14px;
+  }
+}

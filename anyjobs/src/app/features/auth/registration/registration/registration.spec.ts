@@ -5,7 +5,6 @@ import { of } from 'rxjs';
 import { Registration } from './registration';
 import { RegistrationStateService } from '../registration-state.service';
 import { AuthApi } from '../../../../shared/api/auth.api';
-import { UserApi } from '../../../../shared/api/user.api';
 
 describe('Registration', () => {
   let fixture: ComponentFixture<Registration>;
@@ -15,11 +14,19 @@ describe('Registration', () => {
   beforeEach(async () => {
     const authMock: Pick<
       AuthApi,
-      'register' | 'verifyEmail' | 'verifyPhone' | 'isEmailAvailable' | 'isPhoneAvailable'
+      | 'register'
+      | 'verifyEmail'
+      | 'verifyPhone'
+      | 'updateRegistrationLocation'
+      | 'updateRegistrationWorkerProfile'
+      | 'updateRegistrationClientProfile'
+      | 'updateRegistrationPersonalInfo'
+      | 'completeRegistration'
+      | 'isEmailAvailable'
+      | 'isPhoneAvailable'
     > = {
       register: () =>
         of({
-          userId: 'user_1',
           status: 'PENDING',
           emailVerificationRequired: true,
           phoneVerificationRequired: false,
@@ -27,18 +34,13 @@ describe('Registration', () => {
         }),
       verifyEmail: () => of(void 0),
       verifyPhone: () => of(void 0),
+      updateRegistrationLocation: () => of(void 0),
+      updateRegistrationWorkerProfile: () => of(void 0),
+      updateRegistrationClientProfile: () => of(void 0),
+      updateRegistrationPersonalInfo: () => of(void 0),
+      completeRegistration: () => of(void 0),
       isEmailAvailable: () => of(true),
       isPhoneAvailable: () => of(true),
-    };
-
-    const userMock: Pick<
-      UserApi,
-      'updateLocation' | 'updateWorkerProfile' | 'updateClientProfile' | 'updatePersonalInfo'
-    > = {
-      updateLocation: () => of(void 0),
-      updateWorkerProfile: () => of(void 0),
-      updateClientProfile: () => of(void 0),
-      updatePersonalInfo: () => of(void 0),
     };
 
     await TestBed.configureTestingModule({
@@ -46,7 +48,6 @@ describe('Registration', () => {
       providers: [
         provideRouter([]),
         { provide: AuthApi, useValue: authMock },
-        { provide: UserApi, useValue: userMock },
       ],
     }).compileComponents();
 

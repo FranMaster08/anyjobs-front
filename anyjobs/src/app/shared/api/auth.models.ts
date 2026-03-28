@@ -10,7 +10,6 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  userId: string;
   status: RegistrationStatus;
   emailVerificationRequired: boolean;
   phoneVerificationRequired: boolean;

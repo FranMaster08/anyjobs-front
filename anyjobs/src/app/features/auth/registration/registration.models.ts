@@ -16,7 +16,6 @@ export interface RegistrationStateVM {
   emailVerified: boolean;
   phoneVerified: boolean;
   status: RegistrationStatus;
-  userId?: string;
   workerCategoriesCount?: number;
 }
 

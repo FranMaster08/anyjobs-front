@@ -17,15 +17,11 @@ import { OpenRequestListItem } from '../../features/open-requests/open-requests.
 })
 export class OpenRequestCardComponent {
   readonly request = input.required<OpenRequestListItem>();
+  protected readonly ariaLabel = 'Ver detalle de la solicitud';
 
   protected readonly trackByValue = (_: number, v: string) => v;
 
   protected get detailLink(): (string | number)[] {
     return ['/solicitudes', this.request().id];
   }
-
-  protected get ariaLabel(): string {
-    return 'Ver detalle de la solicitud';
-  }
 }
-

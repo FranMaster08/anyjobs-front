@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  HostListener,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -59,7 +66,11 @@ export class Shell {
         const loginParam = urlTree.queryParams?.['login'];
         if (String(loginParam) === '1') {
           this.openLogin();
-          this.router.navigate([], { queryParams: { login: null }, queryParamsHandling: 'merge', replaceUrl: true });
+          this.router.navigate([], {
+            queryParams: { login: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+          });
         }
 
         if (fragment) {

@@ -36,6 +36,12 @@
   --aj-radius-pill: 999px;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   font-family: var(--aj-font-sans);
@@ -62,6 +68,7 @@ body {
   font: inherit;
   background: var(--aj-color-primary);
   color: var(--aj-color-surface);
+  max-width: 100%;
 }
 
 .btn--secondary {
@@ -100,6 +107,9 @@ body {
 }
 
 .fieldControl {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--aj-color-skeleton-2);
   border-radius: var(--aj-radius-sm);
   padding: 10px 12px;

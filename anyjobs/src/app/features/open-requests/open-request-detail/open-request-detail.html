@@ -28,18 +28,26 @@
                 <span class="metaItem" *ngIf="d.publishedAtLabel">{{ d.publishedAtLabel }}</span>
                 <span class="metaSep" *ngIf="d.publishedAtLabel && d.locationLabel">·</span>
                 <span class="metaItem" *ngIf="d.locationLabel">{{ d.locationLabel }}</span>
-                <span class="metaSep" *ngIf="(d.publishedAtLabel || d.locationLabel) && d.budgetLabel">·</span>
+                <span
+                  class="metaSep"
+                  *ngIf="(d.publishedAtLabel || d.locationLabel) && d.budgetLabel"
+                  >·</span
+                >
                 <span class="metaItem" *ngIf="d.budgetLabel">{{ d.budgetLabel }}</span>
               </div>
 
               <div class="tags" *ngIf="d.tags?.length">
-                <span class="tag" *ngFor="let t of d.tags; let i = index" [hidden]="i > 3">{{ t }}</span>
+                <span class="tag" *ngFor="let t of d.tags; let i = index" [hidden]="i > 3">{{
+                  t
+                }}</span>
               </div>
             </div>
 
             <div class="headerActions">
-              <button type="button" class="btn btn--secondary btn--sm" (click)="scrollToApply()">Postular</button>
-              <button type="button" class="btn btn--sm" (click)="scrollToApply()">Contactar</button>
+              <button type="button" class="btn btn--sm" (click)="scrollToApply()">Postular</button>
+              <button type="button" class="btn btn--secondary btn--sm" (click)="scrollToApply()">
+                Contactar
+              </button>
             </div>
           </header>
 
@@ -84,22 +92,39 @@
                 <div class="providerHeader">
                   <h2 class="sectionTitle">Ofrecido por</h2>
                   <div class="providerHeaderRight">
-                    <span class="providerBadge" *ngIf="d.provider.badge">{{ d.provider.badge }}</span>
+                    <span class="providerBadge" *ngIf="d.provider.badge">{{
+                      d.provider.badge
+                    }}</span>
 
-                    <div class="ratingInline" *ngIf="d.reputation !== undefined" aria-label="Reputación del oferente">
+                    <div
+                      class="ratingInline"
+                      *ngIf="d.reputation !== undefined"
+                      aria-label="Reputación del oferente"
+                    >
                       <span class="ratingInlineStar" aria-hidden="true">★</span>
                       <span class="ratingInlineValue">{{ d.reputation | number: '1.1-2' }}</span>
-                      <span class="ratingInlineSep" *ngIf="d.reviewsCount !== undefined" aria-hidden="true">·</span>
-                      <span class="ratingInlineSub" *ngIf="d.reviewsCount !== undefined">{{ d.reviewsCount }} reseñas</span>
+                      <span
+                        class="ratingInlineSep"
+                        *ngIf="d.reviewsCount !== undefined"
+                        aria-hidden="true"
+                        >·</span
+                      >
+                      <span class="ratingInlineSub" *ngIf="d.reviewsCount !== undefined"
+                        >{{ d.reviewsCount }} reseñas</span
+                      >
                     </div>
                   </div>
                 </div>
 
                 <div class="providerRow">
-                  <div class="providerAvatar" aria-hidden="true">{{ d.provider.name.slice(0, 1) }}</div>
+                  <div class="providerAvatar" aria-hidden="true">
+                    {{ d.provider.name.slice(0, 1) }}
+                  </div>
                   <div class="providerBody">
                     <p class="providerName">{{ d.provider.name }}</p>
-                    <p class="providerSubtitle" *ngIf="d.provider.subtitle">{{ d.provider.subtitle }}</p>
+                    <p class="providerSubtitle" *ngIf="d.provider.subtitle">
+                      {{ d.provider.subtitle }}
+                    </p>
                   </div>
                 </div>
 
@@ -107,16 +132,26 @@
                   <h3 class="providerReviewsTitle">Comentarios</h3>
                   <ul class="providerReviewsList" aria-label="Comentarios de usuarios">
                     <li class="providerReview" *ngFor="let r of d.providerReviews">
-                      <div class="providerReviewAvatar" aria-hidden="true">{{ r.author.slice(0, 1) }}</div>
+                      <div class="providerReviewAvatar" aria-hidden="true">
+                        {{ r.author.slice(0, 1) }}
+                      </div>
                       <div class="providerReviewBody">
                         <div class="providerReviewTop">
                           <p class="providerReviewAuthor">{{ r.author }}</p>
                           <p class="providerReviewMeta">
-                            <span *ngIf="r.rating !== undefined" class="providerReviewRating" aria-label="Calificación del comentario">
+                            <span
+                              *ngIf="r.rating !== undefined"
+                              class="providerReviewRating"
+                              aria-label="Calificación del comentario"
+                            >
                               <span class="providerReviewStar" aria-hidden="true">★</span>
-                              <span class="providerReviewRatingValue">{{ r.rating | number: '1.1-2' }}</span>
+                              <span class="providerReviewRatingValue">{{
+                                r.rating | number: '1.1-2'
+                              }}</span>
                             </span>
-                            <span *ngIf="r.dateLabel" class="providerReviewDate">{{ r.dateLabel }}</span>
+                            <span *ngIf="r.dateLabel" class="providerReviewDate">{{
+                              r.dateLabel
+                            }}</span>
                           </p>
                         </div>
                         <p class="providerReviewText">{{ r.text }}</p>
@@ -144,8 +179,8 @@
                     <button type="button" class="btn" (click)="goToProposal()">Postular</button>
                   </ng-container>
                   <ng-template #authCtas>
-                    <button type="button" class="btn btn--secondary" (click)="openLogin()">Iniciar sesión</button>
-                    <a class="btn" routerLink="/registro">Crear cuenta</a>
+                    <button type="button" class="btn" (click)="openLogin()">Iniciar sesión</button>
+                    <a class="btn btn--secondary" routerLink="/registro">Crear cuenta</a>
                   </ng-template>
                 </div>
 
@@ -159,11 +194,21 @@
           <app-modal [open]="isGalleryOpen()" title="Galería" size="lg" (closed)="closeGallery()">
             <div class="galleryModal" *ngIf="d.images.length > 0">
               <div class="galleryModalTop">
-                <button type="button" class="btn btn--secondary" (click)="prevImage()" [disabled]="d.images.length < 2">
+                <button
+                  type="button"
+                  class="btn btn--secondary"
+                  (click)="prevImage()"
+                  [disabled]="d.images.length < 2"
+                >
                   ← Anterior
                 </button>
                 <p class="galleryCount">{{ activeImageIndex() + 1 }} / {{ d.images.length }}</p>
-                <button type="button" class="btn btn--secondary" (click)="nextImage()" [disabled]="d.images.length < 2">
+                <button
+                  type="button"
+                  class="btn btn--secondary"
+                  (click)="nextImage()"
+                  [disabled]="d.images.length < 2"
+                >
                   Siguiente →
                 </button>
               </div>
@@ -174,7 +219,11 @@
                 [alt]="d.images[activeImageIndex()].alt ?? ''"
               />
 
-              <div class="galleryModalThumbs" *ngIf="d.images.length > 1" aria-label="Miniaturas de galería">
+              <div
+                class="galleryModalThumbs"
+                *ngIf="d.images.length > 1"
+                aria-label="Miniaturas de galería"
+              >
                 <button
                   type="button"
                   class="thumbBtn thumbBtn--sm"
@@ -192,4 +241,3 @@
     </ng-container>
   </div>
 </section>
-

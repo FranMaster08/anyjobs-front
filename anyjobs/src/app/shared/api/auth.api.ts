@@ -5,6 +5,12 @@ import { delay, map, Observable, of } from 'rxjs';
 
 import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, VerifyOtpRequest } from './auth.models';
 import { createMockId } from './api.utils';
+import {
+  UpdateClientProfileRequest,
+  UpdateLocationRequest,
+  UpdatePersonalInfoRequest,
+  UpdateWorkerProfileRequest,
+} from './user.models';
 
 export const AUTH_API_URL = new InjectionToken<string>('AUTH_API_URL', {
   providedIn: 'root',
@@ -22,10 +28,8 @@ export class AuthApi {
 
   register(req: RegisterRequest): Observable<RegisterResponse> {
     if (this.apiUrl.includes('/mock/')) {
-      const userId = createMockId('user');
       const phoneRequired = req.roles.includes('WORKER');
       return of<RegisterResponse>({
-        userId,
         status: 'PENDING',
         emailVerificationRequired: true,
         phoneVerificationRequired: phoneRequired,
@@ -55,6 +59,31 @@ export class AuthApi {
       return of(void 0).pipe(delay(250));
     }
     return this.http.post<void>(`${this.apiUrl}/verify-phone`, req);
+  }
+
+  updateRegistrationLocation(req: UpdateLocationRequest): Observable<void> {
+    if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
+    return this.http.patch<void>(`${this.apiUrl}/registration/location`, req);
+  }
+
+  updateRegistrationWorkerProfile(req: UpdateWorkerProfileRequest): Observable<void> {
+    if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
+    return this.http.patch<void>(`${this.apiUrl}/registration/worker-profile`, req);
+  }
+
+  updateRegistrationClientProfile(req: UpdateClientProfileRequest): Observable<void> {
+    if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
+    return this.http.patch<void>(`${this.apiUrl}/registration/client-profile`, req);
+  }
+
+  updateRegistrationPersonalInfo(req: UpdatePersonalInfoRequest): Observable<void> {
+    if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
+    return this.http.patch<void>(`${this.apiUrl}/registration/personal-info`, req);
+  }
+
+  completeRegistration(): Observable<void> {
+    if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
+    return this.http.post<void>(`${this.apiUrl}/registration/complete`, {});
   }
 
   isEmailAvailable(email: string): Observable<boolean> {

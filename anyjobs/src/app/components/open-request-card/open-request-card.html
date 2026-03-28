@@ -2,11 +2,18 @@
   <a class="mediaLink" [routerLink]="detailLink" [attr.aria-label]="ariaLabel">
     <div class="media">
       <div class="mediaBadges" *ngIf="request().tags?.length">
-        <span class="badge" *ngFor="let t of request().tags; let i = index" [hidden]="i > 1">{{ t }}</span>
+        <span class="badge" *ngFor="let t of request().tags; let i = index" [hidden]="i > 1">{{
+          t
+        }}</span>
       </div>
 
       <ng-container *ngIf="request().imageUrl; else placeholder">
-        <img class="media__img" [src]="request().imageUrl" [alt]="request().imageAlt ?? ''" loading="lazy" />
+        <img
+          class="media__img"
+          [src]="request().imageUrl"
+          [alt]="request().imageAlt ?? ''"
+          loading="lazy"
+        />
       </ng-container>
       <ng-template #placeholder>
         <div class="media__placeholder" aria-hidden="true"></div>
@@ -17,16 +24,33 @@
   <div class="body">
     <a class="titleLink" [routerLink]="detailLink">{{ request().excerpt }}</a>
 
-    <div class="meta" *ngIf="request().locationLabel || request().publishedAtLabel || request().budgetLabel">
-      <span class="meta__item" *ngIf="request().publishedAtLabel">{{ request().publishedAtLabel }}</span>
+    <div
+      class="meta"
+      *ngIf="request().locationLabel || request().publishedAtLabel || request().budgetLabel"
+    >
+      <span class="meta__item" *ngIf="request().publishedAtLabel">{{
+        request().publishedAtLabel
+      }}</span>
       <span class="meta__sep" *ngIf="request().publishedAtLabel && request().locationLabel">·</span>
       <span class="meta__item" *ngIf="request().locationLabel">{{ request().locationLabel }}</span>
+      <span
+        class="meta__sep"
+        *ngIf="(request().publishedAtLabel || request().locationLabel) && request().budgetLabel"
+        >·</span
+      >
+      <span class="meta__item" *ngIf="request().budgetLabel">{{ request().budgetLabel }}</span>
     </div>
 
     <div class="actions">
       <a class="btn" [routerLink]="detailLink">Ver detalles</a>
-      <button type="button" class="btn btn--secondary" (click)="$event.preventDefault()">Comparar</button>
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="$event.preventDefault()"
+        aria-label="Comparar solicitud"
+      >
+        Comparar
+      </button>
     </div>
   </div>
 </article>
-

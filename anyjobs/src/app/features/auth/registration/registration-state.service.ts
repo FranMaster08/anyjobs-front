@@ -43,10 +43,6 @@ export class RegistrationStateService {
     this.state.update((s) => ({ ...s, status }));
   }
 
-  setUserId(userId: string | undefined): void {
-    this.state.update((s) => ({ ...s, userId }));
-  }
-
   setWorkerCategoriesCount(count: number): void {
     const safe = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
     this.state.update((s) => ({ ...s, workerCategoriesCount: safe }));

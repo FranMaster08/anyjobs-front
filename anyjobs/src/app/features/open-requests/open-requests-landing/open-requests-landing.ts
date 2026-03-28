@@ -16,7 +16,10 @@ import { finalize } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
 import { OpenRequestCardComponent } from '../../../components/open-request-card/open-request-card';
-import { RequestsMapComponent, RequestsMapMarker } from '../../../components/requests-map/requests-map';
+import {
+  RequestsMapComponent,
+  RequestsMapMarker,
+} from '../../../components/requests-map/requests-map';
 import { OpenRequestListItem } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
 import { SiteConfigService } from '../../../shared/site-config/site-config.service';
@@ -33,7 +36,10 @@ const REQUEST_MARKER_OFFSETS: ReadonlyArray<{ lat: number; lng: number }> = [
   { lat: 0.0, lng: -0.006 },
 ];
 
-function approxDistanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+function approxDistanceKm(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): number {
   const dLat = (b.lat - a.lat) * 111; // km per lat degree
   const meanLatRad = ((a.lat + b.lat) / 2) * (Math.PI / 180);
   const kmPerLng = 111 * Math.cos(meanLatRad);
@@ -65,11 +71,17 @@ const PREVIEW_PIN_POSITIONS: ReadonlyArray<Pick<PreviewPin, 'x' | 'y'>> = [
 @Component({
   selector: 'app-open-requests-landing',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, OpenRequestCardComponent, ModalComponent, RequestsMapComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    OpenRequestCardComponent,
+    ModalComponent,
+    RequestsMapComponent,
+  ],
   templateUrl: './open-requests-landing.html',
   styleUrl: './open-requests-landing.scss',
 })
-export class OpenRequestsLanding {
+export class OpenRequestsLanding implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
   protected readonly site = inject(SiteConfigService);
@@ -325,4 +337,3 @@ export class OpenRequestsLanding {
       });
   }
 }
-
