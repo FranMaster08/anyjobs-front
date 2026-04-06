@@ -108,7 +108,8 @@ jobs:
     needs: build-and-push
     if: needs.build-and-push.outputs.deploy_ref != 'skip'
     runs-on: ubuntu-latest
-    environment: ${{ needs.build-and-push.outputs.deploy_ref }}
+    # Sin `environment:`: VPS_* se leen de Repository secrets. Con environment staging/production,
+    # un secret vacío en ese Environment puede ocultar el del repo y fallar la comprobación.
     env:
       # Opcional: ruta absoluta al script en el VPS. Si está vacío, se usa $HOME/entorno/anyjobs-deploy
       VPS_DEPLOY_SCRIPT: ${{ secrets.VPS_DEPLOY_SCRIPT }}
@@ -122,8 +123,7 @@ jobs:
           VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
         run: |
           if [ -z "${VPS_HOST}" ] || [ -z "${VPS_USER}" ] || [ -z "${VPS_SSH_PRIVATE_KEY}" ]; then
-            echo '::error::Faltan VPS_HOST, VPS_USER o VPS_SSH_PRIVATE_KEY. Añádelos en Settings → Secrets and variables → Actions (nivel repositorio).'
-            echo '::error::Si usas Environments staging/production: define esos tres secrets DENTRO de cada Environment, o elimina entradas vacías con el mismo nombre (un secret de Environment vacío puede tapar el del repositorio).'
+            echo '::error::Faltan VPS_HOST, VPS_USER o VPS_SSH_PRIVATE_KEY. Añádelos en Settings → Secrets and variables → Actions → Repository secrets.'
             exit 1
           fi
 
