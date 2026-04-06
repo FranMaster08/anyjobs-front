@@ -11,10 +11,10 @@ import { Proposal } from '../../../shared/proposals/proposals.models';
 import { OpenRequestsService } from '../../open-requests/open-requests.service';
 import { OpenRequestDetail } from '../../open-requests/open-requests.models';
 
-type MyRequestItem = {
+interface MyRequestItem {
   readonly proposal: Proposal;
   readonly request: OpenRequestDetail | null;
-};
+}
 
 @Component({
   selector: 'app-my-requests-dashboard',

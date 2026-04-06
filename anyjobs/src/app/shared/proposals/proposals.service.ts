@@ -17,7 +17,7 @@ export const PROPOSALS_API_URL = new InjectionToken<string>('PROPOSALS_API_URL',
   },
 });
 
-type ProposalCandidateTemplate = {
+interface ProposalCandidateTemplate {
   readonly userId?: string;
   readonly authorName?: string;
   readonly authorSubtitle?: string;
@@ -26,16 +26,16 @@ type ProposalCandidateTemplate = {
   readonly whoAmI: string;
   readonly message: string;
   readonly estimate: string;
-};
+}
 
-type ProposalTemplate = {
+interface ProposalTemplate {
   readonly requestId: string;
   readonly candidates?: readonly ProposalCandidateTemplate[];
-};
+}
 
-type ProposalsMock = {
+interface ProposalsMock {
   readonly templates?: readonly ProposalTemplate[];
-};
+}
 
 function safeRead(): string | null {
   try {

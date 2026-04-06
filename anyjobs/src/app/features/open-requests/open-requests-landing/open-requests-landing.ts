@@ -25,7 +25,7 @@ import { OpenRequestsService } from '../open-requests.service';
 import { SiteConfigService } from '../../../shared/site-config/site-config.service';
 
 // Offsets (en grados) para simular solicitudes cercanas (radio ~0.3–1.2 km).
-const REQUEST_MARKER_OFFSETS: ReadonlyArray<{ lat: number; lng: number }> = [
+const REQUEST_MARKER_OFFSETS: readonly { lat: number; lng: number }[] = [
   { lat: 0.004, lng: 0.003 },
   { lat: -0.003, lng: 0.004 },
   { lat: 0.002, lng: -0.004 },
@@ -47,15 +47,15 @@ function approxDistanceKm(
   return Math.sqrt(dLat * dLat + dLng * dLng);
 }
 
-type PreviewPin = {
+interface PreviewPin {
   readonly id: string;
   readonly kind: 'user' | 'request';
   readonly label: string;
   readonly x: number; // percent
   readonly y: number; // percent
-};
+}
 
-const PREVIEW_PIN_POSITIONS: ReadonlyArray<Pick<PreviewPin, 'x' | 'y'>> = [
+const PREVIEW_PIN_POSITIONS: readonly Pick<PreviewPin, 'x' | 'y'>[] = [
   { x: 24, y: 62 }, // user
   { x: 64, y: 32 },
   { x: 78, y: 55 },

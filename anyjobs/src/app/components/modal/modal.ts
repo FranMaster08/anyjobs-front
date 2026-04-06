@@ -1,5 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Output,
+  inject,
+} from '@angular/core';
 
 let nextModalId = 0;
 
@@ -10,7 +21,7 @@ let nextModalId = 0;
   templateUrl: './modal.html',
   styleUrl: './modal.scss',
 })
-export class ModalComponent {
+export class ModalComponent implements OnChanges, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) open = false;

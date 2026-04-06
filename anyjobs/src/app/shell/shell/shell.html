@@ -45,10 +45,17 @@
           </button>
 
           @if (isAccountMenuOpen()) {
-            <div class="accountBackdrop" (click)="closeAccountMenu()" role="presentation"></div>
+            <button
+              type="button"
+              class="accountBackdrop"
+              (click)="closeAccountMenu()"
+              aria-label="Cerrar menú"
+            ></button>
             <div
               class="accountMenu"
               (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()"
+              tabindex="0"
               role="menu"
               aria-label="Cuenta"
             >

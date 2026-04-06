@@ -1,10 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormGroup } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 import { Registration } from './registration';
 import { RegistrationStateService } from '../registration-state.service';
 import { AuthApi } from '../../../../shared/api/auth.api';
+
+/** Expone en tests la API `protected` del componente sin usar `any`. */
+interface RegistrationTestHarness {
+  readonly accountForm: FormGroup;
+  readonly verifyForm: FormGroup;
+  readonly locationForm: FormGroup;
+  readonly personalForm: FormGroup;
+  onAccountContinue(): void;
+  onVerifyContinue(): void;
+  onLocationContinue(): void;
+  onPersonalContinue(): void;
+  finish(): void;
+  verifyEmail(): void;
+  verifyPhone(): void;
+  toggleCategory(id: string): void;
+}
+
+function registrationHarness(c: Registration): RegistrationTestHarness {
+  return c as unknown as RegistrationTestHarness;
+}
 
 describe('Registration', () => {
   let fixture: ComponentFixture<Registration>;
@@ -61,7 +82,7 @@ describe('Registration', () => {
   it('completes happy path for CLIENT', async () => {
     expect(reg.vm().stage).toBe('ACCOUNT');
 
-    const c = component as any;
+    const c = registrationHarness(component);
     c.accountForm.setValue({
       fullName: 'Test User',
       email: 'user@anyjobs.test',
@@ -77,7 +98,7 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('VERIFY');
 
-    c.verifyForm.controls.emailOtp.setValue('1234');
+    c.verifyForm.controls['emailOtp'].setValue('1234');
     c.verifyEmail();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -122,7 +143,7 @@ describe('Registration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const c = component as any;
+    const c = registrationHarness(component);
     c.accountForm.setValue({
       fullName: 'Worker User',
       email: 'worker@anyjobs.test',
@@ -138,7 +159,7 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('VERIFY');
 
-    c.verifyForm.controls.smsOtp.setValue('1234');
+    c.verifyForm.controls['smsOtp'].setValue('1234');
     c.verifyPhone();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -151,7 +172,7 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('LOCATION');
 
-    c.locationForm.controls.city.setValue('Barcelona');
+    c.locationForm.controls['city'].setValue('Barcelona');
     c.onLocationContinue();
     fixture.detectChanges();
     await fixture.whenStable();

@@ -7,6 +7,7 @@ import {
   ElementRef,
   Input,
   OnChanges,
+  OnDestroy,
   SimpleChanges,
   ViewChild,
   inject,
@@ -14,13 +15,13 @@ import {
 
 import * as L from 'leaflet';
 
-export type RequestsMapMarker = {
+export interface RequestsMapMarker {
   readonly id: string;
   readonly kind: 'user' | 'request';
   readonly label: string;
   readonly lat: number;
   readonly lng: number;
-};
+}
 
 @Component({
   selector: 'app-requests-map',
@@ -29,7 +30,7 @@ export type RequestsMapMarker = {
   templateUrl: './requests-map.html',
   styleUrl: './requests-map.scss',
 })
-export class RequestsMapComponent implements AfterViewInit, OnChanges {
+export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   @Input() center: { lat: number; lng: number } | null = null;

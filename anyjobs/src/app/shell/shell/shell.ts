@@ -12,7 +12,7 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { filter, finalize } from 'rxjs';
 
-import { AppLang, I18nService } from '../../shared/i18n/i18n.service';
+import { I18nService } from '../../shared/i18n/i18n.service';
 import { SiteConfigService } from '../../shared/site-config/site-config.service';
 import { ModalComponent } from '../../components/modal/modal';
 import { AuthApi } from '../../shared/api/auth.api';

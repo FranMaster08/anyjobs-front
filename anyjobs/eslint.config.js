@@ -36,6 +36,9 @@ module.exports = defineConfig([
   {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
-    rules: {},
+    rules: {
+      // El proyecto aún usa *ngIf/*ngFor; migrar a @if/@for de forma gradual.
+      '@angular-eslint/template/prefer-control-flow': 'off',
+    },
   },
 ]);

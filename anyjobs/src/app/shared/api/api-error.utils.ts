@@ -17,7 +17,8 @@ export function clearApiError(control: AbstractControl): void {
   const errors = control.errors ?? null;
   if (!errors || !('api' in errors)) return;
 
-  const { api: _api, ...rest } = errors;
+  const { api, ...rest } = errors;
+  void api;
   control.setErrors(Object.keys(rest).length > 0 ? rest : null);
 }
 
