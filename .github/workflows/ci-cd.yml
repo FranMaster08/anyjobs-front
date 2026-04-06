@@ -150,6 +150,18 @@ jobs:
                 export ANYJOBS_DEPLOY_ROOT="${HOME}/entorno"
               fi
             fi
+            echo "=== deploy diagnóstico ==="
+            echo "DEPLOY_BIN=$DEPLOY_BIN"
+            echo "ANYJOBS_DEPLOY_ROOT=$ANYJOBS_DEPLOY_ROOT"
+            test -f "$DEPLOY_BIN" || { echo "ERROR: no existe $DEPLOY_BIN — copia vps/anyjobs-deploy.sh del repo anyjobs-deploy"; exit 1; }
+            test -d "$ANYJOBS_DEPLOY_ROOT" || { echo "ERROR: no existe directorio $ANYJOBS_DEPLOY_ROOT"; exit 1; }
+            if [ ! -f "$ANYJOBS_DEPLOY_ROOT/docker-compose.yml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yaml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yml" ]; then
+              echo "ERROR: falta docker-compose.yml en $ANYJOBS_DEPLOY_ROOT"
+              ls -la "$ANYJOBS_DEPLOY_ROOT" || true
+              exit 1
+            fi
+            test -f "$ANYJOBS_DEPLOY_ROOT/.env" || { echo "ERROR: falta .env (líneas ANYJOBS_BACK_IMAGE / ANYJOBS_FRONT_IMAGE)"; exit 1; }
+            command -v docker >/dev/null || { echo "ERROR: docker no está en PATH"; exit 1; }
             bash "$DEPLOY_BIN" \
               --env ${{ needs.build-and-push.outputs.deploy_ref }} \
               --service anyjobs-front \
