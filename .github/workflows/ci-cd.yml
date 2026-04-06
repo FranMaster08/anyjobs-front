@@ -126,7 +126,7 @@ jobs:
           VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
         run: |
           if [ -z "${VPS_HOST}" ] || [ -z "${VPS_USER}" ] || [ -z "${VPS_SSH_PRIVATE_KEY}" ]; then
-            echo '::error::Faltan VPS_HOST, VPS_USER o VPS_SSH_PRIVATE_KEY. Configúralos en Settings → Environments → '"${{ needs.build-and-push.outputs.deploy_ref }}"' → Environment secrets (o en Repository secrets como respaldo).'
+            echo '::error::Faltan VPS_HOST, VPS_USER o VPS_SSH_PRIVATE_KEY. Añádelos en Settings → Environments → '"${{ needs.build-and-push.outputs.deploy_ref }}"' → Environment secrets.'
             exit 1
           fi
 
@@ -136,7 +136,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: ${{ secrets.VPS_SSH_PORT != '' && secrets.VPS_SSH_PORT || '22' }}
-          debug: true
           request_pty: true
           envs: VPS_DEPLOY_SCRIPT,ANYJOBS_DEPLOY_ROOT
           script_stop: true
@@ -144,8 +143,7 @@ jobs:
             set -euo pipefail
             exec 2>&1
             _fail() { echo "::error::$*"; exit 1; }
-            trap '_ec=$?; echo "::error::Fallo remoto (exit $_ec): $BASH_COMMAND"' ERR
-            echo "DEPLOY_START user=$(whoami) HOME=$HOME"
+            trap 'echo "::error::Fallo en el script remoto de despliegue."' ERR
             if [ -n "${VPS_DEPLOY_SCRIPT:-}" ]; then
               DEPLOY_BIN="$VPS_DEPLOY_SCRIPT"
             else
@@ -159,18 +157,13 @@ jobs:
                 export ANYJOBS_DEPLOY_ROOT="${HOME}/entorno"
               fi
             fi
-            echo "=== deploy diagnóstico ==="
-            echo "DEPLOY_BIN=$DEPLOY_BIN"
-            echo "ANYJOBS_DEPLOY_ROOT=$ANYJOBS_DEPLOY_ROOT"
-            test -f "$DEPLOY_BIN" || _fail "No existe $DEPLOY_BIN — copia vps/anyjobs-deploy.sh del repo anyjobs-deploy y chmod +x."
-            test -d "$ANYJOBS_DEPLOY_ROOT" || _fail "No existe directorio $ANYJOBS_DEPLOY_ROOT. Crea ~/entorno-${{ needs.build-and-push.outputs.deploy_ref }} o define el secret ANYJOBS_DEPLOY_ROOT (ruta absoluta al compose)."
+            test -f "$DEPLOY_BIN" || _fail "No existe el script de deploy en el VPS. Copia vps/anyjobs-deploy.sh del repo anyjobs-deploy y chmod +x."
+            test -d "$ANYJOBS_DEPLOY_ROOT" || _fail "No existe el directorio de compose en el VPS. Crea la carpeta del entorno o define ANYJOBS_DEPLOY_ROOT."
             if [ ! -f "$ANYJOBS_DEPLOY_ROOT/docker-compose.yml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yaml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yml" ]; then
-              echo "Listado de $ANYJOBS_DEPLOY_ROOT:"
-              ls -la "$ANYJOBS_DEPLOY_ROOT" || true
-              _fail "Falta docker-compose.yml (o compose.yaml / compose.yml) en $ANYJOBS_DEPLOY_ROOT"
+              _fail "Falta docker-compose.yml (o compose.yaml / compose.yml) en el directorio de despliegue del VPS."
             fi
-            test -f "$ANYJOBS_DEPLOY_ROOT/.env" || _fail "Falta .env en $ANYJOBS_DEPLOY_ROOT (necesita ANYJOBS_BACK_IMAGE= / ANYJOBS_FRONT_IMAGE=)."
-            command -v docker >/dev/null || _fail "docker no está en PATH para el usuario $(whoami)."
+            test -f "$ANYJOBS_DEPLOY_ROOT/.env" || _fail "Falta .env en el directorio de despliegue (ANYJOBS_BACK_IMAGE / ANYJOBS_FRONT_IMAGE)."
+            command -v docker >/dev/null || _fail "docker no está en PATH en el VPS para el usuario de despliegue."
             bash "$DEPLOY_BIN" \
               --env ${{ needs.build-and-push.outputs.deploy_ref }} \
               --service anyjobs-front \
