@@ -112,7 +112,7 @@ jobs:
     env:
       # Opcional: ruta absoluta al script en el VPS. Si está vacío, se usa $HOME/entorno/anyjobs-deploy
       VPS_DEPLOY_SCRIPT: ${{ secrets.VPS_DEPLOY_SCRIPT }}
-      # Opcional: directorio del compose en el VPS. Si vacío: $HOME/entorno-staging o $HOME/entorno-production según rama
+      # Si vacío: usa $HOME/entorno-<staging|production> si existe; si no, $HOME/entorno (un solo stack)
       ANYJOBS_DEPLOY_ROOT: ${{ secrets.ANYJOBS_DEPLOY_ROOT }}
     steps:
       - uses: appleboy/ssh-action@v1.0.3
@@ -131,7 +131,12 @@ jobs:
               DEPLOY_BIN="${HOME}/entorno/anyjobs-deploy"
             fi
             if [ -z "${ANYJOBS_DEPLOY_ROOT:-}" ]; then
-              export ANYJOBS_DEPLOY_ROOT="${HOME}/entorno-${{ needs.build-and-push.outputs.deploy_ref }}"
+              _E="${HOME}/entorno-${{ needs.build-and-push.outputs.deploy_ref }}"
+              if [ -d "$_E" ]; then
+                export ANYJOBS_DEPLOY_ROOT="$_E"
+              else
+                export ANYJOBS_DEPLOY_ROOT="${HOME}/entorno"
+              fi
             fi
             bash "$DEPLOY_BIN" \
               --env ${{ needs.build-and-push.outputs.deploy_ref }} \
