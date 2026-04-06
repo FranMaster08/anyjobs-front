@@ -112,7 +112,7 @@ jobs:
     env:
       # Opcional: ruta absoluta al script en el VPS. Si está vacío, se usa $HOME/entorno/anyjobs-deploy
       VPS_DEPLOY_SCRIPT: ${{ secrets.VPS_DEPLOY_SCRIPT }}
-      # Opcional: directorio con docker-compose.yml y .env (p. ej. /root/entorno). Si vacío, el script remoto usa $HOME/entorno
+      # Opcional: directorio del compose en el VPS. Si vacío: $HOME/entorno-staging o $HOME/entorno-production según rama
       ANYJOBS_DEPLOY_ROOT: ${{ secrets.ANYJOBS_DEPLOY_ROOT }}
     steps:
       - uses: appleboy/ssh-action@v1.0.3
@@ -131,7 +131,7 @@ jobs:
               DEPLOY_BIN="${HOME}/entorno/anyjobs-deploy"
             fi
             if [ -z "${ANYJOBS_DEPLOY_ROOT:-}" ]; then
-              export ANYJOBS_DEPLOY_ROOT="${HOME}/entorno"
+              export ANYJOBS_DEPLOY_ROOT="${HOME}/entorno-${{ needs.build-and-push.outputs.deploy_ref }}"
             fi
             bash "$DEPLOY_BIN" \
               --env ${{ needs.build-and-push.outputs.deploy_ref }} \
