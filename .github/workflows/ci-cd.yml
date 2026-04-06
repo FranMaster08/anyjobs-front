@@ -115,6 +115,13 @@ jobs:
       # Si vacío: usa $HOME/entorno-<staging|production> si existe; si no, $HOME/entorno (un solo stack)
       ANYJOBS_DEPLOY_ROOT: ${{ secrets.ANYJOBS_DEPLOY_ROOT }}
     steps:
+      - name: Comprobar secrets SSH del VPS
+        if: ${{ secrets.VPS_HOST == '' || secrets.VPS_USER == '' || secrets.VPS_SSH_PRIVATE_KEY == '' }}
+        run: |
+          echo '::error::Faltan VPS_HOST, VPS_USER o VPS_SSH_PRIVATE_KEY. Añádelos en Settings → Secrets and variables → Actions (nivel repositorio).'
+          echo '::error::Si usas Environments staging/production: define esos tres secrets DENTRO de cada Environment, o elimina entradas vacías con el mismo nombre (un secret de Environment vacío puede tapar el del repositorio).'
+          exit 1
+
       - uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
