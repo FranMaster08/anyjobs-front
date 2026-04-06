@@ -1,0 +1,124 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: anyjobs/package-lock.json
+
+      - name: Install
+        working-directory: anyjobs
+        run: npm ci
+
+      - name: Lint
+        working-directory: anyjobs
+        run: npm run lint
+
+      - name: Test
+        working-directory: anyjobs
+        run: npm run test -- --watch=false
+
+      - name: Build
+        working-directory: anyjobs
+        run: npm run build -- --configuration production --output-path=dist
+
+  build-and-push:
+    needs: ci
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag_sha: ${{ steps.meta.outputs.sha_tag }}
+      deploy_ref: ${{ steps.ref.outputs.deploy_ref }}
+      full_image: ${{ steps.full_image.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: image_name
+        name: Image name (GHCR lowercase)
+        run: |
+          R=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+          echo "name=ghcr.io/${R}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        name: Docker tags
+        run: |
+          SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          echo "sha_tag=sha-${SHORT}" >> "$GITHUB_OUTPUT"
+          echo "branch_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: prod
+          push: true
+          tags: |
+            ${{ steps.image_name.outputs.name }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ steps.image_name.outputs.name }}:${{ steps.meta.outputs.branch_tag }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - id: full_image
+        run: |
+          echo "value=${{ steps.image_name.outputs.name }}:${{ steps.meta.outputs.sha_tag }}" >> "$GITHUB_OUTPUT"
+
+      - id: ref
+        name: Map branch to deploy environment
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "deploy_ref=production" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_REF_NAME}" = "develop" ]; then
+            echo "deploy_ref=staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy_ref=skip" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: build-and-push
+    if: needs.build-and-push.outputs.deploy_ref != 'skip'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build-and-push.outputs.deploy_ref }}
+    steps:
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT != '' && secrets.VPS_SSH_PORT || '22' }}
+          script_stop: true
+          script: |
+            anyjobs-deploy \
+              --env ${{ needs.build-and-push.outputs.deploy_ref }} \
+              --service anyjobs-front \
+              --image "${{ needs.build-and-push.outputs.full_image }}"

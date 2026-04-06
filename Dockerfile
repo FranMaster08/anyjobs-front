@@ -42,6 +42,7 @@ RUN npm run build -- --configuration production --output-path=dist
 FROM nginxinc/nginx-unprivileged:stable-alpine AS prod
 
 COPY --chown=101:101 docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --chown=101:101 --from=build /app/dist/ /usr/share/nginx/html/
+# @angular/build (v17+) emite la app en dist/browser/
+COPY --chown=101:101 --from=build /app/dist/browser/ /usr/share/nginx/html/
 
 EXPOSE 8080
