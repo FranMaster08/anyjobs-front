@@ -48,10 +48,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      image_tag_sha: ${{ steps.meta.outputs.sha_tag }}
-      deploy_ref: ${{ steps.ref.outputs.deploy_ref }}
-      full_image: ${{ steps.full_image.outputs.value }}
     steps:
       - uses: actions/checkout@v4
 
@@ -88,83 +84,3 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-
-      - id: full_image
-        run: |
-          echo "value=${{ steps.image_name.outputs.name }}:${{ steps.meta.outputs.sha_tag }}" >> "$GITHUB_OUTPUT"
-
-      - id: ref
-        name: Map branch to deploy environment
-        run: |
-          if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            echo "deploy_ref=production" >> "$GITHUB_OUTPUT"
-          elif [ "${GITHUB_REF_NAME}" = "develop" ]; then
-            echo "deploy_ref=staging" >> "$GITHUB_OUTPUT"
-          else
-            echo "deploy_ref=skip" >> "$GITHUB_OUTPUT"
-          fi
-
-  deploy:
-    needs: build-and-push
-    if: needs.build-and-push.outputs.deploy_ref != 'skip'
-    runs-on: ubuntu-latest
-    # Secrets del deploy: Settings → Environments → staging | production → Environment secrets.
-    # Crea ambos entornos con los mismos nombres que deploy_ref. No definas secrets vacíos en el entorno (tapan los del repo).
-    permissions:
-      contents: read
-      deployments: write
-    environment:
-      name: ${{ needs.build-and-push.outputs.deploy_ref }}
-    env:
-      VPS_DEPLOY_SCRIPT: ${{ secrets.VPS_DEPLOY_SCRIPT }}
-      ANYJOBS_DEPLOY_ROOT: ${{ secrets.ANYJOBS_DEPLOY_ROOT }}
-    steps:
-      - name: Comprobar secrets SSH del VPS
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-        run: |
-          if [ -z "${VPS_HOST}" ] || [ -z "${VPS_USER}" ] || [ -z "${VPS_SSH_PRIVATE_KEY}" ]; then
-            echo '::error::Faltan VPS_HOST, VPS_USER o VPS_SSH_PRIVATE_KEY. Añádelos en Settings → Environments → '"${{ needs.build-and-push.outputs.deploy_ref }}"' → Environment secrets.'
-            exit 1
-          fi
-
-      - uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.VPS_SSH_PORT != '' && secrets.VPS_SSH_PORT || '22' }}
-          request_pty: true
-          envs: VPS_DEPLOY_SCRIPT,ANYJOBS_DEPLOY_ROOT
-          script_stop: true
-          script: |
-            set -euo pipefail
-            exec 2>&1
-            _fail() { echo "::error::$*"; exit 1; }
-            trap 'echo "::error::Fallo en el script remoto de despliegue."' ERR
-            if [ -n "${VPS_DEPLOY_SCRIPT:-}" ]; then
-              DEPLOY_BIN="$VPS_DEPLOY_SCRIPT"
-            else
-              DEPLOY_BIN="${HOME}/entorno/anyjobs-deploy"
-            fi
-            if [ -z "${ANYJOBS_DEPLOY_ROOT:-}" ]; then
-              _E="${HOME}/entorno-${{ needs.build-and-push.outputs.deploy_ref }}"
-              if [ -d "$_E" ]; then
-                export ANYJOBS_DEPLOY_ROOT="$_E"
-              else
-                export ANYJOBS_DEPLOY_ROOT="${HOME}/entorno"
-              fi
-            fi
-            test -f "$DEPLOY_BIN" || _fail "No existe el script de deploy en el VPS. Copia vps/anyjobs-deploy.sh del repo anyjobs-deploy y chmod +x."
-            test -d "$ANYJOBS_DEPLOY_ROOT" || _fail "No existe el directorio de compose en el VPS. Crea la carpeta del entorno o define ANYJOBS_DEPLOY_ROOT."
-            if [ ! -f "$ANYJOBS_DEPLOY_ROOT/docker-compose.yml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yaml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yml" ]; then
-              _fail "Falta docker-compose.yml (o compose.yaml / compose.yml) en el directorio de despliegue del VPS."
-            fi
-            test -f "$ANYJOBS_DEPLOY_ROOT/.env" || _fail "Falta .env en el directorio de despliegue (ANYJOBS_BACK_IMAGE / ANYJOBS_FRONT_IMAGE)."
-            command -v docker >/dev/null || _fail "docker no está en PATH en el VPS para el usuario de despliegue."
-            bash "$DEPLOY_BIN" \
-              --env ${{ needs.build-and-push.outputs.deploy_ref }} \
-              --service anyjobs-front \
-              --image "${{ needs.build-and-push.outputs.full_image }}"
