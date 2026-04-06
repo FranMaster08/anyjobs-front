@@ -133,10 +133,12 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: ${{ secrets.VPS_SSH_PORT != '' && secrets.VPS_SSH_PORT || '22' }}
+          debug: true
           envs: VPS_DEPLOY_SCRIPT,ANYJOBS_DEPLOY_ROOT
           script_stop: true
           script: |
             set -euo pipefail
+            exec 2>&1
             if [ -n "${VPS_DEPLOY_SCRIPT:-}" ]; then
               DEPLOY_BIN="$VPS_DEPLOY_SCRIPT"
             else
