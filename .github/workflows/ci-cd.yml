@@ -134,11 +134,15 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: ${{ secrets.VPS_SSH_PORT != '' && secrets.VPS_SSH_PORT || '22' }}
           debug: true
+          request_pty: true
           envs: VPS_DEPLOY_SCRIPT,ANYJOBS_DEPLOY_ROOT
           script_stop: true
           script: |
             set -euo pipefail
             exec 2>&1
+            _fail() { echo "::error::$*"; exit 1; }
+            trap '_ec=$?; echo "::error::Fallo remoto (exit $_ec): $BASH_COMMAND"' ERR
+            echo "DEPLOY_START user=$(whoami) HOME=$HOME"
             if [ -n "${VPS_DEPLOY_SCRIPT:-}" ]; then
               DEPLOY_BIN="$VPS_DEPLOY_SCRIPT"
             else
@@ -155,15 +159,15 @@ jobs:
             echo "=== deploy diagnóstico ==="
             echo "DEPLOY_BIN=$DEPLOY_BIN"
             echo "ANYJOBS_DEPLOY_ROOT=$ANYJOBS_DEPLOY_ROOT"
-            test -f "$DEPLOY_BIN" || { echo "ERROR: no existe $DEPLOY_BIN — copia vps/anyjobs-deploy.sh del repo anyjobs-deploy"; exit 1; }
-            test -d "$ANYJOBS_DEPLOY_ROOT" || { echo "ERROR: no existe directorio $ANYJOBS_DEPLOY_ROOT"; exit 1; }
+            test -f "$DEPLOY_BIN" || _fail "No existe $DEPLOY_BIN — copia vps/anyjobs-deploy.sh del repo anyjobs-deploy y chmod +x."
+            test -d "$ANYJOBS_DEPLOY_ROOT" || _fail "No existe directorio $ANYJOBS_DEPLOY_ROOT. Crea ~/entorno-${{ needs.build-and-push.outputs.deploy_ref }} o define el secret ANYJOBS_DEPLOY_ROOT (ruta absoluta al compose)."
             if [ ! -f "$ANYJOBS_DEPLOY_ROOT/docker-compose.yml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yaml" ] && [ ! -f "$ANYJOBS_DEPLOY_ROOT/compose.yml" ]; then
-              echo "ERROR: falta docker-compose.yml en $ANYJOBS_DEPLOY_ROOT"
+              echo "Listado de $ANYJOBS_DEPLOY_ROOT:"
               ls -la "$ANYJOBS_DEPLOY_ROOT" || true
-              exit 1
+              _fail "Falta docker-compose.yml (o compose.yaml / compose.yml) en $ANYJOBS_DEPLOY_ROOT"
             fi
-            test -f "$ANYJOBS_DEPLOY_ROOT/.env" || { echo "ERROR: falta .env (líneas ANYJOBS_BACK_IMAGE / ANYJOBS_FRONT_IMAGE)"; exit 1; }
-            command -v docker >/dev/null || { echo "ERROR: docker no está en PATH"; exit 1; }
+            test -f "$ANYJOBS_DEPLOY_ROOT/.env" || _fail "Falta .env en $ANYJOBS_DEPLOY_ROOT (necesita ANYJOBS_BACK_IMAGE= / ANYJOBS_FRONT_IMAGE=)."
+            command -v docker >/dev/null || _fail "docker no está en PATH para el usuario $(whoami)."
             bash "$DEPLOY_BIN" \
               --env ${{ needs.build-and-push.outputs.deploy_ref }} \
               --service anyjobs-front \
