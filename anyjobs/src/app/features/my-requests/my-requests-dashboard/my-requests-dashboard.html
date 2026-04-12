@@ -74,14 +74,14 @@
                       (click)="toggleExpanded(it.proposal.requestId)"
                       [attr.aria-expanded]="isExpanded(it.proposal.requestId)"
                       >
-                      {{ isExpanded(it.proposal.requestId) ? 'Ocultar propuestas' : 'Ver propuestas' }}
+                      {{ isExpanded(it.proposal.requestId) ? 'Ocultar tu propuesta' : 'Ver tu propuesta' }}
                       </button>
                     </div>
                   </div>
                 </div>
 
                 <div class="proposal" *ngIf="isExpanded(it.proposal.requestId)">
-                  <p class="proposalListTitle">Propuestas recibidas</p>
+                  <p class="proposalListTitle">Tu propuesta</p>
 
                   <ng-container *ngIf="proposalsForRequest(it.proposal.requestId) as ps">
                     <div class="proposalComment" *ngFor="let p of ps">

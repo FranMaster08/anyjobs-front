@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap, take } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
@@ -88,9 +88,16 @@ export class MyRequestsDashboard {
     if (existing && existing.length > 0) return;
 
     const uid = this.authVm().user?.id ?? '';
+    if (uid.trim().length === 0) return;
+
+    // Solo la propuesta del usuario actual; no listar competidores en la misma solicitud.
     this.proposals
-      .listByRequest(rid, uid)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .getByUserAndRequest(uid, rid)
+      .pipe(
+        map((p) => (p ? [p] : [])),
+        take(1),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((items) => {
         this.requestProposals.update((prev) => ({ ...prev, [rid]: items }));
       });
