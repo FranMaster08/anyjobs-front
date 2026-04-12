@@ -14,7 +14,7 @@ describe('MyRequestsDashboard', () => {
   function configure(opts: {
     loggedIn: boolean;
     listByUser: () => ReturnType<ProposalsService['listByUser']>;
-    listByRequest?: () => ReturnType<ProposalsService['listByRequest']>;
+    getByUserAndRequest?: () => ReturnType<ProposalsService['getByUserAndRequest']>;
     getOpenRequestDetail?: () => ReturnType<OpenRequestsService['getOpenRequestDetail']>;
   }): void {
     const authState = signal(opts.loggedIn);
@@ -52,7 +52,7 @@ describe('MyRequestsDashboard', () => {
           provide: ProposalsService,
           useValue: {
             listByUser: opts.listByUser,
-            listByRequest: opts.listByRequest ?? (() => of([])),
+            getByUserAndRequest: opts.getByUserAndRequest ?? (() => of(null)),
           },
         },
         {
