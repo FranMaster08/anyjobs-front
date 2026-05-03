@@ -22,6 +22,7 @@ import {
 } from '../../../components/requests-map/requests-map';
 import { OpenRequestListItem } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
+import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { SiteConfigService } from '../../../shared/site-config/site-config.service';
 
 // Offsets (en grados) para simular solicitudes cercanas (radio ~0.3–1.2 km).
@@ -121,6 +122,7 @@ export class OpenRequestsLanding implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
   protected readonly site = inject(SiteConfigService);
+  protected readonly authVm = inject(AuthSessionService).vm;
 
   @ViewChild('locationSection', { static: false })
   private readonly locationSection?: ElementRef<HTMLElement>;

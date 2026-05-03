@@ -1,9 +1,10 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, throwError } from 'rxjs';
 
 import {
+  CreateOpenRequestInput,
   OpenRequestDetail,
   OpenRequestImage,
   OpenRequestListItem,
@@ -101,6 +102,33 @@ export class OpenRequestsService {
     return this.http.get<OpenRequestsListResponseDto>(this.apiUrl, { params: httpParams }).pipe(
       map((dto) => toListResponse(dto, pageSize)),
     );
+  }
+
+  createOpenRequest(input: CreateOpenRequestInput): Observable<OpenRequestDetail> {
+    if (this.apiUrl.includes('/mock/')) {
+      return throwError(() => new Error('createOpenRequest no está disponible en modo mock'));
+    }
+
+    const body = buildCreateBody(input);
+
+    return this.http
+      .post<OpenRequestDetailDto>(this.apiUrl, body)
+      .pipe(map((dto) => normalizeDetail(dto, null)));
+  }
+
+  listMyOpenRequests(params: OpenRequestsListParams): Observable<OpenRequestsListResponse> {
+    const page = Math.max(1, params.page);
+    const pageSize = Math.max(1, params.pageSize);
+
+    if (this.apiUrl.includes('/mock/')) {
+      return throwError(() => new Error('listMyOpenRequests no está disponible en modo mock'));
+    }
+
+    const httpParams = new HttpParams().set('page', page).set('pageSize', pageSize);
+
+    return this.http
+      .get<OpenRequestsListResponseDto>(`${this.apiUrl}/mine`, { params: httpParams })
+      .pipe(map((dto) => toListResponse(dto, pageSize)));
   }
 
   getOpenRequestDetail(id: string): Observable<OpenRequestDetail> {
@@ -268,5 +296,26 @@ function missingDetail(id: string): OpenRequestDetail {
     excerpt: 'Sin descripción',
     images: [],
   };
+}
+
+function buildCreateBody(input: CreateOpenRequestInput): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    title: input.title.trim(),
+    excerpt: input.excerpt.trim(),
+    description: input.description.trim(),
+    tags: [...input.tags],
+    locationLabel: input.locationLabel.trim(),
+    budgetLabel: input.budgetLabel.trim(),
+    contactPhone: input.contactPhone.trim(),
+    contactEmail: input.contactEmail.trim(),
+  };
+
+  const imageUrl = input.imageUrl?.trim() ?? '';
+  if (imageUrl.length > 0) body['imageUrl'] = imageUrl;
+
+  const imageAlt = input.imageAlt?.trim() ?? '';
+  if (imageAlt.length > 0) body['imageAlt'] = imageAlt;
+
+  return body;
 }
 

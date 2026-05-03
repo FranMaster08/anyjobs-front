@@ -55,3 +55,16 @@ export interface OpenRequestsListResponse {
   readonly hasMore: boolean;
 }
 
+export interface CreateOpenRequestInput {
+  readonly title: string;
+  readonly excerpt: string;
+  readonly description: string;
+  readonly tags: readonly string[];
+  readonly locationLabel: string;
+  readonly budgetLabel: string;
+  readonly contactPhone: string;
+  readonly contactEmail: string;
+  readonly imageUrl?: string;
+  readonly imageAlt?: string;
+}
+

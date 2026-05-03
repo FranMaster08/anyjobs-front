@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
@@ -9,12 +16,18 @@ import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { ProposalsService } from '../../../shared/proposals/proposals.service';
 import { Proposal } from '../../../shared/proposals/proposals.models';
 import { OpenRequestsService } from '../../open-requests/open-requests.service';
-import { OpenRequestDetail } from '../../open-requests/open-requests.models';
+import {
+  OpenRequestDetail,
+  OpenRequestListItem,
+} from '../../open-requests/open-requests.models';
 
-interface MyRequestItem {
+interface AppliedRequestItem {
   readonly proposal: Proposal;
   readonly request: OpenRequestDetail | null;
 }
+
+type LoadState = 'loading' | 'success' | 'error';
+type TabId = 'published' | 'applied';
 
 @Component({
   selector: 'app-my-requests-dashboard',
@@ -30,8 +43,16 @@ export class MyRequestsDashboard {
   private readonly openRequests = inject(OpenRequestsService);
   protected readonly authVm = inject(AuthSessionService).vm;
 
-  protected readonly state = signal<'loading' | 'success' | 'error'>('loading');
-  protected readonly items = signal<readonly MyRequestItem[]>([]);
+  protected readonly activeTab = signal<TabId>('published');
+
+  protected readonly publishedState = signal<LoadState>('loading');
+  protected readonly publishedItems = signal<readonly OpenRequestListItem[]>([]);
+
+  protected readonly appliedState = signal<LoadState>('loading');
+  protected readonly appliedItems = signal<readonly AppliedRequestItem[]>([]);
+
+  protected readonly publishedCount = computed(() => this.publishedItems().length);
+  protected readonly appliedCount = computed(() => this.appliedItems().length);
 
   protected readonly expandedRequests = signal<ReadonlySet<string>>(new Set());
   protected readonly requestProposals = signal<Record<string, readonly Proposal[]>>({});
@@ -45,8 +66,16 @@ export class MyRequestsDashboard {
     this.load();
   }
 
-  protected retry(): void {
-    this.load();
+  protected setTab(tab: TabId): void {
+    this.activeTab.set(tab);
+  }
+
+  protected retryPublished(): void {
+    this.loadPublished();
+  }
+
+  protected retryApplied(): void {
+    this.loadApplied();
   }
 
   protected openLogin(): void {
@@ -105,7 +134,8 @@ export class MyRequestsDashboard {
   }
 
   private load(): void {
-    this.items.set([]);
+    this.publishedItems.set([]);
+    this.appliedItems.set([]);
     this.requestProposals.set({});
     this.expandedRequests.set(new Set());
 
@@ -113,24 +143,55 @@ export class MyRequestsDashboard {
     const userId = vm.user?.id ?? '';
 
     if (!vm.isLoggedIn || userId.trim().length === 0) {
-      this.state.set('success');
+      this.publishedState.set('success');
+      this.appliedState.set('success');
       return;
     }
 
-    this.state.set('loading');
+    this.loadPublished();
+    this.loadApplied();
+  }
+
+  private loadPublished(): void {
+    this.publishedState.set('loading');
+    this.openRequests
+      .listMyOpenRequests({ page: 1, pageSize: 50 })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.publishedItems.set(res.items);
+          this.publishedState.set('success');
+        },
+        error: () => {
+          this.publishedItems.set([]);
+          this.publishedState.set('error');
+        },
+      });
+  }
+
+  private loadApplied(): void {
+    const vm = this.authVm();
+    const userId = vm.user?.id ?? '';
+    if (!vm.isLoggedIn || userId.trim().length === 0) {
+      this.appliedItems.set([]);
+      this.appliedState.set('success');
+      return;
+    }
+
+    this.appliedState.set('loading');
 
     this.proposals
       .listByUser(userId)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         switchMap((proposals) => {
-          if (proposals.length === 0) return of([] as MyRequestItem[]);
+          if (proposals.length === 0) return of([] as AppliedRequestItem[]);
 
           return forkJoin(
             proposals.map((p) =>
               this.openRequests.getOpenRequestDetail(p.requestId).pipe(
-                map((req) => ({ proposal: p, request: req } satisfies MyRequestItem)),
-                catchError(() => of({ proposal: p, request: null } satisfies MyRequestItem)),
+                map((req) => ({ proposal: p, request: req }) satisfies AppliedRequestItem),
+                catchError(() => of({ proposal: p, request: null } satisfies AppliedRequestItem)),
               ),
             ),
           );
@@ -138,14 +199,13 @@ export class MyRequestsDashboard {
       )
       .subscribe({
         next: (items) => {
-          this.items.set(items);
-          this.state.set('success');
+          this.appliedItems.set(items);
+          this.appliedState.set('success');
         },
         error: () => {
-          this.items.set([]);
-          this.state.set('error');
+          this.appliedItems.set([]);
+          this.appliedState.set('error');
         },
       });
   }
 }
-

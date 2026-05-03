@@ -1,0 +1,304 @@
+<section class="page createRequest">
+  <div class="container">
+    <header class="header">
+      <p class="kicker">PUBLICAR</p>
+      <h1 class="title">Publicar solicitud</h1>
+      <p class="subtitle">Cuéntanos qué necesitas y recibe propuestas.</p>
+    </header>
+
+    <ng-container *ngIf="!authVm().isLoggedIn; else logged">
+      <div class="state" role="status">
+        <p class="state__title">Inicia sesión para publicar una solicitud</p>
+        <p class="state__hint">Necesitas una cuenta para crear solicitudes y recibir propuestas.</p>
+        <div class="actions">
+          <button type="button" class="btn" (click)="openLogin()">Iniciar sesión</button>
+          <a class="btn btn--secondary" routerLink="/registro">Crear cuenta</a>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #logged>
+      <form
+        class="formCard"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        novalidate
+        aria-label="Formulario para publicar una solicitud"
+      >
+        <fieldset class="section" [disabled]="state() === 'submitting'">
+          <legend class="section__legend">Información principal</legend>
+
+          <div class="field">
+            <label class="field__label" for="title">Título</label>
+            <input
+              id="title"
+              class="field__control"
+              type="text"
+              formControlName="title"
+              placeholder="Ej. Limpieza profunda de piso"
+              autocomplete="off"
+              [attr.aria-invalid]="form.controls.title.invalid && form.controls.title.touched ? 'true' : null"
+              aria-describedby="title-error"
+            />
+            <p
+              id="title-error"
+              class="field__error"
+              *ngIf="form.controls.title.touched && form.controls.title.invalid"
+            >
+              <ng-container *ngIf="form.controls.title.errors?.['required']">El título es obligatorio.</ng-container>
+              <ng-container *ngIf="form.controls.title.errors?.['minlength']">Usa al menos 3 caracteres.</ng-container>
+            </p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="excerpt">Resumen corto</label>
+            <input
+              id="excerpt"
+              class="field__control"
+              type="text"
+              formControlName="excerpt"
+              placeholder="Una línea que aparezca en la card"
+              maxlength="160"
+              [attr.aria-invalid]="form.controls.excerpt.invalid && form.controls.excerpt.touched ? 'true' : null"
+              aria-describedby="excerpt-error"
+            />
+            <p
+              id="excerpt-error"
+              class="field__error"
+              *ngIf="form.controls.excerpt.touched && form.controls.excerpt.invalid"
+            >
+              <ng-container *ngIf="form.controls.excerpt.errors?.['required']">El resumen es obligatorio.</ng-container>
+              <ng-container *ngIf="form.controls.excerpt.errors?.['maxlength']">Máximo 160 caracteres.</ng-container>
+            </p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="description">Descripción</label>
+            <textarea
+              id="description"
+              class="field__control field__control--textarea"
+              formControlName="description"
+              rows="5"
+              placeholder="Describe el trabajo con todo el detalle posible."
+              [attr.aria-invalid]="form.controls.description.invalid && form.controls.description.touched ? 'true' : null"
+              aria-describedby="description-error"
+            ></textarea>
+            <p
+              id="description-error"
+              class="field__error"
+              *ngIf="form.controls.description.touched && form.controls.description.invalid"
+            >
+              <ng-container *ngIf="form.controls.description.errors?.['required']">La descripción es obligatoria.</ng-container>
+              <ng-container *ngIf="form.controls.description.errors?.['minlength']">Usa al menos 20 caracteres.</ng-container>
+            </p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="tagsInput">Etiquetas</label>
+            <input
+              id="tagsInput"
+              class="field__control"
+              type="text"
+              formControlName="tagsInput"
+              placeholder="Limpieza, Plomería"
+              autocomplete="off"
+              [attr.aria-invalid]="form.controls.tagsInput.invalid && form.controls.tagsInput.touched ? 'true' : null"
+              aria-describedby="tags-hint tags-error"
+            />
+            <p id="tags-hint" class="field__hint">Separa con comas (ej: Limpieza, Plomería).</p>
+            <ul class="tagsPreview" *ngIf="tagsPreview().length > 0" aria-label="Etiquetas detectadas">
+              <li class="tagsPreview__chip" *ngFor="let tag of tagsPreview()">{{ tag }}</li>
+            </ul>
+            <p
+              id="tags-error"
+              class="field__error"
+              *ngIf="form.controls.tagsInput.touched && form.controls.tagsInput.invalid"
+            >
+              Añade al menos una etiqueta.
+            </p>
+          </div>
+        </fieldset>
+
+        <fieldset class="section" [disabled]="state() === 'submitting'">
+          <legend class="section__legend">Ubicación y presupuesto</legend>
+
+          <div class="grid">
+            <div class="field">
+              <label class="field__label" for="locationLabel">Ubicación</label>
+              <input
+                id="locationLabel"
+                class="field__control"
+                type="text"
+                formControlName="locationLabel"
+                placeholder="Barcelona · Eixample"
+                autocomplete="off"
+                [attr.aria-invalid]="form.controls.locationLabel.invalid && form.controls.locationLabel.touched ? 'true' : null"
+                aria-describedby="location-error"
+              />
+              <p
+                id="location-error"
+                class="field__error"
+                *ngIf="form.controls.locationLabel.touched && form.controls.locationLabel.invalid"
+              >
+                <ng-container *ngIf="form.controls.locationLabel.errors?.['required']">La ubicación es obligatoria.</ng-container>
+                <ng-container *ngIf="form.controls.locationLabel.errors?.['uuidNotAllowed']">No incluyas identificadores técnicos en la ubicación.</ng-container>
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="budgetLabel">Presupuesto</label>
+              <input
+                id="budgetLabel"
+                class="field__control"
+                type="text"
+                formControlName="budgetLabel"
+                placeholder="€60"
+                autocomplete="off"
+                [attr.aria-invalid]="form.controls.budgetLabel.invalid && form.controls.budgetLabel.touched ? 'true' : null"
+                aria-describedby="budget-error"
+              />
+              <p
+                id="budget-error"
+                class="field__error"
+                *ngIf="form.controls.budgetLabel.touched && form.controls.budgetLabel.invalid"
+              >
+                El presupuesto es obligatorio.
+              </p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section" [disabled]="state() === 'submitting'">
+          <legend class="section__legend">Contacto</legend>
+
+          <div class="grid">
+            <div class="field">
+              <label class="field__label" for="contactPhone">Teléfono</label>
+              <input
+                id="contactPhone"
+                class="field__control"
+                type="tel"
+                formControlName="contactPhone"
+                placeholder="+34 600 111 222"
+                autocomplete="tel"
+                [attr.aria-invalid]="form.controls.contactPhone.invalid && form.controls.contactPhone.touched ? 'true' : null"
+                aria-describedby="phone-error"
+              />
+              <p
+                id="phone-error"
+                class="field__error"
+                *ngIf="form.controls.contactPhone.touched && form.controls.contactPhone.invalid"
+              >
+                El teléfono es obligatorio.
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="contactEmail">Email</label>
+              <input
+                id="contactEmail"
+                class="field__control"
+                type="email"
+                formControlName="contactEmail"
+                placeholder="contacto@example.com"
+                autocomplete="email"
+                [attr.aria-invalid]="form.controls.contactEmail.invalid && form.controls.contactEmail.touched ? 'true' : null"
+                aria-describedby="email-error"
+              />
+              <p
+                id="email-error"
+                class="field__error"
+                *ngIf="form.controls.contactEmail.touched && form.controls.contactEmail.invalid"
+              >
+                <ng-container *ngIf="form.controls.contactEmail.errors?.['required']">El email es obligatorio.</ng-container>
+                <ng-container *ngIf="form.controls.contactEmail.errors?.['email']">Email no válido.</ng-container>
+              </p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="section" [disabled]="state() === 'submitting'">
+          <legend class="section__legend">Imagen (opcional)</legend>
+
+          <div class="grid">
+            <div class="field">
+              <label class="field__label" for="imageUrl">URL de imagen</label>
+              <input
+                id="imageUrl"
+                class="field__control"
+                type="url"
+                formControlName="imageUrl"
+                placeholder="https://…"
+                autocomplete="off"
+                [attr.aria-invalid]="form.controls.imageUrl.invalid && form.controls.imageUrl.touched ? 'true' : null"
+                aria-describedby="image-url-error"
+              />
+              <p
+                id="image-url-error"
+                class="field__error"
+                *ngIf="form.controls.imageUrl.touched && form.controls.imageUrl.invalid"
+              >
+                Debe ser una URL http(s) válida.
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="imageAlt">Texto alternativo</label>
+              <input
+                id="imageAlt"
+                class="field__control"
+                type="text"
+                formControlName="imageAlt"
+                placeholder="Descripción breve para accesibilidad"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </fieldset>
+
+        <div *ngIf="state() === 'error'" class="state state--error" role="alert">
+          <p class="state__title">{{ errorMessage() }}</p>
+          <ul class="state__list" *ngIf="missingFields().length > 0">
+            <li *ngFor="let label of missingFields()">{{ label }}</li>
+          </ul>
+          <div class="actions" *ngIf="missingFields().length === 0">
+            <button type="button" class="btn" (click)="retry()">Reintentar</button>
+            <button
+              *ngIf="isSessionExpiredError()"
+              type="button"
+              class="btn btn--secondary"
+              (click)="openLogin()"
+            >
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+
+        <div class="formActions">
+          <button type="button" class="btn btn--secondary" (click)="goBack()">Cancelar</button>
+          <button
+            type="submit"
+            class="btn"
+            [disabled]="isSubmitDisabled()"
+            [attr.aria-busy]="state() === 'submitting' ? 'true' : null"
+          >
+            {{ state() === 'submitting' ? 'Publicando…' : 'Publicar solicitud' }}
+          </button>
+        </div>
+      </form>
+    </ng-template>
+  </div>
+</section>
+
+<app-modal
+  [open]="isSuccessOpen()"
+  title="¡Solicitud publicada!"
+  size="sm"
+  (closed)="closeSuccess()"
+>
+  <div class="state" role="status">
+    <p class="state__title">Tu solicitud está publicada.</p>
+    <p class="state__hint">Te llevamos al detalle para que puedas verla.</p>
+    <button type="button" class="btn" (click)="closeSuccess()">Ver detalle</button>
+  </div>
+</app-modal>

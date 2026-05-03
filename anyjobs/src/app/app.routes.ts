@@ -37,6 +37,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'nueva',
+            loadComponent: () =>
+              import('./features/open-requests/open-request-create/open-request-create').then(
+                (m) => m.OpenRequestCreate,
+              ),
+          },
+          {
             path: ':id/propuesta',
             loadComponent: () =>
               import('./features/open-requests/open-request-proposal-compose/open-request-proposal-compose').then(

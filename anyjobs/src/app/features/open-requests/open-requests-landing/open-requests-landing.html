@@ -98,6 +98,13 @@
                 <a class="btn btn--link" [routerLink]="['/solicitudes']" fragment="contacto"
                   >Solicitar info</a
                 >
+                <a
+                  *ngIf="authVm().isLoggedIn"
+                  class="btn btn--secondary"
+                  routerLink="/solicitudes/nueva"
+                >
+                  ¿Necesitas algo? Publica tu solicitud
+                </a>
               </div>
             </div>
 

@@ -16,6 +16,7 @@ describe('MyRequestsDashboard', () => {
     listByUser: () => ReturnType<ProposalsService['listByUser']>;
     listByRequest?: () => ReturnType<ProposalsService['listByRequest']>;
     getOpenRequestDetail?: () => ReturnType<OpenRequestsService['getOpenRequestDetail']>;
+    listMyOpenRequests?: () => ReturnType<OpenRequestsService['listMyOpenRequests']>;
   }): void {
     const authState = signal(opts.loggedIn);
 
@@ -61,6 +62,8 @@ describe('MyRequestsDashboard', () => {
             getOpenRequestDetail:
               opts.getOpenRequestDetail ??
               (() => of({ id: 'req-1001', title: 'Solicitud', excerpt: 'x', images: [] })),
+            listMyOpenRequests:
+              opts.listMyOpenRequests ?? (() => of({ items: [], nextPage: null, hasMore: false })),
           },
         },
       ],
@@ -92,13 +95,15 @@ describe('MyRequestsDashboard', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Inicia sesión');
+    expect(compiled.querySelector('.tabs')).toBeNull();
   });
 
-  it('should show empty state when user has no proposals', async () => {
+  it('renderiza ambas pestañas con la pestaña "Publicadas por mí" activa por defecto', async () => {
     TestBed.resetTestingModule();
     configure({
       loggedIn: true,
       listByUser: () => of([]),
+      listMyOpenRequests: () => of({ items: [], nextPage: null, hasMore: false }),
     });
     await TestBed.compileComponents();
     fixture = TestBed.createComponent(MyRequestsDashboard);
@@ -107,14 +112,20 @@ describe('MyRequestsDashboard', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('Todavía no postulaste');
+    const tabs = compiled.querySelectorAll<HTMLButtonElement>('.tab');
+    expect(tabs.length).toBe(2);
+    expect(tabs[0]?.textContent).toContain('Publicadas por mí');
+    expect(tabs[1]?.textContent).toContain('Postulé a estas');
+    expect(tabs[0]?.classList.contains('tab--active')).toBe(true);
+    expect(tabs[1]?.classList.contains('tab--active')).toBe(false);
   });
 
-  it('should show error state when loading fails', async () => {
+  it('muestra empty state propio en "Publicadas por mí" cuando no hay solicitudes propias', async () => {
     TestBed.resetTestingModule();
     configure({
       loggedIn: true,
-      listByUser: () => throwError(() => new Error('fail')),
+      listByUser: () => of([]),
+      listMyOpenRequests: () => of({ items: [], nextPage: null, hasMore: false }),
     });
     await TestBed.compileComponents();
     fixture = TestBed.createComponent(MyRequestsDashboard);
@@ -123,7 +134,79 @@ describe('MyRequestsDashboard', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('No se pudieron cargar');
+    expect(compiled.textContent).toContain('No has publicado solicitudes todavía.');
+  });
+
+  it('muestra estado de error en "Publicadas por mí" cuando listMyOpenRequests falla', async () => {
+    TestBed.resetTestingModule();
+    configure({
+      loggedIn: true,
+      listByUser: () => of([]),
+      listMyOpenRequests: () => throwError(() => new Error('boom')),
+    });
+    await TestBed.compileComponents();
+    fixture = TestBed.createComponent(MyRequestsDashboard);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('No pudimos cargar tus solicitudes publicadas');
+  });
+
+  it('al cambiar a la pestaña "Postulé a estas" muestra su empty state', async () => {
+    TestBed.resetTestingModule();
+    configure({
+      loggedIn: true,
+      listByUser: () => of([]),
+      listMyOpenRequests: () => of({ items: [], nextPage: null, hasMore: false }),
+    });
+    await TestBed.compileComponents();
+    fixture = TestBed.createComponent(MyRequestsDashboard);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const appliedTab = compiled.querySelectorAll<HTMLButtonElement>('.tab')[1];
+    appliedTab?.click();
+    fixture.detectChanges();
+
+    expect(compiled.textContent).toContain('Todavía no postulaste a ninguna solicitud.');
+  });
+
+  it('renderiza items publicados con badge "Publicada por ti" y contador en la tab', async () => {
+    TestBed.resetTestingModule();
+    configure({
+      loggedIn: true,
+      listByUser: () => of([]),
+      listMyOpenRequests: () =>
+        of({
+          items: [
+            {
+              id: 'req-pub-1',
+              excerpt: 'Mi solicitud publicada',
+              tags: ['Limpieza'],
+              locationLabel: 'Madrid · Centro',
+              budgetLabel: '€80',
+              publishedAtLabel: 'Hace 1 hora',
+            },
+          ],
+          nextPage: null,
+          hasMore: false,
+        }),
+    });
+    await TestBed.compileComponents();
+    fixture = TestBed.createComponent(MyRequestsDashboard);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Mi solicitud publicada');
+    expect(compiled.textContent).toContain('Publicada por ti');
+
+    const publishedTab = compiled.querySelectorAll<HTMLButtonElement>('.tab')[0];
+    expect(publishedTab?.textContent?.replace(/\s+/g, ' ')).toContain('Publicadas por mí 1');
   });
 });
-
