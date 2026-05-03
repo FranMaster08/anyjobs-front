@@ -137,7 +137,7 @@ export class Home {
   /** Envía telemetría al API (visible en Red como POST …/promo-slides/interactions). */
   private trackInteraction(payload: Record<string, unknown>): void {
     this.http.post(this.interactionsUrl, { ...this.actorPayload(), ...payload }).subscribe({
-      error: () => {},
+      error: () => undefined,
     });
   }
 
