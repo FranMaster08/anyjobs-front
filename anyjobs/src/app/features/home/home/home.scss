@@ -1,4 +1,90 @@
-.page {
-  padding: 24px;
+/* Alto útil = viewport menos header sticky (~56px). El pie sigue debajo al hacer scroll. */
+:host {
+  --home-slider-header-offset: 56px;
+  --home-slider-max-width-sm: 520px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: calc(100dvh - var(--home-slider-header-offset));
 }
 
+.homeSliderPage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: calc(100dvh - var(--home-slider-header-offset));
+  padding: 0;
+}
+
+.homeSliderLoading,
+.homeSliderEmpty {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: var(--aj-color-muted-2, #666);
+  font-size: 15px;
+}
+
+.homeSliderWrap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  max-width: var(--home-slider-max-width-sm);
+  margin: 0 auto;
+  height: calc(100dvh - var(--home-slider-header-offset));
+  min-height: calc(100dvh - var(--home-slider-header-offset));
+}
+
+/* ngx-vertical-slider fuerza max-width: 420px desde 700px — lo anulamos para respetar el ancho del wrap. */
+@media (min-width: 700px) {
+  .homeSliderWrap media-slider {
+    max-width: none !important;
+    width: 100% !important;
+  }
+}
+
+/* Escritorio: la columna del slider ocupa el 70% del ancho del contenido (main). */
+@media (min-width: 900px) {
+  .homeSliderWrap {
+    width: 70%;
+    max-width: none;
+  }
+}
+
+/* La librería usa :host { height: 100dvh }; lo acotamos al hueco bajo el header. */
+.homeSliderWrap media-slider {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100% !important;
+}
+
+/*
+ * Clics en ♥ / 💬 / 🔖: ActionButtonComponent usa :host { display: contents }, que en
+ * algunos navegadores deja la zona clic rota. Forzamos un host con caja y elevamos
+ * la columna de acciones por encima del gradiente del overlay.
+ */
+.homeSliderWrap ::ng-deep media-action-button {
+  display: block;
+}
+
+.homeSliderWrap ::ng-deep media-slide .slide__actions {
+  position: relative;
+  z-index: 6;
+  isolation: isolate;
+}
+
+.homeSliderWrap ::ng-deep media-slide .slide__overlay {
+  z-index: 1;
+}
+
+.homeSliderWrap ::ng-deep .action {
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
+}

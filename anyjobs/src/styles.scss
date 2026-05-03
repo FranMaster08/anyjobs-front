@@ -626,4 +626,17 @@ body {
   line-height: 1.35;
 }
 
+/* Inicio: cadena flex hasta el slider (altura de pantalla bajo el header).
+   display:contents en router-outlet evita que el hueco del outlet limite el alto (~500px). */
+main.app-main router-outlet {
+  display: contents;
+}
+
+main.app-main app-home {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 56px);
+  width: 100%;
+}
 

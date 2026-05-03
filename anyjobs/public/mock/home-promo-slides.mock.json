@@ -1,0 +1,23 @@
+[
+  {
+    "id": "camp-promo-1",
+    "type": "image",
+    "media": "https://picsum.photos/720/1280",
+    "user": "@Anyjobs",
+    "avatar": "https://i.pravatar.cc/100?img=12",
+    "caption": "Descubre oportunidades cerca de ti.",
+    "music": "sonido original",
+    "counts": { "like": "1.2K", "comment": "48", "bookmark": "12" }
+  },
+  {
+    "id": "camp-promo-2",
+    "type": "video",
+    "media": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    "poster": "https://picsum.photos/seed/promo2/720/1280",
+    "user": "@Anyjobs",
+    "avatar": "https://i.pravatar.cc/100?img=45",
+    "caption": "Publicidad — vídeo de ejemplo (mute por defecto).",
+    "music": "pista promocional",
+    "counts": { "like": "890" }
+  }
+]

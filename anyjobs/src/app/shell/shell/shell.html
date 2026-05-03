@@ -1,11 +1,11 @@
 <header class="app-header">
   <div class="headerInner">
-    <a class="brand" [routerLink]="['/solicitudes']" fragment="inicio">
+    <a class="brand" routerLink="/home">
       {{ site.config()?.brandName ?? t('brand.name') }}
     </a>
 
     <nav class="nav" aria-label="Navegación principal">
-      <a class="navLink" [routerLink]="['/solicitudes']" fragment="inicio">
+      <a class="navLink" routerLink="/home">
         {{ t('nav.inicio') }}
       </a>
       <a class="navLink" [routerLink]="['/solicitudes']" fragment="solicitudes">
@@ -149,9 +149,7 @@
   <div class="footerInner">
     <div class="footerBrand">{{ site.config()?.brandName ?? t('brand.name') }}</div>
     <div class="footerLinks">
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="inicio">{{
-        t('nav.inicio')
-      }}</a>
+      <a class="footerLink" routerLink="/home">{{ t('nav.inicio') }}</a>
       <a class="footerLink" [routerLink]="['/solicitudes']" fragment="solicitudes">{{
         t('nav.solicitudes')
       }}</a>

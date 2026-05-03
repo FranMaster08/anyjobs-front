@@ -47,6 +47,42 @@ function approxDistanceKm(
   return Math.sqrt(dLat * dLat + dLng * dLng);
 }
 
+/** Línea que es solo un UUID. */
+const UUID_ONLY_LINE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * El API a veces devuelve `locationLabel` con el id embebido (p. ej. primera línea UUID o prefijo `uuid · ciudad · barrio`).
+ * Para la lista «cercana» solo mostramos la zona legible.
+ */
+function locationLabelZoneOnly(raw: string | undefined | null): string {
+  if (raw == null) return '';
+  const normalized = String(raw).replace(/\r\n/g, '\n').trim();
+  if (!normalized) return '';
+
+  const lines = normalized
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  let text: string;
+  if (lines.length >= 2 && UUID_ONLY_LINE.test(lines[0]!)) {
+    text = lines.slice(1).join(' ');
+  } else {
+    text = lines.join(' ');
+  }
+
+  text = text
+    .replace(/^\s*[·•]\s*/, '')
+    .replace(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\s*[·•]\s*|\s{1,4})/i,
+      '',
+    )
+    .trim();
+
+  return text;
+}
+
 interface PreviewPin {
   readonly id: string;
   readonly kind: 'user' | 'request';
@@ -133,7 +169,8 @@ export class OpenRequestsLanding implements AfterViewInit {
     for (let i = 0; i < requests.length; i++) {
       const req = requests[i]!;
       const off = REQUEST_MARKER_OFFSETS[i]!;
-      const label = req.locationLabel ? `${req.id} · ${req.locationLabel}` : req.id;
+      const zone = locationLabelZoneOnly(req.locationLabel);
+      const label = zone.length > 0 ? zone : 'Solicitud abierta';
       markers.push({
         id: req.id,
         kind: 'request',
@@ -190,10 +227,12 @@ export class OpenRequestsLanding implements AfterViewInit {
     const reqs = this.items().slice(0, PREVIEW_PIN_POSITIONS.length - 1);
     for (let i = 0; i < reqs.length; i++) {
       const pos = PREVIEW_PIN_POSITIONS[i + 1]!;
+      const req = reqs[i]!;
+      const zone = locationLabelZoneOnly(req.locationLabel);
       pins.push({
-        id: reqs[i]!.id,
+        id: req.id,
         kind: 'request',
-        label: reqs[i]!.id,
+        label: zone.length > 0 ? zone : 'Solicitud',
         x: pos.x,
         y: pos.y,
       });
@@ -206,6 +245,11 @@ export class OpenRequestsLanding implements AfterViewInit {
   protected readonly trackByMarkerId = (_: number, item: RequestsMapMarker) => item.id;
   protected readonly trackByPreviewPinId = (_: number, item: PreviewPin) => item.id;
   protected readonly trackByNearbyId = (_: number, it: { item: OpenRequestListItem }) => it.item.id;
+
+  /** Texto de zona para la lista de solicitudes cercanas (sin UUID embebido en `locationLabel`). */
+  protected nearbyZoneLabel(raw: string | undefined): string {
+    return locationLabelZoneOnly(raw);
+  }
 
   constructor() {
     this.site.load();

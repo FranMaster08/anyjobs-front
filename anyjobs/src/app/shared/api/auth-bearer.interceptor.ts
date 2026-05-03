@@ -9,7 +9,14 @@ import { OPEN_REQUESTS_API_URL } from '../../features/open-requests/open-request
 import { PROPOSALS_API_URL } from '../proposals/proposals.service';
 import { SITE_CONFIG_URL } from '../site-config/site-config.service';
 
-const API_PREFIXES = ['/auth', '/users', '/open-requests', '/proposals', '/site-config'] as const;
+const API_PREFIXES = [
+  '/auth',
+  '/users',
+  '/open-requests',
+  '/proposals',
+  '/site-config',
+  '/promo-slides',
+] as const;
 
 function normalizePathname(pathname: string): string {
   // Backend puede exponer los endpoints bajo un prefijo tipo "/api".

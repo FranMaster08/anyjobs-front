@@ -1,3 +1,9 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
 .app-header {
   position: sticky;
   top: 0;
@@ -273,7 +279,10 @@
 }
 
 .app-main {
-  min-height: calc(100vh - 56px);
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 @media (max-width: 900px) {

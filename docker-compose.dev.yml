@@ -3,6 +3,9 @@ services:
     build:
       context: .
       target: dev
+    # Sincronizar node_modules del volumen con package-lock al arrancar
+    command:
+      ["sh", "-lc", "npm install && npm run start -- --host 0.0.0.0 --port 4200"]
     ports:
       - "4200:4200"
     environment:

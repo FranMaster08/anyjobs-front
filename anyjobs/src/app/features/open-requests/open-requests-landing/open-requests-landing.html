@@ -250,10 +250,9 @@
                   >
                     <span class="nearbyDot" aria-hidden="true"></span>
                     <span class="nearbyText">
-                      <strong>{{ it.item.id }}</strong>
-                      <span *ngIf="it.item.locationLabel">· {{ it.item.locationLabel }}</span>
-                      <span *ngIf="it.distanceKm !== null"
-                        >· ~{{ it.distanceKm | number: '1.0-1' }} km</span
+                      {{ nearbyZoneLabel(it.item.locationLabel) }}
+                      <span *ngIf="it.distanceKm !== null">
+                        · ~{{ it.distanceKm | number: '1.0-1' }} km</span
                       >
                     </span>
                   </div>
