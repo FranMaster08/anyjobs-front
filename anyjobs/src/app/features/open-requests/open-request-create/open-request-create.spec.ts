@@ -104,10 +104,16 @@ function fillForm(component: OpenRequestCreate, partial: Partial<CreateOpenReque
     budgetLabel: validInput.budgetLabel,
     contactPhone: validInput.contactPhone,
     contactEmail: validInput.contactEmail,
-    imageUrl: '',
-    imageAlt: '',
     ...partial,
   });
+}
+
+function fakeFileInputChangeEvent(files: File[]): Event {
+  const target = {
+    files: files.length > 0 ? files : null,
+    value: '',
+  } as unknown as HTMLInputElement;
+  return { target } as unknown as Event;
 }
 
 describe('parseTags', () => {
@@ -215,6 +221,57 @@ describe('OpenRequestCreate', () => {
     expect((component as any).form.controls.locationLabel.errors).toMatchObject({
       uuidNotAllowed: true,
     });
+  });
+
+  it('añade imágenes en varios turnos sin borrar las anteriores', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      { createOpenRequest: () => of(validDetail) },
+    );
+
+    const f1 = new File([new Uint8Array([137, 80])], 'a.png', { type: 'image/png' });
+    const f2 = new File([new Uint8Array([137, 80])], 'b.png', { type: 'image/png' });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).onImageFilesSelected(fakeFileInputChangeEvent([f1]));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((component as any).selectedImageFiles()).toEqual([f1]);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).onImageFilesSelected(fakeFileInputChangeEvent([f2]));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((component as any).selectedImageFiles()).toEqual([f1, f2]);
+  });
+
+  it('envía imageFiles cuando hay imágenes seleccionadas', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    let captured: CreateOpenRequestInput | null = null;
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      {
+        createOpenRequest: (input: CreateOpenRequestInput) => {
+          captured = input;
+          return of(validDetail);
+        },
+      },
+    );
+    fillForm(component);
+    const png = new File([new Uint8Array([137, 80])], 'foto.png', { type: 'image/png' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).selectedImageFiles.set([png]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).submit();
+    expect(captured).not.toBeNull();
+    expect(captured!.imageFiles).toEqual([png]);
   });
 
   it("normaliza tags 'a, b, a, ' a ['a','b'] en el body enviado", () => {

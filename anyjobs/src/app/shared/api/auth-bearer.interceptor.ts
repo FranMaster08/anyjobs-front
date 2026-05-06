@@ -9,6 +9,7 @@ import { OPEN_REQUESTS_API_URL } from '../../features/open-requests/open-request
 import { PROPOSALS_API_URL } from '../proposals/proposals.service';
 import { SITE_CONFIG_URL } from '../site-config/site-config.service';
 
+/** Rutas con prefijo en `API_PREFIXES` (+ subrutas) reciben `Authorization: Bearer` si hay token (p. ej. POST/PATCH `/open-requests`, `/open-requests/mine`, `/proposals`). */
 const API_PREFIXES = [
   '/auth',
   '/users',

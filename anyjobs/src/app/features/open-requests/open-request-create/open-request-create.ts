@@ -4,6 +4,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
+  ViewChild,
   computed,
   effect,
   inject,
@@ -23,11 +25,21 @@ import { finalize } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
+import { MAX_OPEN_REQUEST_UPLOAD_FILES } from '../open-requests-multipart';
 import { CreateOpenRequestInput } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
 
 const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-const HTTP_URL_PATTERN = /^https?:\/\/.+/i;
+/** Tipos MIME aceptados al publicar imágenes (alineados con uso típico en API). */
+const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const MAX_IMAGE_BYTES_PER_FILE = 10 * 1024 * 1024;
+
+function fileLooksLikeAcceptedImage(f: File): boolean {
+  const t = f.type.toLowerCase();
+  if (ACCEPTED_IMAGE_TYPES.has(t)) return true;
+  if (t.length > 0) return false;
+  return /\.(jpe?g|png|webp|gif)$/i.test(f.name.trim());
+}
 const SUCCESS_REDIRECT_DELAY_MS = 1500;
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
@@ -44,6 +56,8 @@ type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
   styleUrl: './open-request-create.scss',
 })
 export class OpenRequestCreate {
+  @ViewChild('imageFileInput') private imageFileInput?: ElementRef<HTMLInputElement>;
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
@@ -65,7 +79,6 @@ export class OpenRequestCreate {
     budgetLabel: 'Presupuesto',
     contactPhone: 'Teléfono',
     contactEmail: 'Email',
-    imageUrl: 'URL de imagen',
   };
 
   protected readonly form = this.fb.nonNullable.group({
@@ -92,13 +105,18 @@ export class OpenRequestCreate {
       Validators.required,
       Validators.email,
     ]),
-    imageUrl: this.fb.nonNullable.control('', [optionalHttpUrlValidator()]),
-    imageAlt: this.fb.nonNullable.control(''),
   });
 
   protected readonly isSubmitDisabled = computed(() => this.state() === 'submitting');
 
   protected readonly tagsPreview = signal<readonly string[]>([]);
+
+  /** Archivos locales elegidos por el usuario (multipart `files`). */
+  protected readonly selectedImageFiles = signal<readonly File[]>([]);
+
+  protected readonly imageSelectionError = signal<string | null>(null);
+
+  protected readonly maxImageFiles = MAX_OPEN_REQUEST_UPLOAD_FILES;
 
   constructor() {
     const user = this.authVm().user;
@@ -118,7 +136,7 @@ export class OpenRequestCreate {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         if (this.missingFields().length === 0) return;
-        if (this.form.valid) {
+        if (this.form.valid && !this.imageSelectionError()) {
           this.state.set('idle');
           this.errorMessage.set(null);
           this.missingFields.set([]);
@@ -133,7 +151,85 @@ export class OpenRequestCreate {
     });
   }
 
+  /** Aceptado por el input type=file (evita tipos arbitrarios antes de subir). */
+  protected readonly imageFileAccept = 'image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif';
+
+  protected onImageFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const picked = input.files?.length ? Array.from(input.files) : [];
+    input.value = '';
+
+    if (picked.length === 0) {
+      return;
+    }
+
+    const existing = this.selectedImageFiles();
+    const room = MAX_OPEN_REQUEST_UPLOAD_FILES - existing.length;
+
+    if (room <= 0) {
+      this.imageSelectionError.set(
+        `Solo puedes subir hasta ${MAX_OPEN_REQUEST_UPLOAD_FILES} imágenes. Quita alguna para añadir más.`,
+      );
+      return;
+    }
+
+    const batch = picked.slice(0, room);
+
+    const tooBig = batch.find((f) => f.size > MAX_IMAGE_BYTES_PER_FILE);
+    if (tooBig) {
+      this.imageSelectionError.set('Cada imagen debe pesar menos de 10 MB.');
+      return;
+    }
+
+    const badType = batch.find((f) => !fileLooksLikeAcceptedImage(f));
+    if (badType) {
+      this.imageSelectionError.set('Solo JPG, PNG, WebP o GIF.');
+      return;
+    }
+
+    const isSameFile = (a: File, b: File): boolean =>
+      a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
+
+    const deduped: File[] = [];
+    for (const f of batch) {
+      if (existing.some((e) => isSameFile(e, f))) continue;
+      if (deduped.some((g) => isSameFile(g, f))) continue;
+      deduped.push(f);
+    }
+
+    if (deduped.length === 0) {
+      this.imageSelectionError.set('Esas imágenes ya estaban seleccionadas.');
+      return;
+    }
+
+    this.imageSelectionError.set(null);
+    this.selectedImageFiles.set([...existing, ...deduped]);
+
+    if (this.state() === 'error' && this.missingFields().length === 0) {
+      this.state.set('idle');
+      this.errorMessage.set(null);
+    }
+  }
+
+  protected removeImageAt(index: number): void {
+    this.selectedImageFiles.update((curr) => curr.filter((_, i) => i !== index));
+    this.imageSelectionError.set(null);
+  }
+
+  protected clearAllImages(): void {
+    this.selectedImageFiles.set([]);
+    this.imageSelectionError.set(null);
+    const el = this.imageFileInput?.nativeElement;
+    if (el) el.value = '';
+  }
+
   protected submit(): void {
+    if (this.imageSelectionError()) {
+      this.state.set('error');
+      this.errorMessage.set(this.imageSelectionError());
+      return;
+    }
+
     this.form.markAllAsTouched();
     if (!this.form.valid) {
       this.reportInvalidForm();
@@ -143,6 +239,8 @@ export class OpenRequestCreate {
     this.missingFields.set([]);
 
     const raw = this.form.getRawValue();
+    const files = this.selectedImageFiles();
+
     const input: CreateOpenRequestInput = {
       title: raw.title,
       excerpt: raw.excerpt,
@@ -152,8 +250,7 @@ export class OpenRequestCreate {
       budgetLabel: raw.budgetLabel,
       contactPhone: raw.contactPhone,
       contactEmail: raw.contactEmail,
-      ...(raw.imageUrl.trim().length > 0 ? { imageUrl: raw.imageUrl } : {}),
-      ...(raw.imageAlt.trim().length > 0 ? { imageAlt: raw.imageAlt } : {}),
+      ...(files.length > 0 ? { imageFiles: files } : {}),
     };
 
     this.state.set('submitting');
@@ -246,6 +343,8 @@ export class OpenRequestCreate {
   private handleError(err: unknown): void {
     this.missingFields.set([]);
     const status = err instanceof HttpErrorResponse ? err.status : 0;
+    const apiMessage =
+      err instanceof HttpErrorResponse ? readApiMessage(err.error) : undefined;
 
     if (status === 401) {
       this.auth.clear();
@@ -258,8 +357,19 @@ export class OpenRequestCreate {
       return;
     }
 
+    if (status >= 400 && status < 500 && apiMessage) {
+      this.errorMessage.set(apiMessage);
+      return;
+    }
+
     this.errorMessage.set('No se pudo publicar tu solicitud, intenta de nuevo');
   }
+}
+
+function readApiMessage(body: unknown): string | undefined {
+  if (!body || typeof body !== 'object') return undefined;
+  const msg = (body as Record<string, unknown>)['message'];
+  return typeof msg === 'string' && msg.trim().length > 0 ? msg.trim() : undefined;
 }
 
 export function parseTags(raw: string | null | undefined): string[] {
@@ -287,13 +397,5 @@ function noUuidValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = typeof control.value === 'string' ? control.value : '';
     return UUID_PATTERN.test(value) ? { uuidNotAllowed: true } : null;
-  };
-}
-
-function optionalHttpUrlValidator(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = typeof control.value === 'string' ? control.value.trim() : '';
-    if (value.length === 0) return null;
-    return HTTP_URL_PATTERN.test(value) ? null : { invalidUrl: true };
   };
 }

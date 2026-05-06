@@ -218,41 +218,45 @@
         </fieldset>
 
         <fieldset class="section" [disabled]="state() === 'submitting'">
-          <legend class="section__legend">Imagen (opcional)</legend>
+          <legend class="section__legend">Imágenes (opcional)</legend>
 
-          <div class="grid">
-            <div class="field">
-              <label class="field__label" for="imageUrl">URL de imagen</label>
-              <input
-                id="imageUrl"
-                class="field__control"
-                type="url"
-                formControlName="imageUrl"
-                placeholder="https://…"
-                autocomplete="off"
-                [attr.aria-invalid]="form.controls.imageUrl.invalid && form.controls.imageUrl.touched ? 'true' : null"
-                aria-describedby="image-url-error"
-              />
-              <p
-                id="image-url-error"
-                class="field__error"
-                *ngIf="form.controls.imageUrl.touched && form.controls.imageUrl.invalid"
-              >
-                Debe ser una URL http(s) válida.
-              </p>
-            </div>
+          <p class="field__hint">
+            Podés elegir varias imágenes de una vez, o repetir «Elegir archivos» para ir sumando (hasta {{ maxImageFiles }}
+            en total; JPG, PNG, WebP o GIF; máx. 10 MB cada una).
+          </p>
 
-            <div class="field">
-              <label class="field__label" for="imageAlt">Texto alternativo</label>
-              <input
-                id="imageAlt"
-                class="field__control"
-                type="text"
-                formControlName="imageAlt"
-                placeholder="Descripción breve para accesibilidad"
-                autocomplete="off"
-              />
-            </div>
+          <div class="field">
+            <label class="field__label" for="imageFiles">Archivos</label>
+            <input
+              #imageFileInput
+              id="imageFiles"
+              class="field__control field__control--file"
+              type="file"
+              [accept]="imageFileAccept"
+              multiple
+              (change)="onImageFilesSelected($event)"
+            />
+            <p
+              id="image-files-error"
+              class="field__error"
+              *ngIf="imageSelectionError()"
+              role="alert"
+            >
+              {{ imageSelectionError() }}
+            </p>
+          </div>
+
+          <div class="imagePickList" *ngIf="selectedImageFiles().length > 0">
+            <p class="imagePickList__title">Seleccionadas:</p>
+            <ul class="imagePickList__list" aria-label="Imágenes seleccionadas">
+              <li class="imagePickList__item" *ngFor="let f of selectedImageFiles(); let i = index">
+                <span class="imagePickList__name">{{ f.name }}</span>
+                <button type="button" class="imagePickList__remove" (click)="removeImageAt(i)">Quitar</button>
+              </li>
+            </ul>
+            <button type="button" class="btn btn--secondary imagePickList__clear" (click)="clearAllImages()">
+              Quitar todas
+            </button>
           </div>
         </fieldset>
 

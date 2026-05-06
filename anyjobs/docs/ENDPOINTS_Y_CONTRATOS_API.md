@@ -349,6 +349,16 @@ Estos endpoints se usan en el wizard de registro para completar perfil. El front
       "budgetLabel": "string"
     }
   ],
+  "meta": {
+    "totalItems": 120,
+    "page": 1,
+    "pageSize": 12,
+    "totalPages": 10,
+    "hasNextPage": true,
+    "hasPreviousPage": false,
+    "nextPage": 2,
+    "previousPage": null
+  },
   "nextPage": 2,
   "hasMore": true
 }
@@ -356,7 +366,47 @@ Estos endpoints se usan en el wizard de registro para completar perfil. El front
 
 **Notas**:
 - `items[*].excerpt` se muestra siempre (el front lo normaliza a “Sin descripción” si viene vacío).
-- Paginación: el front entiende `nextPage` (number o null) y `hasMore` (boolean). Si tu backend no usa `nextPage`, puedes devolver `hasMore` y el front calculará `page+1`.
+- Paginación: el front entiende `nextPage` (number o null) y `hasMore` (boolean). El backend también expone `meta` (paginación detallada); el front puede usar `meta.hasNextPage` / `meta.nextPage` si se necesita más control.
+
+---
+
+### POST `/` (crear solicitud)
+
+**Uso en front**: `OpenRequestCreate` → `OpenRequestsService.createOpenRequest`.
+
+**Auth**: `Authorization: Bearer <JWT>` (permiso backend `open-requests.create`).
+
+**Content-Type**: `multipart/form-data` (no usar solo `application/json` si quieres alinear el controlador Nest con `FilesInterceptor`).
+
+**Partes del formulario (texto)**:
+- Obligatorios: `title`, `excerpt`, `description`, `tags` (valor **JSON string** de un array de strings, p. ej. `["Limpieza"]`), `locationLabel`, `budgetLabel`, `contactPhone`, `contactEmail`
+- Opcionales: `publishedAtLabel`, `imageUrl`, `imageAlt`, `images` (JSON string de objetos `{ "url": "string", "alt": "string" }` si aplica)
+
+**Archivos**: repetir el campo **`files`** (hasta **6** ficheros por petición), como multipart file parts.
+
+**Response 201 (JSON)**: mismo shape que GET `/{id}` (`OpenRequestDetail`).
+
+---
+
+### PATCH `/{id}` (actualizar solicitud)
+
+**Auth**: Bearer (permiso `open-requests.update`).
+
+**Content-Type**: `multipart/form-data` igual que `POST`; solo se envían los campos que se desean cambiar + `files` opcionales.
+
+**Response 200 (JSON)**: detalle actualizado (`OpenRequestDetail`).
+
+El servicio expone `patchOpenRequest(id, patch)`; la pantalla de edición MVP puede no existir aún.
+
+---
+
+### GET `/mine` (mis solicitudes del usuario autenticado)
+
+**Auth**: Bearer.
+
+**Query params**: `page`, `pageSize`.
+
+**Response 200**: mismo envelope que GET `/` (`items`, `meta`, `nextPage`, `hasMore`).
 
 ---
 
@@ -439,54 +489,49 @@ Estos endpoints se usan en el wizard de registro para completar perfil. El front
 }
 ```
 
-## Propuestas — estado actual del MVP y contrato recomendado
+## Propuestas (`PROPOSALS_API_URL`)
 
-### Estado actual (importante)
+`ProposalsService` usa **backend real** cuando la URL configurada **no** contiene `/mock/`; en ese caso lista y crea contra la API Nest. En modo mock sigue usando `localStorage`/JSON locales.
 
-En el código actual:
-- La feature de propuestas (`ProposalsService`) **no llama a backend real**.
-- Persiste en `localStorage` y, si está en modo mock, “seedea” desde un JSON local.
+Las peticiones contra `/proposals` reciben `Authorization: Bearer` vía interceptor si hay sesión.
 
-Por tanto, **no hay endpoints estrictamente necesarios** para propuestas para que el front *actual* “arranque”.
+### GET `/` con filtros (`page`, `pageSize`, `userId`, `requestId`)
 
-### Si quieres backend real (recomendado para producción)
-
-El front usa estas operaciones lógicas:
-- `listByUser(userId)`
-- `listByRequest(requestId)`
-- `getByUserAndRequest(userId, requestId)`
-- `sendProposal(input)`
-
-Un set mínimo de endpoints REST compatibles sería:
-
-#### GET `/` con filtros
-
-**Ejemplos**:
-- `GET /proposals?userId=<id>` → lista propuestas del usuario
-- `GET /proposals?requestId=<id>` → lista propuestas para una solicitud
-- `GET /proposals?userId=<id>&requestId=<id>` → una propuesta (si existe) o lista de 0/1
-
-**Response 200 (JSON)**:
+**Response 200 (JSON)** — envoltorio paginado:
 
 ```json
-[
-  {
-    "id": "string",
-    "requestId": "string",
-    "userId": "string",
-    "author": { "name": "string", "subtitle": "string", "rating": 4.8, "reviewsCount": 120 },
-    "whoAmI": "string",
-    "message": "string",
-    "estimate": "string",
-    "createdAt": "2026-01-01T12:00:00.000Z",
-    "status": "SENT"
+{
+  "items": [
+    {
+      "id": "string",
+      "requestId": "string",
+      "userId": "string",
+      "author": { "name": "string", "subtitle": "string", "rating": 4.8, "reviewsCount": 120 },
+      "whoAmI": "string",
+      "message": "string",
+      "estimate": "string",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "status": "SENT"
+    }
+  ],
+  "meta": {
+    "totalItems": 120,
+    "page": 1,
+    "pageSize": 100,
+    "totalPages": 2,
+    "hasNextPage": true,
+    "hasPreviousPage": false,
+    "nextPage": 2,
+    "previousPage": null
   }
-]
+}
 ```
 
-#### POST `/`
+### POST `/` (crear propuesta)
 
-**Request (JSON)** (`CreateProposalInput`):
+**Auth**: Bearer (`proposals.create`).
+
+**Request (JSON)**:
 
 ```json
 {
@@ -500,21 +545,11 @@ Un set mínimo de endpoints REST compatibles sería:
 }
 ```
 
-**Response 200/201 (JSON)** (`Proposal`):
+**Response `201 Created` (preferido) o `200`** con cuerpo `Proposal` (mismo shape que cada elemento de `items` arriba; `author` anidado).
 
-```json
-{
-  "id": "string",
-  "requestId": "string",
-  "userId": "string",
-  "author": { "name": "string", "subtitle": "string" },
-  "whoAmI": "string",
-  "message": "string",
-  "estimate": "string",
-  "createdAt": "2026-01-01T12:00:00.000Z",
-  "status": "SENT"
-}
-```
+### Errores 4xx
+
+Body JSON recomendado: `{ "message": "texto legible" }`. El formulario de publicar solicitud (`OpenRequestCreate`) muestra `message` en validaciones 4xx cuando existe.
 
 ## Dependencias externas (no AnyJobs) usadas por el front
 

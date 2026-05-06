@@ -4,7 +4,55 @@ import { inject, Injectable, InjectionToken } from '@angular/core';
 import { catchError, delay, map, Observable, of, switchMap } from 'rxjs';
 
 import { createMockId } from '../api/api.utils';
-import { CreateProposalInput, Proposal } from './proposals.models';
+import { CreateProposalInput, Proposal, ProposalApiDto, ProposalsListResponseDto } from './proposals.models';
+
+function sortProposalsNewestFirst(items: readonly Proposal[]): Proposal[] {
+  return items.slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+function mapProposalFromApi(dto: ProposalApiDto): Proposal {
+  const rawAuthor = (dto as { author?: unknown }).author;
+  const authorObj =
+    rawAuthor && typeof rawAuthor === 'object' ? (rawAuthor as Record<string, unknown>) : null;
+  const name = typeof authorObj?.['name'] === 'string' ? authorObj['name'].trim() : '';
+  const subtitle = typeof authorObj?.['subtitle'] === 'string' ? authorObj['subtitle'].trim() : '';
+  const rawRating = authorObj?.['rating'];
+  const rating =
+    typeof rawRating === 'number' && Number.isFinite(rawRating) ? Math.min(5, Math.max(0, rawRating)) : undefined;
+  const rawReviews = authorObj?.['reviewsCount'];
+  const reviewsCount =
+    typeof rawReviews === 'number' && Number.isFinite(rawReviews) && rawReviews >= 0
+      ? Math.floor(rawReviews)
+      : undefined;
+
+  return {
+    id: String(dto.id),
+    requestId: String(dto.requestId),
+    userId: String(dto.userId),
+    ...(name.length > 0
+      ? {
+          author: {
+            name,
+            ...(subtitle.length > 0 ? { subtitle } : {}),
+            ...(rating !== undefined ? { rating } : {}),
+            ...(reviewsCount !== undefined ? { reviewsCount } : {}),
+          },
+        }
+      : {}),
+    whoAmI: String(dto.whoAmI),
+    message: String(dto.message),
+    estimate: String(dto.estimate),
+    createdAt: String(dto.createdAt),
+    status: 'SENT',
+  };
+}
+
+function proposalsFromListResponse(res: unknown): Proposal[] {
+  const r = res as Partial<ProposalsListResponseDto> | null;
+  const rawItems = r?.items;
+  const items = Array.isArray(rawItems) ? rawItems : [];
+  return items.map((x) => mapProposalFromApi(x as ProposalApiDto));
+}
 
 const STORAGE_KEY = 'anyjobs.proposals.v1';
 
@@ -296,10 +344,8 @@ export class ProposalsService {
     if (uid.length === 0) return of([]);
     if (!this.apiUrl.includes('/mock/')) {
       return this.http
-        .get<{ items?: Proposal[] }>(this.apiUrl, { params: { userId: uid, page: 1, pageSize: 100 } })
-        .pipe(
-          map((res) => (res.items ?? []).slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))),
-        );
+        .get<unknown>(this.apiUrl, { params: { userId: uid, page: 1, pageSize: 100 } })
+        .pipe(map((res) => sortProposalsNewestFirst(proposalsFromListResponse(res))));
     }
 
     return this.ensureSeededForUser(uid).pipe(
@@ -319,8 +365,8 @@ export class ProposalsService {
     if (uid.length === 0 || rid.length === 0) return of(null);
     if (!this.apiUrl.includes('/mock/')) {
       return this.http
-        .get<{ items?: Proposal[] }>(this.apiUrl, { params: { userId: uid, requestId: rid, page: 1, pageSize: 1 } })
-        .pipe(map((res) => (res.items ?? [])[0] ?? null));
+        .get<unknown>(this.apiUrl, { params: { userId: uid, requestId: rid, page: 1, pageSize: 1 } })
+        .pipe(map((res) => proposalsFromListResponse(res)[0] ?? null));
     }
 
     return this.ensureSeededForUser(uid).pipe(
@@ -337,10 +383,8 @@ export class ProposalsService {
 
     if (!this.apiUrl.includes('/mock/')) {
       return this.http
-        .get<{ items?: Proposal[] }>(this.apiUrl, { params: { requestId: rid, page: 1, pageSize: 100 } })
-        .pipe(
-          map((res) => (res.items ?? []).slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))),
-        );
+        .get<unknown>(this.apiUrl, { params: { requestId: rid, page: 1, pageSize: 100 } })
+        .pipe(map((res) => sortProposalsNewestFirst(proposalsFromListResponse(res))));
     }
 
     const seed$ = seedForUserId
@@ -369,15 +413,17 @@ export class ProposalsService {
     const authorSubtitle = (input.authorSubtitle ?? '').trim();
 
     if (!this.apiUrl.includes('/mock/')) {
-      return this.http.post<Proposal>(this.apiUrl, {
-        requestId,
-        userId,
-        authorName: authorName.length > 0 ? authorName : 'Usuario',
-        authorSubtitle: authorSubtitle.length > 0 ? authorSubtitle : 'Perfil',
-        whoAmI,
-        message,
-        estimate,
-      });
+      return this.http
+        .post<ProposalApiDto>(this.apiUrl, {
+          requestId,
+          userId,
+          authorName: authorName.length > 0 ? authorName : 'Usuario',
+          authorSubtitle: authorSubtitle.length > 0 ? authorSubtitle : 'Perfil',
+          whoAmI,
+          message,
+          estimate,
+        })
+        .pipe(map((dto) => mapProposalFromApi(dto)));
     }
 
     const next: Proposal = {

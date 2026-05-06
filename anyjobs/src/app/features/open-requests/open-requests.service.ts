@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { map, Observable, throwError } from 'rxjs';
 
+import { buildOpenRequestCreateFormData, buildOpenRequestPatchFormData } from './open-requests-multipart';
 import {
   CreateOpenRequestInput,
   OpenRequestDetail,
@@ -11,6 +12,7 @@ import {
   OpenRequestProviderReview,
   OpenRequestsListParams,
   OpenRequestsListResponse,
+  PatchOpenRequestInput,
 } from './open-requests.models';
 
 export const OPEN_REQUESTS_API_URL = new InjectionToken<string>('OPEN_REQUESTS_API_URL', {
@@ -109,10 +111,31 @@ export class OpenRequestsService {
       return throwError(() => new Error('createOpenRequest no está disponible en modo mock'));
     }
 
-    const body = buildCreateBody(input);
+    const body = buildOpenRequestCreateFormData(input);
 
     return this.http
       .post<OpenRequestDetailDto>(this.apiUrl, body)
+      .pipe(map((dto) => normalizeDetail(dto, null)));
+  }
+
+  /**
+   * Actualiza una solicitud existente (`PATCH /open-requests/:id`, multipart).
+   * Requiere permiso `open-requests.update` y Bearer (interceptor).
+   */
+  patchOpenRequest(id: string, patch: PatchOpenRequestInput): Observable<OpenRequestDetail> {
+    const trimmedId = id.trim();
+    if (trimmedId.length === 0) {
+      return throwError(() => new Error('patchOpenRequest: id vacío'));
+    }
+    if (this.apiUrl.includes('/mock/')) {
+      return throwError(() => new Error('patchOpenRequest no está disponible en modo mock'));
+    }
+
+    const url = `${this.apiUrl}/${encodeURIComponent(trimmedId)}`;
+    const body = buildOpenRequestPatchFormData(patch);
+
+    return this.http
+      .patch<OpenRequestDetailDto>(url, body)
       .pipe(map((dto) => normalizeDetail(dto, null)));
   }
 
@@ -296,26 +319,5 @@ function missingDetail(id: string): OpenRequestDetail {
     excerpt: 'Sin descripción',
     images: [],
   };
-}
-
-function buildCreateBody(input: CreateOpenRequestInput): Record<string, unknown> {
-  const body: Record<string, unknown> = {
-    title: input.title.trim(),
-    excerpt: input.excerpt.trim(),
-    description: input.description.trim(),
-    tags: [...input.tags],
-    locationLabel: input.locationLabel.trim(),
-    budgetLabel: input.budgetLabel.trim(),
-    contactPhone: input.contactPhone.trim(),
-    contactEmail: input.contactEmail.trim(),
-  };
-
-  const imageUrl = input.imageUrl?.trim() ?? '';
-  if (imageUrl.length > 0) body['imageUrl'] = imageUrl;
-
-  const imageAlt = input.imageAlt?.trim() ?? '';
-  if (imageAlt.length > 0) body['imageAlt'] = imageAlt;
-
-  return body;
 }
 

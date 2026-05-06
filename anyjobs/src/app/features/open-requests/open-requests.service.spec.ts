@@ -33,7 +33,7 @@ describe('OpenRequestsService.createOpenRequest', () => {
     contactEmail: 'cliente@example.com',
   };
 
-  it('envía POST al apiUrl con el body esperado y normaliza la respuesta', () => {
+  it('envía POST multipart al apiUrl con campos esperados y normaliza la respuesta', () => {
     const { service, httpMock } = setup('https://api.example.com/open-requests');
 
     let received: { id: string; title: string } | null = null;
@@ -43,16 +43,10 @@ describe('OpenRequestsService.createOpenRequest', () => {
 
     const req = httpMock.expectOne('https://api.example.com/open-requests');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({
-      title: 'Limpieza profunda',
-      excerpt: 'Necesito limpieza',
-      description: 'Descripción suficientemente larga para validar el campo.',
-      tags: ['Limpieza'],
-      locationLabel: 'Barcelona · Eixample',
-      budgetLabel: '€60',
-      contactPhone: '+34600111222',
-      contactEmail: 'cliente@example.com',
-    });
+    expect(req.request.body).toBeInstanceOf(FormData);
+    const fd = req.request.body as FormData;
+    expect(fd.get('title')).toBe('Limpieza profunda');
+    expect(fd.get('tags')).toBe(JSON.stringify(['Limpieza']));
 
     req.flush({
       id: 'req-123',
@@ -64,6 +58,7 @@ describe('OpenRequestsService.createOpenRequest', () => {
       budgetLabel: '€60',
       contactPhone: '+34600111222',
       contactEmail: 'cliente@example.com',
+      images: [],
     });
 
     expect(received).toEqual({ id: 'req-123', title: 'Limpieza profunda' });
@@ -71,7 +66,7 @@ describe('OpenRequestsService.createOpenRequest', () => {
     httpMock.verify();
   });
 
-  it('incluye imageUrl/imageAlt en el body solo si tienen contenido', () => {
+  it('incluye imageUrl/imageAlt en FormData solo si tienen contenido', () => {
     const { service, httpMock } = setup('https://api.example.com/open-requests');
 
     service
@@ -83,10 +78,9 @@ describe('OpenRequestsService.createOpenRequest', () => {
       .subscribe();
 
     const req = httpMock.expectOne('https://api.example.com/open-requests');
-    expect(req.request.body).toMatchObject({
-      imageUrl: 'https://example.com/img.jpg',
-      imageAlt: 'foto',
-    });
+    const fd = req.request.body as FormData;
+    expect(fd.get('imageUrl')).toBe('https://example.com/img.jpg');
+    expect(fd.get('imageAlt')).toBe('foto');
     req.flush({ id: 'x', images: [] });
 
     httpMock.verify();
@@ -104,11 +98,26 @@ describe('OpenRequestsService.createOpenRequest', () => {
       .subscribe();
 
     const req = httpMock.expectOne('https://api.example.com/open-requests');
-    const body = req.request.body as Record<string, unknown>;
-    expect(body['imageUrl']).toBeUndefined();
-    expect(body['imageAlt']).toBeUndefined();
+    const fd = req.request.body as FormData;
+    expect(fd.get('imageUrl')).toBeNull();
+    expect(fd.get('imageAlt')).toBeNull();
     req.flush({ id: 'x', images: [] });
 
+    httpMock.verify();
+  });
+
+  it('adjunta hasta 6 archivos en el campo files', () => {
+    const { service, httpMock } = setup('https://api.example.com/open-requests');
+    const f1 = new File(['a'], 'a.png', { type: 'image/png' });
+    const f2 = new File(['b'], 'b.png', { type: 'image/png' });
+
+    service.createOpenRequest({ ...baseInput, imageFiles: [f1, f2] }).subscribe();
+
+    const req = httpMock.expectOne('https://api.example.com/open-requests');
+    const fd = req.request.body as FormData;
+    expect(fd.getAll('files')).toHaveLength(2);
+
+    req.flush({ id: 'x', images: [] });
     httpMock.verify();
   });
 
@@ -127,6 +136,40 @@ describe('OpenRequestsService.createOpenRequest', () => {
 
     httpMock.expectNone(() => true);
     expect(captured).toBe('createOpenRequest no está disponible en modo mock');
+
+    httpMock.verify();
+  });
+});
+
+describe('OpenRequestsService.patchOpenRequest', () => {
+  function setup(apiUrl: string): { service: OpenRequestsService; httpMock: HttpTestingController } {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: OPEN_REQUESTS_API_URL, useValue: apiUrl },
+        OpenRequestsService,
+      ],
+    });
+
+    return {
+      service: TestBed.inject(OpenRequestsService),
+      httpMock: TestBed.inject(HttpTestingController),
+    };
+  }
+
+  it('PATCH envía multipart solo con campos definidos', () => {
+    const { service, httpMock } = setup('https://api.example.com/open-requests');
+
+    service.patchOpenRequest('uuid-1', { title: 'Nuevo título' }).subscribe();
+
+    const req = httpMock.expectOne('https://api.example.com/open-requests/uuid-1');
+    expect(req.request.method).toBe('PATCH');
+    const fd = req.request.body as FormData;
+    expect(fd.get('title')).toBe('Nuevo título');
+    expect(fd.get('excerpt')).toBeNull();
+
+    req.flush({ id: 'uuid-1', title: 'Nuevo título', images: [] });
 
     httpMock.verify();
   });

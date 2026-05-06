@@ -66,5 +66,30 @@ export interface CreateOpenRequestInput {
   readonly contactEmail: string;
   readonly imageUrl?: string;
   readonly imageAlt?: string;
+  /** Hasta 6 imágenes locales; se envían como partes `files` en multipart. */
+  readonly imageFiles?: readonly File[];
+  /** JSON de `ImageDto[]` si se envían URLs en payload en lugar de `files`. */
+  readonly imagesJson?: string;
+  readonly publishedAtLabel?: string;
+}
+
+/**
+ * Campos opcionales para `PATCH /open-requests/:id` (solo se serializan las propiedades definidas).
+ * La pantalla MVP de edición aún no existe; el método de servicio queda para integración futura.
+ */
+export interface PatchOpenRequestInput {
+  readonly title?: string;
+  readonly excerpt?: string;
+  readonly description?: string;
+  readonly tags?: readonly string[];
+  readonly locationLabel?: string;
+  readonly budgetLabel?: string;
+  readonly contactPhone?: string;
+  readonly contactEmail?: string;
+  readonly imageUrl?: string;
+  readonly imageAlt?: string;
+  readonly imageFiles?: readonly File[];
+  readonly imagesJson?: string;
+  readonly publishedAtLabel?: string;
 }
 
