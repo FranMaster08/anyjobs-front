@@ -82,6 +82,7 @@ const validInput: CreateOpenRequestInput = {
   budgetLabel: '€60',
   contactPhone: '+34600111222',
   contactEmail: 'cliente@example.com',
+  imageFiles: [new File(['demo'], 'demo.png', { type: 'image/png' })],
 };
 
 const validDetail: OpenRequestDetail = {
@@ -104,8 +105,7 @@ function fillForm(component: OpenRequestCreate, partial: Partial<CreateOpenReque
     budgetLabel: validInput.budgetLabel,
     contactPhone: validInput.contactPhone,
     contactEmail: validInput.contactEmail,
-    imageUrl: '',
-    imageAlt: '',
+    imageFiles: validInput.imageFiles,
     ...partial,
   });
 }
@@ -238,6 +238,78 @@ describe('OpenRequestCreate', () => {
     (component as any).submit();
     expect(captured).not.toBeNull();
     expect(captured!.tags).toEqual(['a', 'b']);
+  });
+
+  it('rechaza submit cuando no hay imágenes seleccionadas', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    let postCalls = 0;
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      {
+        createOpenRequest: () => {
+          postCalls += 1;
+          return of(validDetail);
+        },
+      },
+    );
+    fillForm(component, { imageFiles: [] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).submit();
+    expect(postCalls).toBe(0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((component as any).form.controls.imageFiles.errors).toMatchObject({ minImages: true });
+  });
+
+  it('incluye archivos seleccionados en el input enviado al servicio', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    let captured: CreateOpenRequestInput | null = null;
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      {
+        createOpenRequest: (input: CreateOpenRequestInput) => {
+          captured = input;
+          return of(validDetail);
+        },
+      },
+    );
+    const f1 = new File(['1'], 'one.png', { type: 'image/png' });
+    const f2 = new File(['2'], 'two.png', { type: 'image/png' });
+    fillForm(component, { imageFiles: [f1, f2] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).submit();
+    expect(captured?.imageFiles.map((f) => f.name)).toEqual(['one.png', 'two.png']);
+  });
+
+  it('acumula archivos entre múltiples selecciones en Choose Files', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      { createOpenRequest: () => of(validDetail) },
+    );
+
+    const first = new File(['1'], 'first.png', { type: 'image/png' });
+    const second = new File(['2'], 'second.png', { type: 'image/png' });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).onFilesSelected({ target: { files: [first], value: 'x' } } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).onFilesSelected({ target: { files: [second], value: 'y' } } as any);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const files = (component as any).form.controls.imageFiles.value as readonly File[];
+    expect(files.map((f) => f.name)).toEqual(['first.png', 'second.png']);
   });
 
   it('navega a /solicitudes/<id> al cerrar el modal de éxito', async () => {

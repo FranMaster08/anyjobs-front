@@ -298,23 +298,20 @@ function missingDetail(id: string): OpenRequestDetail {
   };
 }
 
-function buildCreateBody(input: CreateOpenRequestInput): Record<string, unknown> {
-  const body: Record<string, unknown> = {
-    title: input.title.trim(),
-    excerpt: input.excerpt.trim(),
-    description: input.description.trim(),
-    tags: [...input.tags],
-    locationLabel: input.locationLabel.trim(),
-    budgetLabel: input.budgetLabel.trim(),
-    contactPhone: input.contactPhone.trim(),
-    contactEmail: input.contactEmail.trim(),
-  };
+function buildCreateBody(input: CreateOpenRequestInput): FormData {
+  const body = new FormData();
+  body.append('title', input.title.trim());
+  body.append('excerpt', input.excerpt.trim());
+  body.append('description', input.description.trim());
+  body.append('tags', JSON.stringify([...input.tags]));
+  body.append('locationLabel', input.locationLabel.trim());
+  body.append('budgetLabel', input.budgetLabel.trim());
+  body.append('contactPhone', input.contactPhone.trim());
+  body.append('contactEmail', input.contactEmail.trim());
 
-  const imageUrl = input.imageUrl?.trim() ?? '';
-  if (imageUrl.length > 0) body['imageUrl'] = imageUrl;
-
-  const imageAlt = input.imageAlt?.trim() ?? '';
-  if (imageAlt.length > 0) body['imageAlt'] = imageAlt;
+  for (const file of input.imageFiles) {
+    body.append('files', file);
+  }
 
   return body;
 }
