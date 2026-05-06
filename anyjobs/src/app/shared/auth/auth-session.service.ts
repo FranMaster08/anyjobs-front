@@ -13,12 +13,13 @@ function safeRead(key: string): string | null {
   }
 }
 
-function safeWrite(key: string, value: string): void {
+function safeWrite(key: string, value: string): boolean {
   try {
-    if (typeof localStorage === 'undefined') return;
+    if (typeof localStorage === 'undefined') return false;
     localStorage.setItem(key, value);
+    return true;
   } catch {
-    // ignore
+    return false;
   }
 }
 
@@ -59,6 +60,7 @@ export class AuthSessionService {
   });
 
   setSession(next: AuthSession): void {
+    // Estado en memoria primero para UI; persistencia después (best-effort, sin logs sensibles).
     this.session.set(next);
     safeWrite(TOKEN_KEY, next.token);
     safeWrite(USER_KEY, JSON.stringify(next.user));

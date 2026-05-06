@@ -129,8 +129,17 @@
       <button type="button" class="btn btn--secondary" (click)="closeLogin()">
         {{ t('auth.cancel') }}
       </button>
-      <button type="submit" class="btn" [disabled]="loginForm.invalid || loginBusy()">
-        {{ t('auth.login') }}
+      <button
+        type="submit"
+        class="btn"
+        [class.btn--loginBusy]="loginBusy()"
+        [disabled]="loginForm.invalid || loginBusy()"
+        [attr.aria-busy]="loginBusy() ? 'true' : null"
+      >
+        @if (loginBusy()) {
+          <span class="loginSubmitSpinner" aria-hidden="true"></span>
+        }
+        {{ loginBusy() ? t('auth.loginSubmitting') : t('auth.login') }}
       </button>
     </footer>
 

@@ -18,6 +18,13 @@ const DICTIONARIES: Record<AppLang, Dictionary> = {
 
     // Auth
     'auth.login': 'Iniciar sesión',
+    'auth.loginSubmitting': 'Iniciando sesión…',
+    'auth.loginFailed':
+      'Las credenciales ingresadas no son válidas o no fue posible iniciar sesión.',
+    'auth.loginNetworkError':
+      'No hay conexión o el servidor no respondió. Inténtalo de nuevo.',
+    'auth.loginUnavailable':
+      'No fue posible iniciar sesión en este momento. Inténtalo más tarde.',
     'auth.logout': 'Logout',
     'auth.myProfile': 'Mi perfil',
     'auth.email': 'Email',
@@ -140,6 +147,11 @@ const DICTIONARIES: Record<AppLang, Dictionary> = {
 
     // Auth
     'auth.login': 'Sign in',
+    'auth.loginSubmitting': 'Signing in…',
+    'auth.loginFailed':
+      'The credentials entered are not valid or sign-in was not possible.',
+    'auth.loginNetworkError': 'No connection or the server did not respond. Please try again.',
+    'auth.loginUnavailable': 'Sign-in is not possible right now. Please try again later.',
     'auth.logout': 'Logout',
     'auth.myProfile': 'My profile',
     'auth.email': 'Email',

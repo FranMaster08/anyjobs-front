@@ -1,7 +1,8 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { Shell } from './shell';
@@ -10,6 +11,16 @@ import { AuthApi } from '../../shared/api/auth.api';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
 import { AuthSession } from '../../shared/auth/auth.models';
 import { LoginResponse } from '../../shared/api/auth.models';
+
+type ShellLoginTestView = {
+  openLogin(): void;
+  submitLogin(): void;
+  isLoginOpen(): boolean;
+  loginError(): string | null;
+  loginForm: {
+    setValue(value: { email: string; password: string }): void;
+  };
+};
 
 describe('Shell', () => {
   let component: Shell;
@@ -82,14 +93,7 @@ describe('Shell', () => {
     };
     loginSpy.mockReturnValue(of(response));
 
-    const shell = component as unknown as {
-      openLogin(): void;
-      submitLogin(): void;
-      isLoginOpen(): boolean;
-      loginForm: {
-        setValue(value: { email: string; password: string }): void;
-      };
-    };
+    const shell = component as unknown as ShellLoginTestView;
 
     shell.openLogin();
     shell.loginForm.setValue({ email: 'demo@anyjobs.test', password: '1234' });
@@ -99,5 +103,29 @@ describe('Shell', () => {
     expect(setSessionSpy).toHaveBeenCalledWith(response);
     expect(authState().isLoggedIn).toBe(true);
     expect(shell.isLoginOpen()).toBe(false);
+  });
+
+  it('shows unified safe message for HTTP login failure', async () => {
+    loginSpy.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
+    const shell = component as unknown as ShellLoginTestView;
+    shell.openLogin();
+    shell.loginForm.setValue({ email: 'a@b.co', password: '1234' });
+    shell.submitLogin();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(shell.loginError()).toBe(
+      'Las credenciales ingresadas no son válidas o no fue posible iniciar sesión.',
+    );
+  });
+
+  it('does not start a second login request while the first is in flight', () => {
+    loginSpy.mockReturnValue(NEVER);
+    const shell = component as unknown as ShellLoginTestView;
+    shell.openLogin();
+    shell.loginForm.setValue({ email: 'demo@anyjobs.test', password: '1234' });
+    shell.submitLogin();
+    shell.submitLogin();
+    fixture.detectChanges();
+    expect(loginSpy).toHaveBeenCalledTimes(1);
   });
 });

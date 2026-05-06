@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DestroyRef,
   HostListener,
@@ -10,12 +11,14 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { filter, finalize } from 'rxjs';
+import { catchError, exhaustMap, filter, EMPTY, finalize, Subject } from 'rxjs';
 
 import { I18nService } from '../../shared/i18n/i18n.service';
 import { SiteConfigService } from '../../shared/site-config/site-config.service';
 import { ModalComponent } from '../../components/modal/modal';
 import { AuthApi } from '../../shared/api/auth.api';
+import { mapLoginErrorToMessage } from '../../shared/api/auth-login-error.utils';
+import { LoginRequest } from '../../shared/api/auth.models';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
 
 @Component({
@@ -28,11 +31,13 @@ import { AuthSessionService } from '../../shared/auth/auth-session.service';
 export class Shell {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly fb = inject(FormBuilder);
   protected readonly i18n = inject(I18nService);
   protected readonly site = inject(SiteConfigService);
   private readonly authApi = inject(AuthApi);
   protected readonly auth = inject(AuthSessionService);
+  private readonly loginRequests = new Subject<LoginRequest>();
 
   protected readonly t = (key: string) => this.i18n.t(key);
   protected readonly authVm = this.auth.vm;
@@ -49,6 +54,32 @@ export class Shell {
 
   constructor() {
     this.site.load();
+
+    this.loginRequests
+      .pipe(
+        exhaustMap((creds) => {
+          this.loginBusy.set(true);
+          this.loginError.set(null);
+          return this.authApi.login(creds).pipe(
+            finalize(() => this.loginBusy.set(false)),
+            catchError((err: unknown) => {
+              const msg = mapLoginErrorToMessage(err, (key) => this.i18n.t(key));
+              this.loginError.set(msg);
+              return EMPTY;
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (res) => {
+          this.auth.setSession({ token: res.token, user: res.user });
+          this.isLoginOpen.set(false);
+          this.isAccountMenuOpen.set(false);
+          this.loginForm.reset({ email: '', password: '' });
+          this.cdr.markForCheck();
+        },
+      });
 
     // Router scroll behavior:
     // - If URL has fragment: scroll to anchor (if present)
@@ -125,29 +156,9 @@ export class Shell {
       this.loginForm.markAllAsTouched();
       return;
     }
+    if (this.loginBusy()) return;
 
-    const value = this.loginForm.getRawValue();
-    this.loginBusy.set(true);
-    this.loginError.set(null);
-
-    this.authApi
-      .login(value)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.loginBusy.set(false)),
-      )
-      .subscribe({
-        next: (res) => {
-          this.auth.setSession({ token: res.token, user: res.user });
-          this.isLoginOpen.set(false);
-          this.isAccountMenuOpen.set(false);
-          this.loginForm.reset({ email: '', password: '' });
-        },
-        error: (err: unknown) => {
-          const msg = err instanceof Error ? err.message : 'Error inesperado';
-          this.loginError.set(msg);
-        },
-      });
+    this.loginRequests.next(this.loginForm.getRawValue());
   }
 
   @HostListener('document:keydown', ['$event'])

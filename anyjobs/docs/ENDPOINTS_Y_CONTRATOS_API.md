@@ -43,9 +43,9 @@ Si eliges cross-origin + cookies, recuerda que el front tendría que enviar `wit
 
 ### Errores
 
-El front, tal cual está, solo muestra mensajes cuando el error llega como `Error`/string; para errores HTTP típicos podría terminar en “Error inesperado”.
+Para el **modal de login**, el cliente aplica mensajes seguros por código HTTP según la tabla documentada en `POST /login` (no muestra texto crudo de error del backend ahí).
 
-Para compatibilidad, se recomienda que en casos de validación el backend responda con:
+Para compatibilidad en **otras** vistas, se recomienda que en casos de validación el backend responda con:
 
 - **4xx** y body JSON simple con un mensaje:
 
@@ -226,6 +226,20 @@ Igual a `verify-email`.
 **Notas**:
 - El front guarda `token` y `user` en `localStorage`, pero hoy **no lo usa** para firmar requests HTTP.
 - Campos del usuario (salvo `id/fullName/email/roles`) son **opcionales**.
+
+### Errores esperados (`POST /login`) — comportamiento frontend
+
+Para que la UI pueda aplicar política **anti-enumeración** (mensaje único sin distinguir usuario vs contraseña), esta es la interpretación esperada por el cliente:
+
+| HTTP | Uso típico | Mensaje mostrado al usuario (resumen) |
+|------|------------|----------------------------------------|
+| **400**, **401**, **403**, **422** | Credenciales inválidas, cuenta no activa, validación de acceso | Texto unificado seguro (ver i18n `auth.loginFailed`); **no** se muestran detalles del backend ni “usuario no existe” / “contraseña incorrecta”. |
+| **0** | Red / CORS / sin respuesta | Mensaje de red genérico (`auth.loginNetworkError`). |
+| **5xx** | Fallo servidor | Mensaje genérico de indisponibilidad (`auth.loginUnavailable`). |
+
+El cuerpo JSON de error del backend (p. ej. `{ "message": "..." }`) **no** debe mostrarse tal cual en el modal de login para evitar fugas de información.
+
+**Checklist QA manual (mobile):** en **Chrome Mobile** y **Safari Mobile**, verificar login correcto, persistencia de sesión tras recarga de la SPA, tras cerrar y reabrir el navegador cuando el origen conserva `localStorage`, y cierre limpio del modal tras éxito (sin segundo intento forzado).
 
 ## Endpoints — Usuarios (`USERS_API_URL`)
 
