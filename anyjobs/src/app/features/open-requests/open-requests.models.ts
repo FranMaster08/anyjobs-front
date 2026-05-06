@@ -64,7 +64,6 @@ export interface CreateOpenRequestInput {
   readonly budgetLabel: string;
   readonly contactPhone: string;
   readonly contactEmail: string;
-  readonly imageUrl?: string;
-  readonly imageAlt?: string;
+  readonly imageFiles: readonly File[];
 }
 

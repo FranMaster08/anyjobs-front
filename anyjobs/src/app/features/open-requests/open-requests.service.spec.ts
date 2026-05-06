@@ -31,6 +31,7 @@ describe('OpenRequestsService.createOpenRequest', () => {
     budgetLabel: '€60',
     contactPhone: '+34600111222',
     contactEmail: 'cliente@example.com',
+    imageFiles: [],
   };
 
   it('envía POST al apiUrl con el body esperado y normaliza la respuesta', () => {
@@ -43,16 +44,16 @@ describe('OpenRequestsService.createOpenRequest', () => {
 
     const req = httpMock.expectOne('https://api.example.com/open-requests');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({
-      title: 'Limpieza profunda',
-      excerpt: 'Necesito limpieza',
-      description: 'Descripción suficientemente larga para validar el campo.',
-      tags: ['Limpieza'],
-      locationLabel: 'Barcelona · Eixample',
-      budgetLabel: '€60',
-      contactPhone: '+34600111222',
-      contactEmail: 'cliente@example.com',
-    });
+    const body = req.request.body as FormData;
+    expect(body instanceof FormData).toBe(true);
+    expect(body.get('title')).toBe('Limpieza profunda');
+    expect(body.get('excerpt')).toBe('Necesito limpieza');
+    expect(body.get('description')).toBe('Descripción suficientemente larga para validar el campo.');
+    expect(body.get('tags')).toBe(JSON.stringify(['Limpieza']));
+    expect(body.get('locationLabel')).toBe('Barcelona · Eixample');
+    expect(body.get('budgetLabel')).toBe('€60');
+    expect(body.get('contactPhone')).toBe('+34600111222');
+    expect(body.get('contactEmail')).toBe('cliente@example.com');
 
     req.flush({
       id: 'req-123',
@@ -71,42 +72,37 @@ describe('OpenRequestsService.createOpenRequest', () => {
     httpMock.verify();
   });
 
-  it('incluye imageUrl/imageAlt en el body solo si tienen contenido', () => {
+  it('incluye archivos de imagen en la clave files', () => {
     const { service, httpMock } = setup('https://api.example.com/open-requests');
+    const first = new File(['a'], 'a.png', { type: 'image/png' });
+    const second = new File(['b'], 'b.jpg', { type: 'image/jpeg' });
 
     service
       .createOpenRequest({
         ...baseInput,
-        imageUrl: 'https://example.com/img.jpg',
-        imageAlt: 'foto',
+        imageFiles: [first, second],
       })
       .subscribe();
 
     const req = httpMock.expectOne('https://api.example.com/open-requests');
-    expect(req.request.body).toMatchObject({
-      imageUrl: 'https://example.com/img.jpg',
-      imageAlt: 'foto',
-    });
+    const body = req.request.body as FormData;
+    const files = body.getAll('files') as File[];
+    expect(files.length).toBe(2);
+    expect(files[0]?.name).toBe('a.png');
+    expect(files[1]?.name).toBe('b.jpg');
     req.flush({ id: 'x', images: [] });
 
     httpMock.verify();
   });
 
-  it('omite imageUrl/imageAlt cuando vienen vacías', () => {
+  it('envía sin files cuando no hay imágenes seleccionadas', () => {
     const { service, httpMock } = setup('https://api.example.com/open-requests');
 
-    service
-      .createOpenRequest({
-        ...baseInput,
-        imageUrl: '   ',
-        imageAlt: '',
-      })
-      .subscribe();
+    service.createOpenRequest(baseInput).subscribe();
 
     const req = httpMock.expectOne('https://api.example.com/open-requests');
-    const body = req.request.body as Record<string, unknown>;
-    expect(body['imageUrl']).toBeUndefined();
-    expect(body['imageAlt']).toBeUndefined();
+    const body = req.request.body as FormData;
+    expect(body.getAll('files').length).toBe(0);
     req.flush({ id: 'x', images: [] });
 
     httpMock.verify();
@@ -208,3 +204,4 @@ describe('OpenRequestsService.listMyOpenRequests', () => {
     httpMock.verify();
   });
 });
+

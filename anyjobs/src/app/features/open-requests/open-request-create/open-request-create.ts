@@ -27,8 +27,9 @@ import { CreateOpenRequestInput } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
 
 const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-const HTTP_URL_PATTERN = /^https?:\/\/.+/i;
 const SUCCESS_REDIRECT_DELAY_MS = 1500;
+const MAX_IMAGE_FILES = 6;
+const MIN_IMAGE_FILES = 1;
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -65,7 +66,7 @@ export class OpenRequestCreate {
     budgetLabel: 'Presupuesto',
     contactPhone: 'Teléfono',
     contactEmail: 'Email',
-    imageUrl: 'URL de imagen',
+    imageFiles: 'Imágenes',
   };
 
   protected readonly form = this.fb.nonNullable.group({
@@ -92,13 +93,13 @@ export class OpenRequestCreate {
       Validators.required,
       Validators.email,
     ]),
-    imageUrl: this.fb.nonNullable.control('', [optionalHttpUrlValidator()]),
-    imageAlt: this.fb.nonNullable.control(''),
+    imageFiles: this.fb.nonNullable.control<readonly File[]>([], [imageFilesCountValidator()]),
   });
 
   protected readonly isSubmitDisabled = computed(() => this.state() === 'submitting');
 
   protected readonly tagsPreview = signal<readonly string[]>([]);
+  protected readonly selectedImageFiles = signal<readonly File[]>([]);
 
   constructor() {
     const user = this.authVm().user;
@@ -112,6 +113,9 @@ export class OpenRequestCreate {
     this.form.controls.tagsInput.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((raw) => this.tagsPreview.set(parseTags(raw)));
+    this.form.controls.imageFiles.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((files) => this.selectedImageFiles.set(files));
 
     // Cuando el usuario corrige el form tras un error de validación local, limpiamos el banner.
     this.form.statusChanges
@@ -152,8 +156,7 @@ export class OpenRequestCreate {
       budgetLabel: raw.budgetLabel,
       contactPhone: raw.contactPhone,
       contactEmail: raw.contactEmail,
-      ...(raw.imageUrl.trim().length > 0 ? { imageUrl: raw.imageUrl } : {}),
-      ...(raw.imageAlt.trim().length > 0 ? { imageAlt: raw.imageAlt } : {}),
+      imageFiles: raw.imageFiles,
     };
 
     this.state.set('submitting');
@@ -203,6 +206,25 @@ export class OpenRequestCreate {
     if (this.createdId) {
       void this.router.navigate(['/solicitudes', this.createdId]);
     }
+  }
+
+  protected onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const files = input?.files ? Array.from(input.files) : [];
+    const current = [...this.form.controls.imageFiles.value];
+    const dedupedCurrent = dedupeFiles(current);
+    const next = dedupeFiles([...dedupedCurrent, ...files]).slice(0, MAX_IMAGE_FILES);
+    this.form.controls.imageFiles.setValue(next);
+    this.form.controls.imageFiles.markAsTouched();
+    if (input) input.value = '';
+  }
+
+  protected removeSelectedFile(index: number): void {
+    const current = [...this.form.controls.imageFiles.value];
+    if (index < 0 || index >= current.length) return;
+    current.splice(index, 1);
+    this.form.controls.imageFiles.setValue(current);
+    this.form.controls.imageFiles.markAsTouched();
   }
 
   protected isSessionExpiredError(): boolean {
@@ -290,10 +312,23 @@ function noUuidValidator(): ValidatorFn {
   };
 }
 
-function optionalHttpUrlValidator(): ValidatorFn {
+function imageFilesCountValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    const value = typeof control.value === 'string' ? control.value.trim() : '';
-    if (value.length === 0) return null;
-    return HTTP_URL_PATTERN.test(value) ? null : { invalidUrl: true };
+    const value = Array.isArray(control.value) ? (control.value as readonly File[]) : [];
+    if (value.length < MIN_IMAGE_FILES) return { minImages: true };
+    if (value.length > MAX_IMAGE_FILES) return { maxImages: true };
+    return null;
   };
+}
+
+function dedupeFiles(files: readonly File[]): File[] {
+  const seen = new Set<string>();
+  const out: File[] = [];
+  for (const file of files) {
+    const key = `${file.name}::${file.size}::${file.lastModified}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(file);
+  }
+  return out;
 }

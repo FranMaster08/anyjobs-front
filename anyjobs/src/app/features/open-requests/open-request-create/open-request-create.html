@@ -218,41 +218,38 @@
         </fieldset>
 
         <fieldset class="section" [disabled]="state() === 'submitting'">
-          <legend class="section__legend">Imagen (opcional)</legend>
+          <legend class="section__legend">Imágenes</legend>
 
-          <div class="grid">
-            <div class="field">
-              <label class="field__label" for="imageUrl">URL de imagen</label>
-              <input
-                id="imageUrl"
-                class="field__control"
-                type="url"
-                formControlName="imageUrl"
-                placeholder="https://…"
-                autocomplete="off"
-                [attr.aria-invalid]="form.controls.imageUrl.invalid && form.controls.imageUrl.touched ? 'true' : null"
-                aria-describedby="image-url-error"
-              />
-              <p
-                id="image-url-error"
-                class="field__error"
-                *ngIf="form.controls.imageUrl.touched && form.controls.imageUrl.invalid"
-              >
-                Debe ser una URL http(s) válida.
-              </p>
-            </div>
+          <div class="field">
+            <label class="field__label" for="imageFiles">Subir imágenes</label>
+            <input
+              id="imageFiles"
+              class="field__control"
+              type="file"
+              accept="image/*"
+              multiple
+              (change)="onFilesSelected($event)"
+              [attr.aria-invalid]="form.controls.imageFiles.invalid && form.controls.imageFiles.touched ? 'true' : null"
+              aria-describedby="image-files-hint image-files-error"
+            />
+            <p id="image-files-hint" class="field__hint">Adjunta entre 1 y 6 imágenes.</p>
+            <p
+              id="image-files-error"
+              class="field__error"
+              *ngIf="form.controls.imageFiles.touched && form.controls.imageFiles.invalid"
+            >
+              <ng-container *ngIf="form.controls.imageFiles.errors?.['minImages']">Debes adjuntar al menos 1 imagen.</ng-container>
+              <ng-container *ngIf="form.controls.imageFiles.errors?.['maxImages']">Puedes adjuntar máximo 6 imágenes.</ng-container>
+            </p>
 
-            <div class="field">
-              <label class="field__label" for="imageAlt">Texto alternativo</label>
-              <input
-                id="imageAlt"
-                class="field__control"
-                type="text"
-                formControlName="imageAlt"
-                placeholder="Descripción breve para accesibilidad"
-                autocomplete="off"
-              />
-            </div>
+            <ul class="filesPreview" *ngIf="selectedImageFiles().length > 0" aria-label="Imágenes seleccionadas">
+              <li class="filesPreview__item" *ngFor="let file of selectedImageFiles(); let i = index">
+                <span class="filesPreview__name">{{ file.name }}</span>
+                <button type="button" class="btn btn--secondary filesPreview__remove" (click)="removeSelectedFile(i)">
+                  Quitar
+                </button>
+              </li>
+            </ul>
           </div>
         </fieldset>
 
