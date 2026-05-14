@@ -603,6 +603,129 @@
     }
   }
 
+  /* Móvil muy estrecho: desde ~300px de ancho (hasta ~360px) — legibilidad y targets táctiles. */
+  @media (max-width: 360px) {
+    padding: 12px max(12px, env(safe-area-inset-left, 0px)) 20px
+      max(12px, env(safe-area-inset-right, 0px));
+
+    .container {
+      padding: 0;
+    }
+
+    .header {
+      padding: 14px 12px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      border-radius: 14px;
+      gap: 6px;
+      padding: 6px;
+    }
+
+    .tab {
+      width: 100%;
+      justify-content: space-between;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .item {
+      padding: 12px;
+    }
+
+    .itemHeader {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .chips {
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .chip {
+      white-space: normal;
+      text-align: left;
+      max-width: 100%;
+    }
+
+    .metaPills {
+      gap: 6px;
+    }
+
+    .pill {
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .itemActions {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-width: none;
+    }
+
+    .itemActions .btn {
+      min-height: 44px;
+      font-size: 13px;
+      padding: 10px 12px;
+    }
+
+    .proposalHeaderActions .btn {
+      min-height: 44px;
+    }
+
+    .proposalRating {
+      white-space: normal;
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+
+    .state {
+      padding: 14px 12px;
+    }
+
+    .state__title {
+      font-size: 15px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .state__hint {
+      font-size: 13px;
+    }
+
+    .actions {
+      flex-direction: column;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+
+    .actions .btn {
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 44px;
+      justify-content: center;
+    }
+  }
+
   @keyframes shimmer {
     0% {
       background-position: 100% 0;
