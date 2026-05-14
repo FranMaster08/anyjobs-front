@@ -44,6 +44,13 @@
             </div>
 
             <div class="headerActions">
+              <a
+                *ngIf="d.ownerUserId && !isRequestOwner()"
+                class="btn btn--secondary btn--sm"
+                [routerLink]="['/usuarios', d.ownerUserId]"
+              >
+                Ver perfil
+              </a>
               <button
                 type="button"
                 class="btn btn--sm"

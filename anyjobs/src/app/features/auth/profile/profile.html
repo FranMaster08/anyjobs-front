@@ -1,133 +1,238 @@
 <section class="page profilePage">
-  @if (!vm().isLoggedIn) {
+  @if (!routeUserId() && !vm().isLoggedIn) {
     <section class="profileCard profileCard--empty" role="status">
       <h1 class="profileTitle">No hay sesión activa</h1>
       <p class="profileHint">Inicia sesión desde el header para ver tu perfil.</p>
       <a class="btn" routerLink="/home">Ir a Home</a>
     </section>
-  } @else {
+  } @else if (viewState() === 'loading') {
+    <div class="profileCard profileCard--empty" aria-busy="true">
+      <div class="skeletonTitle"></div>
+      <div class="skeletonLine"></div>
+      <div class="skeletonLine"></div>
+    </div>
+  } @else if (viewState() === 'error') {
+    <section class="profileCard profileCard--empty state state--error" role="status">
+      <h1 class="profileTitle">Algo salió mal</h1>
+      <p class="profileHint">{{ loadError() }}</p>
+      <button type="button" class="btn" (click)="reload()">Reintentar</button>
+    </section>
+  } @else if (viewState() === 'ready') {
+    @if (profileBanner()) {
+      <div class="profileBanner" role="status">{{ profileBanner() }}</div>
+    }
     <section class="profileHero">
       <div class="profileHeroTop">
         <div class="profileAvatar" aria-hidden="true">{{ initials() }}</div>
         <div class="profileHeroText">
-          <h1 class="profileTitle">{{ vm().user?.fullName }}</h1>
-          <p class="profileHint">{{ vm().user?.email }}</p>
-
-          <div class="profileBadges" aria-label="Estado de cuenta">
-            <span class="profileBadge profileBadge--ok">Status: {{ vm().user?.status ?? '—' }}</span>
-            <span class="profileBadge" [class.profileBadge--ok]="vm().user?.emailVerified">
-              Email: {{ vm().user?.emailVerified ? 'sí' : 'no' }}
-            </span>
-            <span class="profileBadge" [class.profileBadge--ok]="vm().user?.phoneVerified">
-              Tel: {{ vm().user?.phoneVerified ? 'sí' : 'no' }}
-            </span>
-            <span class="profileBadge" *ngIf="vm().user?.roles?.length">
-              Roles: {{ vm().user?.roles?.join(', ') }}
-            </span>
-          </div>
+          <p class="profileKicker">{{ visibilityMode() === 'private' ? 'Tu perfil' : 'Perfil público' }}</p>
+          <h1 class="profileTitle">{{ displayName() }}</h1>
+          @if (rolesLine()) {
+            <p class="profileRoles">{{ rolesLine() }}</p>
+          }
+          @if (headlineText()) {
+            <p class="profileHeadline">{{ headlineText() }}</p>
+          }
+          @if (locationLine()) {
+            <p class="profileHint profileLocation">{{ locationLine() }}</p>
+          } @else {
+            <p class="profileHint profileLocation profileLocation--muted">Ubicación no indicada</p>
+          }
+          @if (bioText()) {
+            <p class="profileBio">{{ bioText() }}</p>
+          } @else {
+            <p class="profileBio profileBio--placeholder">Sin descripción todavía.</p>
+          }
         </div>
       </div>
 
+      @if (metrics()) {
+        <div class="profileMetrics" aria-label="Métricas de actividad">
+          <div class="profileMetric">
+            <span class="profileMetricValue">{{ metrics()!.openRequestsPublished }}</span>
+            <span class="profileMetricLabel">Solicitudes publicadas</span>
+          </div>
+          <div class="profileMetric">
+            <span class="profileMetricValue">{{ metrics()!.proposalsSent }}</span>
+            <span class="profileMetricLabel">Propuestas enviadas</span>
+          </div>
+        </div>
+      }
+
       <footer class="profileActions">
-        <a class="btn btn--secondary" routerLink="/solicitudes">Ver solicitudes</a>
-        <button type="button" class="btn" (click)="logout()">{{ t('auth.logout') }}</button>
+        @if (visibilityMode() === 'private') {
+          <a class="btn btn--secondary" routerLink="/mis-solicitudes">Mis solicitudes</a>
+        } @else {
+          <a class="btn btn--secondary" routerLink="/solicitudes">Ver solicitudes abiertas</a>
+          @if (!vm().isLoggedIn) {
+            <a class="btn" routerLink="/home">Inicio</a>
+          }
+        }
       </footer>
     </section>
 
-    <section class="profileGrid">
-      <section class="profileCard">
-        <h2 class="profileSectionTitle">Cuenta</h2>
-        <div class="profileList">
-          <p class="profileRow"><span class="profileLabel">ID</span> <span class="profileValue">{{ vm().user?.id }}</span></p>
-          <p class="profileRow">
-            <span class="profileLabel">Token</span> <span class="profileValue">{{ tokenPreview() }}</span>
-          </p>
-          <p class="profileRow">
-            <span class="profileLabel">Creado</span> <span class="profileValue">{{ vm().user?.createdAt ?? '—' }}</span>
-          </p>
-        </div>
-      </section>
+    <div class="tabs profileTabs" role="tablist" aria-label="Secciones del perfil">
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.tab--active]="activeTab() === 'info'"
+        [attr.aria-selected]="activeTab() === 'info'"
+        (click)="setTab('info')"
+      >
+        Información
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.tab--active]="activeTab() === 'activity'"
+        [attr.aria-selected]="activeTab() === 'activity'"
+        (click)="setTab('activity')"
+      >
+        Actividad
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.tab--active]="activeTab() === 'multimedia'"
+        [attr.aria-selected]="activeTab() === 'multimedia'"
+        (click)="setTab('multimedia')"
+      >
+        Multimedia
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.tab--active]="activeTab() === 'score'"
+        [attr.aria-selected]="activeTab() === 'score'"
+        (click)="setTab('score')"
+      >
+        Puntaje
+      </button>
+    </div>
 
-      <section class="profileCard">
-        <h2 class="profileSectionTitle">Contacto</h2>
-        <div class="profileList">
-          <p class="profileRow">
-            <span class="profileLabel">Email</span> <span class="profileValue">{{ vm().user?.email }}</span>
-          </p>
-          <p class="profileRow">
-            <span class="profileLabel">Teléfono</span> <span class="profileValue">{{ vm().user?.phoneNumber ?? '—' }}</span>
-          </p>
-        </div>
+    @if (activeTab() === 'info') {
+      <section class="profileGrid">
+        <section class="profileCard">
+          <h2 class="profileSectionTitle">Resumen</h2>
+          <div class="profileList">
+            <p class="profileRow">
+              <span class="profileLabel">Nombre</span>
+              <span class="profileValue">{{ displayName() }}</span>
+            </p>
+            @if (visibilityMode() === 'private' && privateProfile()?.email) {
+              <p class="profileRow">
+                <span class="profileLabel">Email</span>
+                <span class="profileValue">{{ privateProfile()!.email }}</span>
+              </p>
+            }
+            @if (visibilityMode() === 'private' && privateProfile()?.phoneNumber) {
+              <p class="profileRow">
+                <span class="profileLabel">Teléfono</span>
+                <span class="profileValue">{{ privateProfile()!.phoneNumber }}</span>
+              </p>
+            }
+            @if (rolesLine()) {
+              <p class="profileRow">
+                <span class="profileLabel">Roles</span>
+                <span class="profileValue">{{ rolesLine() }}</span>
+              </p>
+            }
+          </div>
+        </section>
+        <section class="profileCard">
+          <h2 class="profileSectionTitle">Ubicación</h2>
+          <div class="profileList">
+            @if (locationLine()) {
+              <p class="profileRow">
+                <span class="profileLabel">Zona</span>
+                <span class="profileValue">{{ locationLine() }}</span>
+              </p>
+            } @else {
+              <p class="profileHint">Sin datos de ubicación.</p>
+            }
+          </div>
+        </section>
+        @if (visibilityMode() === 'private' && privateProfile()) {
+          <section class="profileCard">
+            <h2 class="profileSectionTitle">Estado</h2>
+            <div class="profileBadges" aria-label="Estado de cuenta">
+              <span class="profileBadge profileBadge--ok">Status: {{ privateProfile()!.status ?? '—' }}</span>
+              <span class="profileBadge" [class.profileBadge--ok]="privateProfile()!.emailVerified">
+                Email: {{ privateProfile()!.emailVerified ? 'sí' : 'no' }}
+              </span>
+              <span class="profileBadge" [class.profileBadge--ok]="privateProfile()!.phoneVerified">
+                Tel: {{ privateProfile()!.phoneVerified ? 'sí' : 'no' }}
+              </span>
+            </div>
+          </section>
+          <section class="profileCard">
+            <h2 class="profileSectionTitle">Identidad</h2>
+            <div class="profileList">
+              <p class="profileRow">
+                <span class="profileLabel">Documento</span>
+                <span class="profileValue">
+                  {{ privateProfile()!.documentType ?? '—' }} {{ privateProfile()!.documentNumber ?? '' }}
+                </span>
+              </p>
+              <p class="profileRow">
+                <span class="profileLabel">Nacimiento</span>
+                <span class="profileValue">{{ privateProfile()!.birthDate ?? '—' }}</span>
+              </p>
+              <p class="profileRow">
+                <span class="profileLabel">Género</span>
+                <span class="profileValue">{{ privateProfile()!.gender ?? '—' }}</span>
+              </p>
+              <p class="profileRow">
+                <span class="profileLabel">Nacionalidad</span>
+                <span class="profileValue">{{ privateProfile()!.nationality ?? '—' }}</span>
+              </p>
+            </div>
+          </section>
+        }
       </section>
+    }
 
-      <section class="profileCard">
-        <h2 class="profileSectionTitle">Ubicación</h2>
-        <div class="profileList">
-          <p class="profileRow">
-            <span class="profileLabel">País</span> <span class="profileValue">{{ vm().user?.countryCode ?? '—' }}</span>
+    @if (activeTab() === 'activity') {
+      <section class="profileCard profileCard--wide">
+        <h2 class="profileSectionTitle">Actividad</h2>
+        @if (metrics()) {
+          <p class="profileHint">
+            Publicaste <strong>{{ metrics()!.openRequestsPublished }}</strong> solicitudes y enviaste
+            <strong>{{ metrics()!.proposalsSent }}</strong> propuestas.
           </p>
-          <p class="profileRow">
-            <span class="profileLabel">Ciudad</span> <span class="profileValue">{{ vm().user?.city ?? '—' }}</span>
+        } @else if (visibilityMode() === 'private') {
+          <p class="profileHint">
+            Las métricas en vivo no están disponibles (sin respuesta del servidor o sesión solo local).
           </p>
-          <p class="profileRow">
-            <span class="profileLabel">Zona</span> <span class="profileValue">{{ vm().user?.area ?? '—' }}</span>
-          </p>
-          <p class="profileRow" *ngIf="vm().user?.coverageRadiusKm !== undefined">
-            <span class="profileLabel">Radio (km)</span>
-            <span class="profileValue">{{ vm().user?.coverageRadiusKm }}</span>
-          </p>
-        </div>
+        }
+        @if (visibilityMode() === 'private') {
+          <p class="profileHint">Para listados completos usa Mis solicitudes.</p>
+          <div class="profileActions">
+            <a class="btn" routerLink="/mis-solicitudes">Ir a Mis solicitudes</a>
+          </div>
+        } @else {
+          <p class="profileHint">El detalle de actividad pública avanzará en próximas versiones.</p>
+        }
       </section>
+    }
 
-      <section class="profileCard">
-        <h2 class="profileSectionTitle">Identidad</h2>
-        <div class="profileList">
-          <p class="profileRow">
-            <span class="profileLabel">Documento</span>
-            <span class="profileValue">
-              {{ vm().user?.documentType ?? '—' }} {{ vm().user?.documentNumber ?? '' }}
-            </span>
-          </p>
-          <p class="profileRow">
-            <span class="profileLabel">Nacimiento</span> <span class="profileValue">{{ vm().user?.birthDate ?? '—' }}</span>
-          </p>
-          <p class="profileRow">
-            <span class="profileLabel">Género</span> <span class="profileValue">{{ vm().user?.gender ?? '—' }}</span>
-          </p>
-          <p class="profileRow">
-            <span class="profileLabel">Nacionalidad</span> <span class="profileValue">{{ vm().user?.nationality ?? '—' }}</span>
-          </p>
-        </div>
+    @if (activeTab() === 'multimedia') {
+      <section class="profileCard profileCard--wide profileCard--muted" role="status">
+        <h2 class="profileSectionTitle">Multimedia</h2>
+        <p class="profileHint">Próximamente podrás ver reels y videos en el perfil. Aún no hay contenido multimedia.</p>
       </section>
+    }
 
-      <section class="profileCard" *ngIf="vm().user?.preferredPaymentMethod">
-        <h2 class="profileSectionTitle">Preferencias</h2>
-        <div class="profileList">
-          <p class="profileRow">
-            <span class="profileLabel">Pago</span>
-            <span class="profileValue">{{ vm().user?.preferredPaymentMethod }}</span>
-          </p>
-        </div>
+    @if (activeTab() === 'score') {
+      <section class="profileCard profileCard--wide profileCard--muted" role="status">
+        <h2 class="profileSectionTitle">Puntaje</h2>
+        <p class="profileHint">Esta sección se implementará más adelante.</p>
       </section>
+    }
 
-      <section class="profileCard" *ngIf="vm().user?.workerCategories?.length">
-        <h2 class="profileSectionTitle">Worker</h2>
-        <div class="profileList">
-          <p class="profileRow">
-            <span class="profileLabel">Categorías</span>
-            <span class="profileValue">{{ vm().user?.workerCategories?.join(', ') }}</span>
-          </p>
-          <p class="profileRow" *ngIf="vm().user?.workerHeadline">
-            <span class="profileLabel">Headline</span>
-            <span class="profileValue">{{ vm().user?.workerHeadline }}</span>
-          </p>
-          <p class="profileRow" *ngIf="vm().user?.workerBio">
-            <span class="profileLabel">Bio</span>
-            <span class="profileValue">{{ vm().user?.workerBio }}</span>
-          </p>
-        </div>
-      </section>
-    </section>
   }
 </section>
-

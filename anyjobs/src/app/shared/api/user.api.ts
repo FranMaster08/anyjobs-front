@@ -9,6 +9,7 @@ import {
   UpdatePersonalInfoRequest,
   UpdateWorkerProfileRequest,
 } from './user.models';
+import type { UserPrivateProfileDto, UserPublicProfileDto } from './user-profile.models';
 
 export const USERS_API_URL = new InjectionToken<string>('USERS_API_URL', {
   providedIn: 'root',
@@ -42,6 +43,36 @@ export class UserApi {
   updatePersonalInfo(req: UpdatePersonalInfoRequest): Observable<void> {
     if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
     return this.http.patch<void>(`${this.apiUrl}/me/personal-info`, req);
+  }
+
+  getMyProfile(): Observable<UserPrivateProfileDto> {
+    if (this.apiUrl.includes('/mock/')) {
+      const mock: UserPrivateProfileDto = {
+        userId: 'mock-user',
+        fullName: 'Usuario demo',
+        email: 'demo@example.com',
+        roles: ['WORKER'],
+        visibility: 'private',
+        metrics: { openRequestsPublished: 0, proposalsSent: 0 },
+      };
+      return of(mock).pipe(delay(200));
+    }
+    return this.http.get<UserPrivateProfileDto>(`${this.apiUrl}/me/profile`);
+  }
+
+  getPublicProfile(userId: string): Observable<UserPublicProfileDto> {
+    const id = encodeURIComponent(userId.trim());
+    if (this.apiUrl.includes('/mock/')) {
+      const mock: UserPublicProfileDto = {
+        userId,
+        fullName: 'Usuario público',
+        roles: ['CLIENT'],
+        visibility: 'public',
+        metrics: { openRequestsPublished: 0, proposalsSent: 0 },
+      };
+      return of(mock).pipe(delay(200));
+    }
+    return this.http.get<UserPublicProfileDto>(`${this.apiUrl}/profile/${id}`);
   }
 }
 

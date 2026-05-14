@@ -20,6 +20,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/auth/profile/profile').then((m) => m.Profile),
       },
       {
+        path: 'usuarios/:userId',
+        loadComponent: () => import('./features/auth/profile/profile').then((m) => m.Profile),
+      },
+      {
         path: 'mis-solicitudes',
         loadComponent: () =>
           import('./features/my-requests/my-requests-dashboard/my-requests-dashboard').then(
