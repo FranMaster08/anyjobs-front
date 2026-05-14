@@ -1,0 +1,19 @@
+<a
+  class="userIdentityLink"
+  [routerLink]="['/usuarios', userId()]"
+  [attr.aria-label]="ariaLabelText()"
+>
+  @if (avatarUrl(); as src) {
+    <img class="userIdentityLink__img" [src]="src" alt="" />
+  } @else {
+    <span class="userIdentityLink__initial" aria-hidden="true">{{ initialLetter() }}</span>
+  }
+  <span class="userIdentityLink__text">
+    <span class="userIdentityLink__name">{{ displayName() }}</span>
+    @if (subtitle(); as sub) {
+      @if (sub.length > 0) {
+        <span class="userIdentityLink__sub">{{ sub }}</span>
+      }
+    }
+  </span>
+</a>

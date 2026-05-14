@@ -15,7 +15,7 @@
         </a>
       }
       @if (authVm().isLoggedIn) {
-        <a class="mainNavLink" routerLink="/perfil">{{ t('auth.myProfile') }}</a>
+        <a class="mainNavLink" [routerLink]="profileRouterLink()">{{ t('auth.myProfile') }}</a>
       }
     </nav>
 
@@ -68,7 +68,7 @@
               <a
                 class="accountMenuItem"
                 role="menuitem"
-                routerLink="/perfil"
+                [routerLink]="profileRouterLink()"
                 (click)="closeAccountMenu()"
               >
                 {{ t('auth.myProfile') }}
@@ -209,7 +209,7 @@
                 <a
                   class="accountMenuItem"
                   role="menuitem"
-                  routerLink="/perfil"
+                  [routerLink]="profileRouterLink()"
                   (click)="closeAccountMenu(); closeMobileNav()"
                 >
                   {{ t('auth.myProfile') }}

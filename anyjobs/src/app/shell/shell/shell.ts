@@ -51,6 +51,12 @@ export class Shell {
   protected readonly t = (key: string) => this.i18n.t(key);
   protected readonly authVm = this.auth.vm;
 
+  protected profileRouterLink(): readonly string[] {
+    const id = this.authVm().user?.id?.trim();
+    if (id) return ['/usuarios', id];
+    return ['/perfil'];
+  }
+
   protected readonly isLoginOpen = signal(false);
   protected readonly loginBusy = signal(false);
   protected readonly loginError = signal<string | null>(null);

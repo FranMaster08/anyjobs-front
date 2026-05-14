@@ -138,28 +138,29 @@
                       <div class="proposalComment" *ngFor="let p of proposalsForRequest(it.id)">
                         <header class="proposalHeader" aria-label="Autor de la propuesta">
                           <div class="proposalHeaderLeft">
-                            <div class="proposalAvatar" aria-hidden="true">
-                              {{ (p.author?.name ?? 'U').slice(0, 1) }}
-                            </div>
-                            <div class="proposalHeaderBody">
-                              <p class="proposalAuthor">{{ p.author?.name ?? 'Postulante' }}</p>
-                              <p class="proposalAuthorSub" *ngIf="p.author?.subtitle">{{ p.author?.subtitle }}</p>
-
-                              <div class="proposalRating" *ngIf="p.author?.rating !== undefined">
-                                <span class="proposalStar" aria-hidden="true">★</span>
-                                <span class="proposalRatingValue">{{ p.author?.rating | number: '1.1-2' }}</span>
-                                <span class="proposalRatingSep" *ngIf="p.author?.reviewsCount !== undefined" aria-hidden="true">·</span>
-                                <span class="proposalRatingCount" *ngIf="p.author?.reviewsCount !== undefined">
-                                  {{ p.author?.reviewsCount }} reseñas
-                                </span>
-                              </div>
+                            <app-user-identity-link
+                              [userId]="p.userId"
+                              [displayName]="p.author?.name ?? 'Postulante'"
+                              [subtitle]="p.author?.subtitle"
+                            />
+                            <div class="proposalRating" *ngIf="p.author?.rating !== undefined">
+                              <span class="proposalStar" aria-hidden="true">★</span>
+                              <span class="proposalRatingValue">{{ p.author?.rating | number: '1.1-2' }}</span>
+                              <span class="proposalRatingSep" *ngIf="p.author?.reviewsCount !== undefined" aria-hidden="true">·</span>
+                              <span class="proposalRatingCount" *ngIf="p.author?.reviewsCount !== undefined">
+                                {{ p.author?.reviewsCount }} reseñas
+                              </span>
                             </div>
                           </div>
 
                           <div class="proposalHeaderActions" role="group" aria-label="Acciones de propuesta">
-                            <button type="button" class="btn btn--secondary btn--sm" (click)="openProfileWip(p)">
+                            <a
+                              class="btn btn--secondary btn--sm"
+                              [routerLink]="['/usuarios', p.userId]"
+                              *ngIf="p.userId.trim()"
+                            >
                               Ver perfil
-                            </button>
+                            </a>
                             <button type="button" class="btn btn--sm" (click)="openChooseWip(p)">
                               Elegir
                             </button>
@@ -274,30 +275,29 @@
                     <div class="proposalComment">
                       <header class="proposalHeader" aria-label="Autor de la propuesta">
                         <div class="proposalHeaderLeft">
-                          <div class="proposalAvatar" aria-hidden="true">
-                            {{ (it.proposal.author?.name ?? 'U').slice(0, 1) }}
-                          </div>
-                          <div class="proposalHeaderBody">
-                            <p class="proposalAuthor">{{ it.proposal.author?.name ?? 'Postulante' }}</p>
-                            <p class="proposalAuthorSub" *ngIf="it.proposal.author?.subtitle">
-                              {{ it.proposal.author?.subtitle }}
-                            </p>
-
-                            <div class="proposalRating" *ngIf="it.proposal.author?.rating !== undefined">
-                              <span class="proposalStar" aria-hidden="true">★</span>
-                              <span class="proposalRatingValue">{{ it.proposal.author?.rating | number: '1.1-2' }}</span>
-                              <span class="proposalRatingSep" *ngIf="it.proposal.author?.reviewsCount !== undefined" aria-hidden="true">·</span>
-                              <span class="proposalRatingCount" *ngIf="it.proposal.author?.reviewsCount !== undefined">
-                                {{ it.proposal.author?.reviewsCount }} reseñas
-                              </span>
-                            </div>
+                          <app-user-identity-link
+                            [userId]="it.proposal.userId"
+                            [displayName]="it.proposal.author?.name ?? 'Postulante'"
+                            [subtitle]="it.proposal.author?.subtitle"
+                          />
+                          <div class="proposalRating" *ngIf="it.proposal.author?.rating !== undefined">
+                            <span class="proposalStar" aria-hidden="true">★</span>
+                            <span class="proposalRatingValue">{{ it.proposal.author?.rating | number: '1.1-2' }}</span>
+                            <span class="proposalRatingSep" *ngIf="it.proposal.author?.reviewsCount !== undefined" aria-hidden="true">·</span>
+                            <span class="proposalRatingCount" *ngIf="it.proposal.author?.reviewsCount !== undefined">
+                              {{ it.proposal.author?.reviewsCount }} reseñas
+                            </span>
                           </div>
                         </div>
 
                         <div class="proposalHeaderActions" role="group" aria-label="Acciones de propuesta">
-                          <button type="button" class="btn btn--secondary btn--sm" (click)="openProfileWip(it.proposal)">
+                          <a
+                            class="btn btn--secondary btn--sm"
+                            [routerLink]="['/usuarios', it.proposal.userId]"
+                            *ngIf="it.proposal.userId.trim()"
+                          >
                             Ver perfil
-                          </button>
+                          </a>
                           <button type="button" class="btn btn--sm" (click)="openChooseWip(it.proposal)">
                             Elegir
                           </button>
@@ -340,16 +340,6 @@
     </ng-template>
   </div>
 </section>
-
-<app-modal [open]="isProfileWipOpen()" title="Perfil (próximamente)" size="sm" (closed)="closeProfileWip()">
-  <div class="state" role="status">
-    <p class="state__title">Estamos trabajando en “Ver perfil”.</p>
-    <p class="state__hint">
-      Muy pronto podrás abrir el perfil de <strong>{{ profileWipName() }}</strong> desde aquí.
-    </p>
-    <button type="button" class="btn" (click)="closeProfileWip()">Entendido</button>
-  </div>
-</app-modal>
 
 <app-modal [open]="isChooseWipOpen()" title="Elegir (próximamente)" size="sm" (closed)="closeChooseWip()">
   <div class="state" role="status">

@@ -568,3 +568,8 @@ Si habilitas el mapa, Leaflet carga tiles de OpenStreetMap:
 
 Esto no es parte del backend AnyJobs, pero sí es un “endpoint” externo requerido para ver el mapa con tiles.
 
+## Navegación a perfiles públicos (UI)
+
+- Cada propuesta en `GET /proposals` (ítems del listado o `listByRequest`) **debe** incluir `userId` para que el front pueda enlazar a la ruta de aplicación `/usuarios/:userId`, que a su vez consume `GET /users/profile/:userId`.
+- Si el perfil no existe, el backend responde `404` con un mensaje genérico (p. ej. “Usuario no encontrado”); el front muestra estado de error sin exponer datos internos.
+

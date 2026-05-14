@@ -87,7 +87,7 @@
 .heroMetrics {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .heroMetric {
@@ -97,10 +97,6 @@
   border-radius: 16px;
   background: rgba(17, 24, 39, 0.03);
   border: 1px solid rgba(17, 24, 39, 0.06);
-}
-
-.heroMetric--muted {
-  background: linear-gradient(135deg, rgba(14, 165, 164, 0.08), rgba(17, 24, 39, 0.04));
 }
 
 .heroMetricValue {

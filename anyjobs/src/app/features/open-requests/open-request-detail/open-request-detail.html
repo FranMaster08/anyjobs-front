@@ -115,15 +115,15 @@
                     </p>
 
                     <article class="postulanteRow" *ngFor="let p of postulantes()" role="listitem">
-                      <div class="postulanteAvatar" aria-hidden="true">{{ (p.author?.name ?? 'U').slice(0, 1) }}</div>
-                      <div class="postulanteBody">
-                        <p class="postulanteName">{{ p.author?.name ?? 'Postulante' }}</p>
-                        <p class="postulanteSub" *ngIf="p.author?.subtitle">{{ p.author?.subtitle }}</p>
-                        <p class="postulanteMeta muted">
-                          <span *ngIf="p.createdAt">Postuló el {{ p.createdAt | date: 'short' }}</span>
-                          <span *ngIf="p.status"> · {{ p.status }}</span>
-                        </p>
-                      </div>
+                      <app-user-identity-link
+                        [userId]="p.userId"
+                        [displayName]="p.author?.name ?? 'Postulante'"
+                        [subtitle]="p.author?.subtitle"
+                      />
+                      <p class="postulanteMeta muted">
+                        <span *ngIf="p.createdAt">Postuló el {{ p.createdAt | date: 'short' }}</span>
+                        <span *ngIf="p.status"> · {{ p.status }}</span>
+                      </p>
                     </article>
                   </div>
                 </ng-container>

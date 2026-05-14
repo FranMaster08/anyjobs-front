@@ -42,6 +42,15 @@ export class Profile {
   protected readonly privateProfile = signal<UserPrivateProfileDto | null>(null);
   protected readonly publicProfile = signal<UserPublicProfileDto | null>(null);
 
+  protected readonly profileErrorHeading = computed(() => {
+    const msg = this.loadError() ?? '';
+    const m = msg.toLowerCase();
+    if (m.includes('no existe') || m.includes('no encontrado')) {
+      return 'Usuario no encontrado';
+    }
+    return 'Algo salió mal';
+  });
+
   protected readonly displayName = computed(() => {
     const priv = this.privateProfile();
     const pub = this.publicProfile();
@@ -252,7 +261,9 @@ export class Profile {
         catchError((err: unknown) => {
           const msg =
             err instanceof HttpErrorResponse && err.status === 404
-              ? 'Este perfil no existe.'
+              ? (typeof err.error?.message === 'string' && err.error.message.trim().length > 0
+                  ? err.error.message.trim()
+                  : 'Este perfil no existe.')
               : err instanceof HttpErrorResponse && err.status === 0
                 ? 'Sin conexión con el servidor.'
                 : 'No pudimos cargar este perfil.';

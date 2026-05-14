@@ -7,6 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { ModalComponent } from '../../../components/modal/modal';
+import { UserIdentityLinkComponent } from '../../../shared/components/user-identity-link/user-identity-link';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
@@ -21,7 +22,7 @@ import { Proposal } from '../../../shared/proposals/proposals.models';
 @Component({
   selector: 'app-open-request-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, ModalComponent],
+  imports: [CommonModule, RouterLink, ModalComponent, UserIdentityLinkComponent],
   templateUrl: './open-request-detail.html',
   styleUrl: './open-request-detail.scss',
 })

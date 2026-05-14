@@ -13,6 +13,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
+import { UserIdentityLinkComponent } from '../../../shared/components/user-identity-link/user-identity-link';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { ProposalsService } from '../../../shared/proposals/proposals.service';
 import { Proposal } from '../../../shared/proposals/proposals.models';
@@ -43,7 +44,7 @@ function postulantesHttpMessage(err: unknown): string {
 @Component({
   selector: 'app-my-requests-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, ModalComponent],
+  imports: [CommonModule, RouterLink, ModalComponent, UserIdentityLinkComponent],
   templateUrl: './my-requests-dashboard.html',
   styleUrl: './my-requests-dashboard.scss',
 })
@@ -74,8 +75,6 @@ export class MyRequestsDashboard {
   protected readonly postulantesLoadingIds = signal<ReadonlySet<string>>(new Set());
   protected readonly proposalPostulantesError = signal<Record<string, string | undefined>>({});
 
-  protected readonly isProfileWipOpen = signal(false);
-  protected readonly profileWipName = signal<string>('este usuario');
   protected readonly isChooseWipOpen = signal(false);
   protected readonly chooseWipName = signal<string>('este usuario');
 
@@ -97,16 +96,6 @@ export class MyRequestsDashboard {
 
   protected openLogin(): void {
     this.router.navigate([], { queryParams: { login: 1 }, queryParamsHandling: 'merge' });
-  }
-
-  protected openProfileWip(proposal: Proposal): void {
-    const name = proposal.author?.name?.trim();
-    this.profileWipName.set(name && name.length > 0 ? name : 'este usuario');
-    this.isProfileWipOpen.set(true);
-  }
-
-  protected closeProfileWip(): void {
-    this.isProfileWipOpen.set(false);
   }
 
   protected openChooseWip(proposal: Proposal): void {

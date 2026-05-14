@@ -13,7 +13,7 @@
     </div>
   } @else if (viewState() === 'error') {
     <section class="profileCard profileCard--empty state state--error" role="status">
-      <h1 class="profileTitle">Algo salió mal</h1>
+      <h1 class="profileTitle">{{ profileErrorHeading() }}</h1>
       <p class="profileHint">{{ loadError() }}</p>
       <button type="button" class="btn" (click)="reload()">Reintentar</button>
     </section>
