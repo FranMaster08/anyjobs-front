@@ -1,13 +1,22 @@
 /* Alto útil = viewport menos header sticky (~56px). El pie sigue debajo al hacer scroll. */
 :host {
   --home-slider-header-offset: 56px;
+  /* Barra inferior fija en móvil (alineada al shell ≤900px); 0 en escritorio. */
+  --home-bottom-nav-height: 0px;
   --home-slider-max-width-sm: 520px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   width: 100%;
   flex: 1 1 auto;
-  min-height: calc(100dvh - var(--home-slider-header-offset));
+  min-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
+}
+
+@media (max-width: 900px) {
+  :host {
+    --home-bottom-nav-height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--home-bottom-nav-height);
+  }
 }
 
 .homeSliderPage {
@@ -15,7 +24,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: calc(100dvh - var(--home-slider-header-offset));
+  min-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
   padding: 0;
 }
 
@@ -36,8 +45,21 @@
   width: 100%;
   max-width: var(--home-slider-max-width-sm);
   margin: 0 auto;
-  height: calc(100dvh - var(--home-slider-header-offset));
-  min-height: calc(100dvh - var(--home-slider-header-offset));
+  height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
+  min-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
+}
+
+/* La librería fija cada slide a `100dvh` y el host del slider también; si el wrap es
+ * más bajo (header + barra inferior), el slide sobresale y el overlay queda con
+ * coordenadas incorrectas (p. ej. `top` negativo). Acotar al alto real del contenedor. */
+.homeSliderWrap ::ng-deep media-slider {
+  max-height: 100%;
+}
+
+.homeSliderWrap ::ng-deep media-slide {
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100%;
 }
 
 /* ngx-vertical-slider fuerza max-width: 420px desde 700px — lo anulamos para respetar el ancho del wrap. */
@@ -45,6 +67,11 @@
   .homeSliderWrap media-slider {
     max-width: none !important;
     width: 100% !important;
+  }
+
+  .homeSliderWrap ::ng-deep media-slide {
+    height: 100% !important;
+    min-height: 100% !important;
   }
 }
 

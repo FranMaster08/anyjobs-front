@@ -1,0 +1,61 @@
+<nav class="homeBottomNav" [attr.aria-label]="t('home.bottomNav.ariaLabel')">
+  <a
+    class="homeBottomNav__item"
+    [routerLink]="['/solicitudes']"
+    fragment="solicitudes"
+    [class.homeBottomNav__item--active]="solicitudesActive()"
+  >
+    <span class="homeBottomNav__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round" />
+      </svg>
+    </span>
+    <span class="homeBottomNav__label">{{ t('nav.solicitudes') }}</span>
+  </a>
+
+  @if (authVm().isLoggedIn) {
+    <a
+      class="homeBottomNav__item"
+      [routerLink]="profileLink()"
+      [class.homeBottomNav__item--active]="profileActive()"
+    >
+      <span class="homeBottomNav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </span>
+      <span class="homeBottomNav__label">{{ t('home.bottomNav.perfil') }}</span>
+    </a>
+  } @else {
+    <button
+      type="button"
+      class="homeBottomNav__item"
+      (click)="openLoginFlow()"
+      [attr.aria-label]="t('home.bottomNav.perfilOpenLogin')"
+    >
+      <span class="homeBottomNav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </span>
+      <span class="homeBottomNav__label">{{ t('home.bottomNav.perfil') }}</span>
+    </button>
+  }
+
+  <a
+    class="homeBottomNav__item"
+    [routerLink]="['/solicitudes']"
+    fragment="ubicacion"
+    [class.homeBottomNav__item--active]="mapaActive()"
+  >
+    <span class="homeBottomNav__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    </span>
+    <span class="homeBottomNav__label">{{ t('home.bottomNav.mapa') }}</span>
+  </a>
+</nav>

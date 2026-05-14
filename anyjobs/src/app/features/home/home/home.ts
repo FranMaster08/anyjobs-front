@@ -12,6 +12,8 @@ import {
 
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 
+import { HomeMobileBottomNavComponent } from '../home-mobile-bottom-nav/home-mobile-bottom-nav';
+
 /** Campaña / creatividad: viene del JSON del API; opcional en `SlideData` plano. */
 type PromoSlide = SlideData & { readonly id?: string };
 
@@ -36,7 +38,7 @@ function storageSet(key: string, value: string): void {
 
 @Component({
   selector: 'app-home',
-  imports: [MediaSliderComponent],
+  imports: [MediaSliderComponent, HomeMobileBottomNavComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

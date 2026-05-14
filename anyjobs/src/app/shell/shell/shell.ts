@@ -20,6 +20,7 @@ import { AuthApi } from '../../shared/api/auth.api';
 import { mapLoginErrorToMessage } from '../../shared/api/auth-login-error.utils';
 import { LoginRequest } from '../../shared/api/auth.models';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
+import { buildProfileRouterLink } from '../../shared/navigation/profile-router-link';
 
 /** Breakpoint alineado con `shell.scss` (cabecera compacta ≤900px). */
 export const SHELL_HEADER_COMPACT_MAX_PX = 900;
@@ -52,9 +53,7 @@ export class Shell {
   protected readonly authVm = this.auth.vm;
 
   protected profileRouterLink(): readonly string[] {
-    const id = this.authVm().user?.id?.trim();
-    if (id) return ['/usuarios', id];
-    return ['/perfil'];
+    return buildProfileRouterLink(this.authVm().user?.id);
   }
 
   protected readonly isLoginOpen = signal(false);
@@ -62,6 +61,8 @@ export class Shell {
   protected readonly loginError = signal<string | null>(null);
   protected readonly isAccountMenuOpen = signal(false);
   protected readonly isMobileNavOpen = signal(false);
+
+  private fragmentScrollHandle: ReturnType<typeof setTimeout> | null = null;
 
   /** Una sola fuente de verdad para desktop y panel móvil (mismas rutas y fragmentos). */
   protected readonly mainNavItems: readonly ShellMainNavItem[] = [
@@ -77,6 +78,7 @@ export class Shell {
   });
 
   constructor() {
+    this.destroyRef.onDestroy(() => this.clearFragmentScrollSchedule());
     this.site.load();
 
     this.loginRequests
@@ -115,6 +117,7 @@ export class Shell {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
+        this.clearFragmentScrollSchedule();
         this.isAccountMenuOpen.set(false);
         this.isMobileNavOpen.set(false);
         const urlTree = this.router.parseUrl(this.router.url);
@@ -131,15 +134,9 @@ export class Shell {
         }
 
         if (fragment) {
-          // Wait one tick so the target element can render after route navigation.
-          setTimeout(() => {
-            const el = document.getElementById(fragment);
-            if (el) {
-              el.scrollIntoView({ block: 'start', behavior: 'smooth' });
-              return;
-            }
-            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-          }, 0);
+          // Los anclas de `/solicitudes` viven dentro del *ngSwitch* de la landing y solo
+          // existen tras `success`; un solo `setTimeout(0)` corre demasiado pronto.
+          this.scheduleScrollToFragment(fragment);
           return;
         }
 
@@ -163,6 +160,45 @@ export class Shell {
       this.destroyRef.onDestroy(() => mqWide.removeEventListener('change', onWideChange));
       onWideChange();
     }
+  }
+
+  private clearFragmentScrollSchedule(): void {
+    if (this.fragmentScrollHandle !== null) {
+      clearTimeout(this.fragmentScrollHandle);
+      this.fragmentScrollHandle = null;
+    }
+  }
+
+  /**
+   * Reintenta hasta que el ancla exista en el DOM (p. ej. landing async) o hasta timeout.
+   * Cancela si la URL pierde el fragmento (nueva navegación).
+   */
+  private scheduleScrollToFragment(fragment: string): void {
+    this.clearFragmentScrollSchedule();
+    const deadline = Date.now() + 6000;
+    const stepMs = 48;
+
+    const tick = (): void => {
+      const current = this.router.parseUrl(this.router.url).fragment;
+      if (current !== fragment) {
+        this.clearFragmentScrollSchedule();
+        return;
+      }
+      const el = document.getElementById(fragment);
+      if (el) {
+        el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        this.clearFragmentScrollSchedule();
+        return;
+      }
+      if (Date.now() >= deadline) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        this.clearFragmentScrollSchedule();
+        return;
+      }
+      this.fragmentScrollHandle = setTimeout(tick, stepMs);
+    };
+
+    this.fragmentScrollHandle = setTimeout(tick, 0);
   }
 
   protected onLangChange(event: Event): void {
