@@ -12,7 +12,7 @@ import { AuthSessionService } from '../../shared/auth/auth-session.service';
 import { AuthSession } from '../../shared/auth/auth.models';
 import { LoginResponse } from '../../shared/api/auth.models';
 
-type ShellLoginTestView = {
+interface ShellLoginTestView {
   openLogin(): void;
   submitLogin(): void;
   isLoginOpen(): boolean;
@@ -20,7 +20,7 @@ type ShellLoginTestView = {
   loginForm: {
     setValue(value: { email: string; password: string }): void;
   };
-};
+}
 
 describe('Shell', () => {
   let component: Shell;

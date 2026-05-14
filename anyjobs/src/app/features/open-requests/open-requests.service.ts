@@ -53,6 +53,7 @@ interface OpenRequestImageDto {
 
 interface OpenRequestDetailDto {
   id: string;
+  ownerUserId?: string | null;
   title?: string | null;
   excerpt?: string | null;
   description?: string | null;
@@ -243,6 +244,11 @@ function normalizeDetail(dto: OpenRequestDetailDto, base: OpenRequestListItemDto
 
   return {
     id: dto.id,
+    ...(typeof dto.ownerUserId === 'string' && dto.ownerUserId.trim().length > 0
+      ? { ownerUserId: dto.ownerUserId.trim() }
+      : dto.ownerUserId === null
+        ? { ownerUserId: null as null }
+        : {}),
     title: title.length > 0 ? title : `Solicitud ${dto.id}`,
     excerpt: excerpt.length > 0 ? excerpt : 'Sin descripción',
     description: description.length > 0 ? description : undefined,
@@ -315,6 +321,7 @@ function normalizeFallbackImages(base: OpenRequestListItemDto | null): OpenReque
 function missingDetail(id: string): OpenRequestDetail {
   return {
     id,
+    ownerUserId: undefined,
     title: id ? `Solicitud ${id}` : 'Solicitud',
     excerpt: 'Sin descripción',
     images: [],

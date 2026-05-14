@@ -3,13 +3,31 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { catchError, EMPTY, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { OpenRequestsService } from '../open-requests.service';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { ProposalsService } from '../../../shared/proposals/proposals.service';
+
+function proposalSubmitErrorMessage(err: unknown): string {
+  if (err instanceof HttpErrorResponse && err.error && typeof err.error === 'object') {
+    const body = err.error as { errorCode?: string; message?: string };
+    if (body.errorCode === 'PROPOSAL.CANNOT_APPLY_TO_OWN_REQUEST') {
+      return 'No puedes postularte a tu propia request.';
+    }
+    if (body.errorCode === 'PROPOSAL.ALREADY_EXISTS') {
+      return 'Ya enviaste una propuesta para esta solicitud.';
+    }
+    if (typeof body.message === 'string' && body.message.trim().length > 0) {
+      return body.message.trim();
+    }
+  }
+  if (err instanceof Error) return err.message;
+  return 'No se pudo enviar la propuesta.';
+}
 
 @Component({
   selector: 'app-open-request-proposal-compose',
@@ -35,6 +53,7 @@ export class OpenRequestProposalCompose {
   protected readonly detail = signal<OpenRequestDetailModel | null>(null);
   protected readonly sent = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly isOwnRequest = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     whoAmI: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
@@ -81,6 +100,11 @@ export class OpenRequestProposalCompose {
       return;
     }
 
+    if (this.isOwnRequest()) {
+      this.errorMessage.set('No puedes postularte a tu propia request.');
+      return;
+    }
+
     const value = this.form.getRawValue();
     this.errorMessage.set(null);
 
@@ -94,14 +118,16 @@ export class OpenRequestProposalCompose {
         message: value.message,
         estimate: value.estimate,
       })
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        catchError((err: unknown) => {
+          this.errorMessage.set(proposalSubmitErrorMessage(err));
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: () => {
           this.sent.set(true);
-        },
-        error: (err: unknown) => {
-          const msg = err instanceof Error ? err.message : 'No se pudo enviar la propuesta.';
-          this.errorMessage.set(msg);
         },
       });
   }
@@ -115,6 +141,7 @@ export class OpenRequestProposalCompose {
 
     this.sent.set(false);
     this.errorMessage.set(null);
+    this.isOwnRequest.set(false);
     this.state.set('loading');
 
     this.openRequests
@@ -123,6 +150,9 @@ export class OpenRequestProposalCompose {
       .subscribe({
         next: (d) => {
           this.detail.set(d);
+          const uid = this.authVm().user?.id?.trim() ?? '';
+          const owner = d.ownerUserId?.trim() ?? '';
+          this.isOwnRequest.set(Boolean(uid && owner && uid === owner));
           this.state.set('success');
         },
         error: () => {

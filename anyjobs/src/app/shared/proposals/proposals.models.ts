@@ -19,7 +19,8 @@ export interface Proposal {
 
 export interface CreateProposalInput {
   readonly requestId: string;
-  readonly userId: string;
+  /** Solo usado en modo mock/local; el API real toma el usuario de la sesión. */
+  readonly userId?: string;
   readonly authorName?: string;
   readonly authorSubtitle?: string;
   readonly whoAmI: string;

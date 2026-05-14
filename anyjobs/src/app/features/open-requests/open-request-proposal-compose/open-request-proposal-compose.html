@@ -33,6 +33,16 @@
           </header>
 
           <ng-container *ngIf="authVm().isLoggedIn; else needLogin">
+            <div *ngIf="isOwnRequest()" class="state" role="status">
+              <p class="state__title">No puedes postularte a tu propia solicitud</p>
+              <p class="state__hint">Como creador de esta request, puedes ver quién se postula desde “Mis solicitudes”.</p>
+              <div class="actions">
+                <button type="button" class="btn" (click)="goToMyRequests()">Ir a Mis solicitudes</button>
+                <button type="button" class="btn btn--secondary" (click)="cancel()">Volver al detalle</button>
+              </div>
+            </div>
+
+            <ng-container *ngIf="!isOwnRequest()">
             <ng-container *ngIf="sent(); else formView">
               <div class="state" role="status">
                 <p class="state__title">Propuesta enviada (simulado)</p>
@@ -91,6 +101,7 @@
                 </footer>
               </form>
             </ng-template>
+            </ng-container>
           </ng-container>
 
           <ng-template #needLogin>

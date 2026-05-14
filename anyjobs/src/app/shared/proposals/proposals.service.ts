@@ -404,7 +404,6 @@ export class ProposalsService {
 
   sendProposal(input: CreateProposalInput): Observable<Proposal> {
     const requestId = input.requestId.trim();
-    const userId = input.userId.trim();
     const whoAmI = input.whoAmI.trim();
     const message = input.message.trim();
     const estimate = input.estimate.trim();
@@ -416,7 +415,6 @@ export class ProposalsService {
       return this.http
         .post<ProposalApiDto>(this.apiUrl, {
           requestId,
-          userId,
           authorName: authorName.length > 0 ? authorName : 'Usuario',
           authorSubtitle: authorSubtitle.length > 0 ? authorSubtitle : 'Perfil',
           whoAmI,
@@ -429,7 +427,7 @@ export class ProposalsService {
     const next: Proposal = {
       id: createMockId('proposal'),
       requestId,
-      userId,
+      userId: (input.userId ?? '').trim() || 'mock-user',
       ...(authorName.length > 0
         ? {
             author: {

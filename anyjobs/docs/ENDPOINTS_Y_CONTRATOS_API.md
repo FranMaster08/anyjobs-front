@@ -419,9 +419,12 @@ El servicio expone `patchOpenRequest(id, patch)`; la pantalla de edición MVP pu
 
 **Response 200 (JSON)** (`OpenRequestDetail`):
 
+**Nota**: `ownerUserId` identifica al creador (UUID). Puede ser `null` en datos legacy; el front lo usa para ocultar la acción de postular y para cargar postulantes solo al dueño.
+
 ```json
 {
   "id": "string",
+  "ownerUserId": "00000000-0000-0000-0000-000000001001",
   "title": "string",
   "excerpt": "string",
   "description": "string",
@@ -497,6 +500,8 @@ Las peticiones contra `/proposals` reciben `Authorization: Bearer` vía intercep
 
 ### GET `/` con filtros (`page`, `pageSize`, `userId`, `requestId`)
 
+Si se envía **`requestId`**, el backend solo permite el listado al **usuario creador** de esa solicitud abierta; en caso contrario responde **`403`** con `errorCode: "PROPOSAL.VIEW_APPLICANTS_FORBIDDEN"` (además del flujo RBAC habitual).
+
 **Response 200 (JSON)** — envoltorio paginado:
 
 ```json
@@ -531,12 +536,11 @@ Las peticiones contra `/proposals` reciben `Authorization: Bearer` vía intercep
 
 **Auth**: Bearer (`proposals.create`).
 
-**Request (JSON)**:
+**Request (JSON)** — el usuario postulante se toma de la **sesión** (Bearer); el cuerpo **no** incluye `userId`:
 
 ```json
 {
   "requestId": "string",
-  "userId": "string",
   "authorName": "string",
   "authorSubtitle": "string",
   "whoAmI": "string",
@@ -546,6 +550,11 @@ Las peticiones contra `/proposals` reciben `Authorization: Bearer` vía intercep
 ```
 
 **Response `201 Created` (preferido) o `200`** con cuerpo `Proposal` (mismo shape que cada elemento de `items` arriba; `author` anidado).
+
+Errores frecuentes controlados por catálogo Nest:
+
+- **`400`** `errorCode: "PROPOSAL.CANNOT_APPLY_TO_OWN_REQUEST"` — el creador de la solicitud intenta postularse a la suya.
+- **`409`** `errorCode: "PROPOSAL.ALREADY_EXISTS"` — el mismo usuario ya envió una propuesta para esa `requestId`.
 
 ### Errores 4xx
 

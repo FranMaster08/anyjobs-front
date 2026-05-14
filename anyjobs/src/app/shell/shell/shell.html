@@ -4,22 +4,22 @@
       {{ site.config()?.brandName ?? t('brand.name') }}
     </a>
 
-    <nav class="nav" aria-label="Navegación principal">
-      <a class="navLink" routerLink="/home">
-        {{ t('nav.inicio') }}
-      </a>
-      <a class="navLink" [routerLink]="['/solicitudes']" fragment="solicitudes">
-        {{ t('nav.solicitudes') }}
-      </a>
-      <a class="navLink" [routerLink]="['/solicitudes']" fragment="ubicacion">
-        {{ t('nav.ubicacion') }}
-      </a>
-      <a class="navLink" [routerLink]="['/solicitudes']" fragment="contacto">
-        {{ t('nav.contacto') }}
-      </a>
+    <nav class="nav nav--desktop" aria-label="Navegación principal">
+      @for (item of mainNavItems; track item.i18nKey) {
+        <a
+          class="mainNavLink"
+          [routerLink]="item.routerLink"
+          [fragment]="item.fragment"
+        >
+          {{ t(item.i18nKey) }}
+        </a>
+      }
+      @if (authVm().isLoggedIn) {
+        <a class="mainNavLink" routerLink="/perfil">{{ t('auth.myProfile') }}</a>
+      }
     </nav>
 
-    <div class="headerActions">
+    <div class="headerActions headerActions--desktop" aria-label="Acciones de cabecera">
       <select
         class="langSelect"
         [value]="i18n.lang()"
@@ -36,7 +36,13 @@
 
       @if (authVm().isLoggedIn) {
         <div class="accountWrap">
-          <button type="button" class="accountBtn" (click)="toggleAccountMenu()">
+          <button
+            type="button"
+            class="accountBtn"
+            (click)="toggleAccountMenu()"
+            [attr.aria-expanded]="isAccountMenuOpen()"
+            aria-haspopup="menu"
+          >
             <span class="accountAvatar" aria-hidden="true">
               {{ authVm().user?.fullName?.slice(0, 1) ?? 'U' }}
             </span>
@@ -44,7 +50,7 @@
             <span class="accountCaret" aria-hidden="true">▾</span>
           </button>
 
-          @if (isAccountMenuOpen()) {
+          @if (isAccountMenuOpen() && !isMobileNavOpen()) {
             <button
               type="button"
               class="accountBackdrop"
@@ -85,7 +91,151 @@
         <button type="button" class="headerBtn" (click)="openLogin()">{{ t('auth.login') }}</button>
       }
     </div>
+
+    <button
+      type="button"
+      class="menuToggle"
+      [class.menuToggle--open]="isMobileNavOpen()"
+      (click)="toggleMobileNav()"
+      [attr.aria-expanded]="isMobileNavOpen()"
+      [attr.aria-controls]="isMobileNavOpen() ? 'shell-mobile-nav' : null"
+      [attr.aria-label]="isMobileNavOpen() ? t('nav.menuClose') : t('nav.menuOpen')"
+    >
+      <span class="menuToggleBars" aria-hidden="true">
+        <span class="menuToggleBar"></span>
+        <span class="menuToggleBar"></span>
+        <span class="menuToggleBar"></span>
+      </span>
+    </button>
   </div>
+
+  @if (isMobileNavOpen()) {
+    <button
+      type="button"
+      class="mobileNavBackdrop"
+      (click)="closeMobileNav()"
+      tabindex="-1"
+      [attr.aria-label]="t('nav.menuClose')"
+    ></button>
+    <div
+      id="shell-mobile-nav"
+      class="mobileNavDrawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="shell-mobile-nav-title"
+    >
+      <div class="mobileNavDrawerHeader">
+        <h2 id="shell-mobile-nav-title" class="mobileNavDrawerTitle">{{ t('nav.mobileMenuHeading') }}</h2>
+        <button
+          type="button"
+          class="mobileNavDrawerClose"
+          (click)="closeMobileNav()"
+          [attr.aria-label]="t('nav.menuClose')"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="mobileNavDrawerBody">
+        <nav class="mobileNavLinks" aria-label="Navegación principal">
+          @for (item of mainNavItems; track item.i18nKey) {
+            <a
+              class="mainNavLink"
+              [routerLink]="item.routerLink"
+              [fragment]="item.fragment"
+              (click)="closeMobileNav()"
+            >
+              {{ t(item.i18nKey) }}
+            </a>
+          }
+        </nav>
+
+        <div class="mobileNavSection">
+          <label class="mobileNavLabel" for="shell-mobile-lang">{{ t('nav.language') }}</label>
+          <select
+            id="shell-mobile-lang"
+            class="langSelect langSelect--block"
+            [value]="i18n.lang()"
+            (change)="onLangChange($event)"
+            aria-label="Idioma"
+          >
+            <option value="es">{{ t('lang.es') }}</option>
+            <option value="en">{{ t('lang.en') }}</option>
+          </select>
+        </div>
+
+        <a
+          class="cta cta--block"
+          [routerLink]="['/solicitudes']"
+          fragment="contacto"
+          (click)="closeMobileNav()"
+        >
+          {{ site.config()?.sections?.requests?.cta ?? t('cta.publicar') }}
+        </a>
+      </div>
+
+      <div class="mobileNavDrawerFooter">
+        @if (authVm().isLoggedIn) {
+          <div class="accountWrap accountWrap--mobilePanel">
+            <button
+              type="button"
+              class="accountBtn accountBtn--block"
+              (click)="toggleAccountMenu()"
+              [attr.aria-expanded]="isAccountMenuOpen()"
+              aria-haspopup="menu"
+            >
+              <span class="accountAvatar" aria-hidden="true">
+                {{ authVm().user?.fullName?.slice(0, 1) ?? 'U' }}
+              </span>
+              <span class="accountName">{{ authVm().user?.fullName ?? t('auth.myProfile') }}</span>
+              <span class="accountCaret" aria-hidden="true">▾</span>
+            </button>
+
+            @if (isAccountMenuOpen() && isMobileNavOpen()) {
+              <button
+                type="button"
+                class="accountBackdrop"
+                (click)="closeAccountMenu()"
+                aria-label="Cerrar menú"
+              ></button>
+              <div
+                class="accountMenu accountMenu--mobilePanel"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()"
+                tabindex="0"
+                role="menu"
+                aria-label="Cuenta"
+              >
+                <a
+                  class="accountMenuItem"
+                  role="menuitem"
+                  routerLink="/perfil"
+                  (click)="closeAccountMenu(); closeMobileNav()"
+                >
+                  {{ t('auth.myProfile') }}
+                </a>
+                <a
+                  class="accountMenuItem"
+                  role="menuitem"
+                  routerLink="/mis-solicitudes"
+                  (click)="closeAccountMenu(); closeMobileNav()"
+                >
+                  Mis solicitudes
+                </a>
+                <button type="button" class="accountMenuItem" role="menuitem" (click)="logout()">
+                  {{ t('auth.logout') }}
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <button type="button" class="headerBtn headerBtn--block" (click)="openLogin()">
+            {{ t('auth.login') }}
+          </button>
+        }
+      </div>
+    </div>
+  }
 </header>
 
 <app-modal [open]="isLoginOpen()" [title]="t('auth.login')" size="sm" (closed)="closeLogin()">

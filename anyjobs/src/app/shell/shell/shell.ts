@@ -21,6 +21,15 @@ import { mapLoginErrorToMessage } from '../../shared/api/auth-login-error.utils'
 import { LoginRequest } from '../../shared/api/auth.models';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
 
+/** Breakpoint alineado con `shell.scss` (cabecera compacta ≤900px). */
+export const SHELL_HEADER_COMPACT_MAX_PX = 900;
+
+export interface ShellMainNavItem {
+  i18nKey: string;
+  routerLink: readonly string[];
+  fragment?: string;
+}
+
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +55,15 @@ export class Shell {
   protected readonly loginBusy = signal(false);
   protected readonly loginError = signal<string | null>(null);
   protected readonly isAccountMenuOpen = signal(false);
+  protected readonly isMobileNavOpen = signal(false);
+
+  /** Una sola fuente de verdad para desktop y panel móvil (mismas rutas y fragmentos). */
+  protected readonly mainNavItems: readonly ShellMainNavItem[] = [
+    { i18nKey: 'nav.inicio', routerLink: ['/home'] },
+    { i18nKey: 'nav.solicitudes', routerLink: ['/solicitudes'], fragment: 'solicitudes' },
+    { i18nKey: 'nav.ubicacion', routerLink: ['/solicitudes'], fragment: 'ubicacion' },
+    { i18nKey: 'nav.contacto', routerLink: ['/solicitudes'], fragment: 'contacto' },
+  ] as const;
 
   protected readonly loginForm = this.fb.nonNullable.group({
     email: this.fb.nonNullable.control('', [Validators.required, Validators.email]),
@@ -76,6 +94,7 @@ export class Shell {
           this.auth.setSession({ token: res.token, user: res.user });
           this.isLoginOpen.set(false);
           this.isAccountMenuOpen.set(false);
+          this.isMobileNavOpen.set(false);
           this.loginForm.reset({ email: '', password: '' });
           this.cdr.markForCheck();
         },
@@ -91,6 +110,7 @@ export class Shell {
       )
       .subscribe(() => {
         this.isAccountMenuOpen.set(false);
+        this.isMobileNavOpen.set(false);
         const urlTree = this.router.parseUrl(this.router.url);
         const fragment = urlTree.fragment;
 
@@ -119,6 +139,24 @@ export class Shell {
 
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       });
+
+    // Si el panel móvil quedó abierto y el viewport vuelve a escritorio, cerrarlo; si no,
+    // `isMobileNavOpen()` sigue true y bloquea el menú de cuenta (`!isMobileNavOpen()` en desktop).
+    const mqWide =
+      typeof matchMedia !== 'undefined'
+        ? matchMedia(`(min-width: ${SHELL_HEADER_COMPACT_MAX_PX + 1}px)`)
+        : null;
+    if (mqWide) {
+      const onWideChange = () => {
+        if (mqWide.matches && this.isMobileNavOpen()) {
+          this.closeMobileNav();
+          this.cdr.markForCheck();
+        }
+      };
+      mqWide.addEventListener('change', onWideChange);
+      this.destroyRef.onDestroy(() => mqWide.removeEventListener('change', onWideChange));
+      onWideChange();
+    }
   }
 
   protected onLangChange(event: Event): void {
@@ -129,6 +167,7 @@ export class Shell {
   }
 
   protected openLogin(): void {
+    this.closeMobileNav();
     this.loginError.set(null);
     this.isLoginOpen.set(true);
   }
@@ -145,8 +184,24 @@ export class Shell {
     this.isAccountMenuOpen.set(false);
   }
 
+  protected toggleMobileNav(): void {
+    this.isMobileNavOpen.update((open) => {
+      const next = !open;
+      if (next) {
+        this.isAccountMenuOpen.set(false);
+      }
+      return next;
+    });
+  }
+
+  protected closeMobileNav(): void {
+    this.isAccountMenuOpen.set(false);
+    this.isMobileNavOpen.set(false);
+  }
+
   protected logout(): void {
     this.isAccountMenuOpen.set(false);
+    this.isMobileNavOpen.set(false);
     this.auth.clear();
     this.router.navigateByUrl('/home');
   }
@@ -164,7 +219,7 @@ export class Shell {
   @HostListener('document:keydown', ['$event'])
   protected onDocumentKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
-      if (this.isAccountMenuOpen()) this.isAccountMenuOpen.set(false);
+      this.closeMobileNav();
       if (this.isLoginOpen()) this.isLoginOpen.set(false);
     }
   }

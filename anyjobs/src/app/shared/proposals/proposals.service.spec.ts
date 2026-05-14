@@ -92,6 +92,14 @@ describe('ProposalsService (backend real)', () => {
 
     const req = httpMock.expectOne('https://api.example.com/proposals');
     expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      requestId: 'req-1',
+      authorName: 'María',
+      authorSubtitle: 'Pro',
+      whoAmI: 'Limpio ventanas.',
+      message: 'Puedo el martes.',
+      estimate: '€40',
+    });
     req.flush(apiProposal, { status: 201, statusText: 'Created' });
 
     expect(received).toEqual({ id: 'p1', authorName: 'María' });

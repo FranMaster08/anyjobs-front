@@ -29,6 +29,8 @@ export interface OpenRequestProviderReview {
 
 export interface OpenRequestDetail {
   readonly id: string;
+  /** UUID del usuario creador; viene del API cuando existe en BD. */
+  readonly ownerUserId?: string | null;
   readonly title: string;
   readonly excerpt: string;
   readonly description?: string;

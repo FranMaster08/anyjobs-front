@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
@@ -28,6 +29,16 @@ interface AppliedRequestItem {
 
 type LoadState = 'loading' | 'success' | 'error';
 type TabId = 'published' | 'applied';
+
+function postulantesHttpMessage(err: unknown): string {
+  if (err instanceof HttpErrorResponse) {
+    const body = err.error as { message?: string } | null;
+    if (body && typeof body.message === 'string' && body.message.trim().length > 0) {
+      return body.message.trim();
+    }
+  }
+  return 'No se pudieron cargar las postulaciones.';
+}
 
 @Component({
   selector: 'app-my-requests-dashboard',
@@ -54,8 +65,14 @@ export class MyRequestsDashboard {
   protected readonly publishedCount = computed(() => this.publishedItems().length);
   protected readonly appliedCount = computed(() => this.appliedItems().length);
 
-  protected readonly expandedRequests = signal<ReadonlySet<string>>(new Set());
-  protected readonly requestProposals = signal<Record<string, readonly Proposal[]>>({});
+  /** Solicitudes publicadas: ver postulantes (solo el dueño puede cargar desde API). */
+  protected readonly publishedPostulantesExpanded = signal<ReadonlySet<string>>(new Set());
+  /** Postulé a estas: desplegar detalle de la propia propuesta (sin listar a terceros). */
+  protected readonly appliedProposalDetailExpanded = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly requestProposals = signal<Record<string, readonly Proposal[] | undefined>>({});
+  protected readonly postulantesLoadingIds = signal<ReadonlySet<string>>(new Set());
+  protected readonly proposalPostulantesError = signal<Record<string, string | undefined>>({});
 
   protected readonly isProfileWipOpen = signal(false);
   protected readonly profileWipName = signal<string>('este usuario');
@@ -102,42 +119,87 @@ export class MyRequestsDashboard {
     this.isChooseWipOpen.set(false);
   }
 
-  protected toggleExpanded(requestId: string): void {
+  protected togglePublishedPostulantes(requestId: string): void {
     const rid = requestId.trim();
     if (!rid) return;
 
-    this.expandedRequests.update((prev) => {
+    const wasExpanded = this.publishedPostulantesExpanded().has(rid);
+    this.publishedPostulantesExpanded.update((prev) => {
       const next = new Set(prev);
       if (next.has(rid)) next.delete(rid);
       else next.add(rid);
       return next;
     });
+    if (wasExpanded) return;
 
-    const existing = this.requestProposals()[rid];
-    if (existing && existing.length > 0) return;
+    const loaded = this.requestProposals()[rid] !== undefined;
+    if (loaded) return;
 
-    const uid = this.authVm().user?.id ?? '';
+    this.proposalPostulantesError.update((prev) => ({ ...prev, [rid]: undefined }));
+    this.postulantesLoadingIds.update((prev) => new Set(prev).add(rid));
+
     this.proposals
-      .listByRequest(rid, uid)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .listByRequest(rid)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError((err: unknown) => {
+          this.proposalPostulantesError.update((prev) => ({ ...prev, [rid]: postulantesHttpMessage(err) }));
+          return of([] as const);
+        }),
+      )
       .subscribe((items) => {
         this.requestProposals.update((prev) => ({ ...prev, [rid]: items }));
+        this.postulantesLoadingIds.update((prev) => {
+          const next = new Set(prev);
+          next.delete(rid);
+          return next;
+        });
       });
   }
 
-  protected isExpanded(requestId: string): boolean {
-    return this.expandedRequests().has(requestId);
+  protected isPublishedPostulantesExpanded(requestId: string): boolean {
+    return this.publishedPostulantesExpanded().has(requestId);
+  }
+
+  protected isPostulantesLoading(requestId: string): boolean {
+    return this.postulantesLoadingIds().has(requestId);
+  }
+
+  protected postulantesErrorFor(requestId: string): string | undefined {
+    return this.proposalPostulantesError()[requestId];
+  }
+
+  protected toggleAppliedProposalDetail(proposalId: string): void {
+    const id = proposalId.trim();
+    if (!id) return;
+    this.appliedProposalDetailExpanded.update((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  protected isAppliedProposalExpanded(proposalId: string): boolean {
+    return this.appliedProposalDetailExpanded().has(proposalId);
   }
 
   protected proposalsForRequest(requestId: string): readonly Proposal[] {
     return this.requestProposals()[requestId] ?? [];
   }
 
+  protected postulantesLoaded(requestId: string): boolean {
+    return this.requestProposals()[requestId] !== undefined;
+  }
+
   private load(): void {
     this.publishedItems.set([]);
     this.appliedItems.set([]);
     this.requestProposals.set({});
-    this.expandedRequests.set(new Set());
+    this.publishedPostulantesExpanded.set(new Set());
+    this.appliedProposalDetailExpanded.set(new Set());
+    this.postulantesLoadingIds.set(new Set());
+    this.proposalPostulantesError.set({});
 
     const vm = this.authVm();
     const userId = vm.user?.id ?? '';
