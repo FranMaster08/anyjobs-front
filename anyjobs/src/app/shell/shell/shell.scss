@@ -394,6 +394,9 @@
 }
 
 .accountMenu--mobilePanel {
+  /* En el pie del drawer no hay espacio debajo del botón: abrir hacia arriba para que las opciones queden en pantalla. */
+  top: auto;
+  bottom: calc(100% + 8px);
   left: 0;
   right: 0;
   width: 100%;
