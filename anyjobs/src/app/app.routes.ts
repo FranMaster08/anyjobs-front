@@ -11,6 +11,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/home/home/home').then((m) => m.Home),
       },
       {
+        path: 'reels',
+        loadComponent: () =>
+          import('./features/reels-feed/reels-feed/reels-feed').then((m) => m.ReelsFeed),
+      },
+      {
         path: 'registro',
         loadChildren: () =>
           import('./features/auth/registration/registration.routes').then((m) => m.registrationRoutes),

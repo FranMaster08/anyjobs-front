@@ -20,6 +20,7 @@ const API_PREFIXES = [
   '/promo-slides',
   '/user-media',
   '/user-reels',
+  '/feed',
 ] as const;
 
 function normalizePathname(pathname: string): string {
