@@ -16,6 +16,12 @@ import { catchError, EMPTY, finalize, of, Subscription, switchMap } from 'rxjs';
 import { ModalComponent } from '../../../components/modal/modal';
 import type { UserReelDto } from '../../../shared/api/user-media.api';
 import { UserMediaApi } from '../../../shared/api/user-media.api';
+import {
+  formatFileSizeMb,
+  isUploadFileTooLarge,
+  resolveUploadMimeType,
+  USER_MEDIA_MAX_BYTES,
+} from '../../../shared/media/user-media-upload.utils';
 
 @Component({
   selector: 'app-profile-multimedia',
@@ -67,28 +73,28 @@ export class ProfileMultimediaComponent {
     input.value = '';
     if (!file || !this.isOwnProfile()) return;
 
-    const allowed = [
-      'video/mp4',
-      'video/webm',
-      'video/quicktime',
-      'video/x-m4v',
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-    ];
-    if (!allowed.includes(file.type)) {
-      this.uploadError.set('Formato no permitido. Usa MP4, WebM o imagen JPG/PNG/WebP.');
+    const mime = resolveUploadMimeType(file);
+    if (!mime) {
+      this.uploadError.set(
+        `Formato no permitido (${file.type || 'tipo desconocido'}). Usa MP4, WebM, MOV o imagen JPG/PNG/WebP.`,
+      );
       return;
     }
-    if (file.size > 50 * 1024 * 1024) {
-      this.uploadError.set('El archivo supera 50 MB.');
+    if (isUploadFileTooLarge(file.size)) {
+      this.uploadError.set(
+        `El archivo pesa ${formatFileSizeMb(file.size)} y el máximo es ${formatFileSizeMb(USER_MEDIA_MAX_BYTES)}. ` +
+          'El explorador a veces muestra un tamaño menor; revisa las propiedades del archivo.',
+      );
       return;
     }
+
+    const uploadFile =
+      mime !== file.type ? new File([file], file.name, { type: mime, lastModified: file.lastModified }) : file;
 
     this.uploadBusy.set(true);
     this.uploadError.set(null);
     this.mediaApi
-      .uploadAsset(file)
+      .uploadAsset(uploadFile)
       .pipe(
         switchMap((asset) =>
           this.mediaApi.createReel(asset.id).pipe(
@@ -197,6 +203,28 @@ export class ProfileMultimediaComponent {
       });
   }
 
+  private readApiErrorMessage(err: HttpErrorResponse): string | null {
+    const body = err.error;
+    if (typeof body?.message === 'string' && body.message.trim().length > 0) {
+      return body.message.trim();
+    }
+    const details = body?.details;
+    if (details && typeof details === 'object') {
+      const raw = (details as { message?: unknown }).message;
+      if (typeof raw === 'string') return raw;
+      if (Array.isArray(raw) && raw.length > 0) {
+        return raw.map((m) => String(m)).join(' ');
+      }
+    }
+    if (typeof body?.technicalMessage === 'string' && body.technicalMessage.includes('MIME')) {
+      return 'Formato de video no reconocido. Prueba exportar a MP4.';
+    }
+    if (typeof body?.technicalMessage === 'string' && body.technicalMessage.includes('50 MB')) {
+      return 'El servidor rechazó el archivo por tamaño (máx. 50 MB).';
+    }
+    return null;
+  }
+
   private resolveUploadErrorMessage(err: unknown): string {
     if (!(err instanceof HttpErrorResponse)) {
       return 'No se pudo completar la publicación del reel.';
@@ -211,11 +239,10 @@ export class ProfileMultimediaComponent {
       return 'El servidor no encontró la ruta de subida. Reinicia el front (ng serve / docker compose) para aplicar el proxy.';
     }
     if (err.status === 400) {
-      const msg = typeof err.error?.message === 'string' ? err.error.message : null;
-      return msg ?? 'Archivo no válido (formato o tamaño).';
+      return this.readApiErrorMessage(err) ?? 'Archivo no válido (formato o tamaño).';
     }
     if (err.status === 413) {
-      return 'El archivo supera el límite permitido.';
+      return 'El archivo supera el límite del servidor (proxy o API). Máximo permitido: 50 MB.';
     }
     return 'No se pudo completar la publicación del reel.';
   }
