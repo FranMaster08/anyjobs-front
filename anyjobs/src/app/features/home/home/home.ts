@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
 import {
   afterNextRender,
   Component,
@@ -23,13 +24,20 @@ import {
 } from 'ngx-vertical-slider';
 
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
+import { MediaPlaybackService } from '../../../shared/media/media-playback.service';
+import {
+  bootstrapSliderPlayback,
+  destroySliderPlayback,
+  pauseSliderPlayback,
+  setupSliderViewportScrollSync,
+} from '../../../shared/media/media-slider-playback';
+import { setupSliderAvatarProfileNavigation } from '../../../shared/media/media-slider-profile-nav';
 
 import { HomeMobileBottomNavComponent } from '../home-mobile-bottom-nav/home-mobile-bottom-nav';
 
-/** Campaña / creatividad: viene del JSON del API; opcional en `SlideData` plano. */
-type PromoSlide = SlideData & { readonly id?: string };
+type FeaturedReelSlide = SlideData & { readonly id?: string; readonly creatorUserId?: string };
 
-const ANONYMOUS_ACTOR_KEY = 'anyjobs.promo.actor.anonymousId';
+const ANONYMOUS_ACTOR_KEY = 'anyjobs.reels.actor.anonymousId';
 const EARLY_SKIP_MS = 2000;
 const WATCH_PROGRESS_INTERVAL_MS = 5000;
 
@@ -57,74 +65,126 @@ function storageSet(key: string, value: string): void {
   styleUrl: './home.scss',
 })
 export class Home {
-  /** Identifica esta instancia ante el backend/analytics (si hay varios sliders en la app). */
-  private static readonly SLIDER_ID = 'home-promotional';
+  private static readonly SLIDER_ID = 'home-featured-reels';
 
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly auth = inject(AuthSessionService);
+  private readonly mediaPlayback = inject(MediaPlaybackService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
   private readonly sliderWrap = viewChild<ElementRef<HTMLElement>>('homeSliderWrap');
+  private readonly mediaSlider = viewChild(MediaSliderComponent);
 
   private readonly interactionsUrl = new URL(
-    '/promo-slides/interactions',
+    '/feed/reels/interactions',
     this.document.baseURI,
   ).toString();
 
   readonly loaded = signal(false);
   readonly loadFailed = signal(false);
-  readonly slides = signal<readonly SlideData[]>([]);
+  readonly slides = signal<readonly FeaturedReelSlide[]>([]);
 
   private activeSlideIndex: number | null = null;
   private viewStartedAt: number | null = null;
   private readonly impressionsSent = new Set<number>();
   private visibilityObserver: MutationObserver | null = null;
+  private teardownScrollSync: (() => void) | null = null;
   private watchProgressTimer: ReturnType<typeof setInterval> | null = null;
+  private teardownAvatarNavigation: (() => void) | null = null;
 
   constructor() {
-    const promoUrl = new URL('/promo-slides', this.document.baseURI);
-    promoUrl.search = new HttpParams()
+    const featuredUrl = new URL('/home/featured-reels', this.document.baseURI);
+    featuredUrl.search = new HttpParams()
       .set('anonymousId', this.anonymousActorId())
+      .set('limit', '15')
       .toString();
 
-    const mockUrl = new URL('/mock/home-promo-slides.mock.json', this.document.baseURI).toString();
-
     this.http
-      .get<SlideData[]>(promoUrl.toString())
+      .get<FeaturedReelSlide[]>(featuredUrl.toString())
       .pipe(
-        catchError(() => this.http.get<SlideData[]>(mockUrl)),
         catchError(() => {
           this.loadFailed.set(true);
-          return of([] as SlideData[]);
+          return of([] as FeaturedReelSlide[]);
         }),
         finalize(() => this.loaded.set(true)),
       )
       .subscribe((data) => {
-        this.slides.set(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data.map((slide) => this.normalizeSlide(slide)) : [];
+        this.slides.set(list);
         if (!Array.isArray(data)) {
           this.loadFailed.set(true);
         }
       });
 
-    this.destroyRef.onDestroy(() => this.teardownRetentionTracking());
+    this.destroyRef.onDestroy(() => this.teardownSliderSession());
 
     effect(() => {
       if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
       runInInjectionContext(this.injector, () => {
-        afterNextRender(() => this.setupRetentionTracking());
+        afterNextRender(() => {
+          this.setupRetentionTracking();
+          this.setupAvatarProfileNavigation();
+          this.ensureFirstVideoPlays();
+        });
       });
     });
+  }
+
+  /** ngx-vertical-slider exige avatar, music y counts; el API solo envía campos de reel. */
+  private normalizeSlide(raw: FeaturedReelSlide): FeaturedReelSlide {
+    const user = raw.user?.trim() || 'Usuario';
+    return {
+      ...raw,
+      type: raw.type === 'image' ? 'image' : 'video',
+      media: this.resolveMediaUrl(raw.media),
+      user,
+      avatar: raw.avatar?.trim() || this.avatarPlaceholder(user),
+      caption: raw.caption ?? '',
+      music: raw.music ?? 'sonido original',
+      counts: { ...raw.counts },
+      creatorUserId: raw.creatorUserId,
+    };
+  }
+
+  private setupAvatarProfileNavigation(): void {
+    const wrap = this.sliderWrap()?.nativeElement;
+    if (!wrap) return;
+
+    this.teardownAvatarNavigation?.();
+    this.teardownAvatarNavigation = setupSliderAvatarProfileNavigation(
+      wrap,
+      (index) => this.slides()[index]?.creatorUserId,
+      (userId) => void this.router.navigate(['/usuarios', userId]),
+    );
+  }
+
+  private resolveMediaUrl(media: string): string {
+    const trimmed = media?.trim() ?? '';
+    if (trimmed.length === 0) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return new URL(trimmed, this.document.baseURI).href;
+  }
+
+  private avatarPlaceholder(user: string): string {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&size=96&background=fe2c55&color=fff`;
+  }
+
+  /** Tras cargar slides async, el IntersectionObserver a veces no dispara play en el primer reel. */
+  private ensureFirstVideoPlays(): void {
+    const wrap = this.sliderWrap()?.nativeElement;
+    if (!wrap) return;
+    bootstrapSliderPlayback(wrap, this.mediaSlider(), true);
   }
 
   private slideMediaAt(index: number): string | null {
     return this.slides()[index]?.media ?? null;
   }
 
-  private slideCampaignId(index: number): string | null {
-    const s = this.slides()[index] as PromoSlide | undefined;
-    return s?.id ?? null;
+  private slideReelId(index: number): string | null {
+    return (this.slides()[index] as FeaturedReelSlide | undefined)?.id ?? null;
   }
 
   private anonymousActorId(): string {
@@ -175,7 +235,7 @@ export class Home {
       route: '/home',
       slideIndex: index,
       slideMedia: this.slideMediaAt(index),
-      campaignId: this.slideCampaignId(index),
+      reelId: this.slideReelId(index),
     };
   }
 
@@ -191,20 +251,34 @@ export class Home {
       return null;
     };
 
-    const onVisibleChange = (): void => {
-      const index = detectVisibleIndex();
-      if (index === this.activeSlideIndex) return;
-      if (this.activeSlideIndex !== null) {
-        this.endSlideView(this.activeSlideIndex);
-      }
-      if (index !== null) {
-        this.startSlideView(index);
-      } else {
-        this.activeSlideIndex = null;
-        this.viewStartedAt = null;
-        this.clearWatchProgressTimer();
-      }
+    const syncPlayback = (): void => {
+      this.mediaPlayback.syncSlider(wrap, true, this.mediaSlider());
     };
+
+    const onVisibleChange = (): void => {
+      requestAnimationFrame(() => {
+        const index = detectVisibleIndex();
+        syncPlayback();
+
+        if (index === this.activeSlideIndex) return;
+        if (this.activeSlideIndex !== null) {
+          this.endSlideView(this.activeSlideIndex);
+        }
+        if (index !== null) {
+          this.startSlideView(index);
+        } else {
+          pauseSliderPlayback(wrap, this.mediaSlider());
+          this.activeSlideIndex = null;
+          this.viewStartedAt = null;
+          this.clearWatchProgressTimer();
+        }
+      });
+    };
+
+    this.teardownScrollSync?.();
+    setupSliderViewportScrollSync(wrap, this.mediaSlider(), true, (fn) => {
+      this.teardownScrollSync = fn;
+    });
 
     this.visibilityObserver = new MutationObserver(onVisibleChange);
     this.visibilityObserver.observe(wrap, {
@@ -216,13 +290,29 @@ export class Home {
     onVisibleChange();
   }
 
-  private teardownRetentionTracking(): void {
+  private stopSliderMedia(): void {
+    destroySliderPlayback(this.sliderWrap()?.nativeElement, this.mediaSlider());
+  }
+
+  private teardownSliderSession(): void {
     if (this.activeSlideIndex !== null) {
       this.endSlideView(this.activeSlideIndex);
     }
+    this.teardownRetentionTracking();
+    this.stopSliderMedia();
+    this.mediaPlayback.stopAll();
+    this.teardownAvatarNavigation?.();
+    this.teardownAvatarNavigation = null;
+  }
+
+  private teardownRetentionTracking(): void {
     this.visibilityObserver?.disconnect();
     this.visibilityObserver = null;
+    this.teardownScrollSync?.();
+    this.teardownScrollSync = null;
     this.clearWatchProgressTimer();
+    this.activeSlideIndex = null;
+    this.viewStartedAt = null;
   }
 
   private startSlideView(index: number): void {
@@ -330,12 +420,8 @@ export class Home {
 
   onSlideAction(event: SlideActionEvent): void {
     this.trackInteraction({
-      sliderId: Home.SLIDER_ID,
+      ...this.slideTelemetryBase(event.index),
       kind: 'slideAction',
-      route: '/home',
-      slideIndex: event.index,
-      slideMedia: this.slideMediaAt(event.index),
-      campaignId: this.slideCampaignId(event.index),
       action: event.action,
       active: event.active,
       count: event.count,
@@ -344,12 +430,8 @@ export class Home {
 
   onSlideFollow(event: SlideFollowEvent): void {
     this.trackInteraction({
-      sliderId: Home.SLIDER_ID,
+      ...this.slideTelemetryBase(event.index),
       kind: 'slideFollow',
-      route: '/home',
-      slideIndex: event.index,
-      slideMedia: this.slideMediaAt(event.index),
-      campaignId: this.slideCampaignId(event.index),
       following: event.following,
     });
   }

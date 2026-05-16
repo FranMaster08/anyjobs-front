@@ -39,6 +39,11 @@
     "secure": false,
     "changeOrigin": true
   },
+  "/home/featured-reels": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
   "/uploads": {
     "target": "http://anyjobs-back:3000",
     "secure": false,

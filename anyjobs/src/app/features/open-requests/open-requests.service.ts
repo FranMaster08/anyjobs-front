@@ -101,6 +101,7 @@ export class OpenRequestsService {
 
     let httpParams = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (params.sort) httpParams = httpParams.set('sort', params.sort);
+    if (params.anonymousId) httpParams = httpParams.set('anonymousId', params.anonymousId);
 
     return this.http.get<OpenRequestsListResponseDto>(this.apiUrl, { params: httpParams }).pipe(
       map((dto) => toListResponse(dto, pageSize)),

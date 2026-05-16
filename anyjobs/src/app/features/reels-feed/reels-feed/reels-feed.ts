@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
 import {
   afterNextRender,
   Component,
@@ -23,6 +24,14 @@ import {
 } from 'ngx-vertical-slider';
 
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
+import { MediaPlaybackService } from '../../../shared/media/media-playback.service';
+import {
+  bootstrapSliderPlayback,
+  destroySliderPlayback,
+  pauseSliderPlayback,
+  setupSliderViewportScrollSync,
+} from '../../../shared/media/media-slider-playback';
+import { setupSliderAvatarProfileNavigation } from '../../../shared/media/media-slider-profile-nav';
 import { HomeMobileBottomNavComponent } from '../../home/home-mobile-bottom-nav/home-mobile-bottom-nav';
 
 const ANONYMOUS_ACTOR_KEY = 'anyjobs.reels.actor.anonymousId';
@@ -46,6 +55,8 @@ function storageSet(key: string, value: string): void {
   }
 }
 
+type ReelSlide = SlideData & { readonly id?: string; readonly creatorUserId?: string };
+
 @Component({
   selector: 'app-reels-feed',
   imports: [MediaSliderComponent, HomeMobileBottomNavComponent],
@@ -56,12 +67,15 @@ export class ReelsFeed {
   private static readonly SLIDER_ID = 'user-reels-feed';
 
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly auth = inject(AuthSessionService);
+  private readonly mediaPlayback = inject(MediaPlaybackService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
   private readonly sliderWrap = viewChild<ElementRef<HTMLElement>>('reelsSliderWrap');
+  private readonly mediaSlider = viewChild(MediaSliderComponent);
 
   private readonly interactionsUrl = new URL(
     '/feed/reels/interactions',
@@ -70,13 +84,15 @@ export class ReelsFeed {
 
   readonly loaded = signal(false);
   readonly loadFailed = signal(false);
-  readonly slides = signal<readonly SlideData[]>([]);
+  readonly slides = signal<readonly ReelSlide[]>([]);
 
   private activeSlideIndex: number | null = null;
   private viewStartedAt: number | null = null;
   private readonly impressionsSent = new Set<number>();
   private visibilityObserver: MutationObserver | null = null;
+  private teardownScrollSync: (() => void) | null = null;
   private watchProgressTimer: ReturnType<typeof setInterval> | null = null;
+  private teardownAvatarNavigation: (() => void) | null = null;
 
   constructor() {
     const feedUrl = new URL('/feed/reels', this.document.baseURI);
@@ -85,29 +101,73 @@ export class ReelsFeed {
       .toString();
 
     this.http
-      .get<SlideData[]>(feedUrl.toString())
+      .get<ReelSlide[]>(feedUrl.toString())
       .pipe(
         catchError(() => {
           this.loadFailed.set(true);
-          return of([] as SlideData[]);
+          return of([] as ReelSlide[]);
         }),
         finalize(() => this.loaded.set(true)),
       )
       .subscribe((data) => {
-        this.slides.set(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data.map((slide) => this.normalizeSlide(slide)) : [];
+        this.slides.set(list);
         if (!Array.isArray(data)) {
           this.loadFailed.set(true);
         }
       });
 
-    this.destroyRef.onDestroy(() => this.teardownRetentionTracking());
+    this.destroyRef.onDestroy(() => this.teardownSliderSession());
 
     effect(() => {
       if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
       runInInjectionContext(this.injector, () => {
-        afterNextRender(() => this.setupRetentionTracking());
+        afterNextRender(() => {
+          this.setupRetentionTracking();
+          this.setupAvatarProfileNavigation();
+          const wrap = this.sliderWrap()?.nativeElement;
+          if (wrap) bootstrapSliderPlayback(wrap, this.mediaSlider(), true);
+        });
       });
     });
+  }
+
+  private normalizeSlide(raw: ReelSlide): ReelSlide {
+    const user = raw.user?.trim() || 'Usuario';
+    return {
+      ...raw,
+      type: raw.type === 'image' ? 'image' : 'video',
+      media: this.resolveMediaUrl(raw.media),
+      user,
+      avatar: raw.avatar?.trim() || this.avatarPlaceholder(user),
+      caption: raw.caption ?? '',
+      music: raw.music ?? 'sonido original',
+      counts: { ...raw.counts },
+      creatorUserId: raw.creatorUserId,
+    };
+  }
+
+  private setupAvatarProfileNavigation(): void {
+    const wrap = this.sliderWrap()?.nativeElement;
+    if (!wrap) return;
+
+    this.teardownAvatarNavigation?.();
+    this.teardownAvatarNavigation = setupSliderAvatarProfileNavigation(
+      wrap,
+      (index) => this.slides()[index]?.creatorUserId,
+      (userId) => void this.router.navigate(['/usuarios', userId]),
+    );
+  }
+
+  private resolveMediaUrl(media: string): string {
+    const trimmed = media?.trim() ?? '';
+    if (trimmed.length === 0) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return new URL(trimmed, this.document.baseURI).href;
+  }
+
+  private avatarPlaceholder(user: string): string {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&size=96&background=fe2c55&color=fff`;
   }
 
   private slideMediaAt(index: number): string | null {
@@ -182,20 +242,34 @@ export class ReelsFeed {
       return null;
     };
 
-    const onVisibleChange = (): void => {
-      const index = detectVisibleIndex();
-      if (index === this.activeSlideIndex) return;
-      if (this.activeSlideIndex !== null) {
-        this.endSlideView(this.activeSlideIndex);
-      }
-      if (index !== null) {
-        this.startSlideView(index);
-      } else {
-        this.activeSlideIndex = null;
-        this.viewStartedAt = null;
-        this.clearWatchProgressTimer();
-      }
+    const syncPlayback = (): void => {
+      this.mediaPlayback.syncSlider(wrap, true, this.mediaSlider());
     };
+
+    const onVisibleChange = (): void => {
+      requestAnimationFrame(() => {
+        const index = detectVisibleIndex();
+        syncPlayback();
+
+        if (index === this.activeSlideIndex) return;
+        if (this.activeSlideIndex !== null) {
+          this.endSlideView(this.activeSlideIndex);
+        }
+        if (index !== null) {
+          this.startSlideView(index);
+        } else {
+          pauseSliderPlayback(wrap, this.mediaSlider());
+          this.activeSlideIndex = null;
+          this.viewStartedAt = null;
+          this.clearWatchProgressTimer();
+        }
+      });
+    };
+
+    this.teardownScrollSync?.();
+    setupSliderViewportScrollSync(wrap, this.mediaSlider(), true, (fn) => {
+      this.teardownScrollSync = fn;
+    });
 
     this.visibilityObserver = new MutationObserver(onVisibleChange);
     this.visibilityObserver.observe(wrap, {
@@ -207,13 +281,29 @@ export class ReelsFeed {
     onVisibleChange();
   }
 
-  private teardownRetentionTracking(): void {
+  private stopSliderMedia(): void {
+    destroySliderPlayback(this.sliderWrap()?.nativeElement, this.mediaSlider());
+  }
+
+  private teardownSliderSession(): void {
     if (this.activeSlideIndex !== null) {
       this.endSlideView(this.activeSlideIndex);
     }
+    this.teardownRetentionTracking();
+    this.stopSliderMedia();
+    this.mediaPlayback.stopAll();
+    this.teardownAvatarNavigation?.();
+    this.teardownAvatarNavigation = null;
+  }
+
+  private teardownRetentionTracking(): void {
     this.visibilityObserver?.disconnect();
     this.visibilityObserver = null;
+    this.teardownScrollSync?.();
+    this.teardownScrollSync = null;
     this.clearWatchProgressTimer();
+    this.activeSlideIndex = null;
+    this.viewStartedAt = null;
   }
 
   private startSlideView(index: number): void {

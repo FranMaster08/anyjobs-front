@@ -28,13 +28,52 @@
   padding: 0;
 }
 
-.homeSliderLoading,
-.homeSliderEmpty {
+.homeSliderLoading {
   margin: 0;
   padding: 24px;
   text-align: center;
   color: var(--aj-color-muted-2, #666);
   font-size: 15px;
+}
+
+.homeSliderPlaceholder {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: var(--home-slider-max-width-sm);
+  margin: 0 auto;
+  padding: 32px 24px;
+  min-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
+  box-sizing: border-box;
+  text-align: center;
+  background: linear-gradient(165deg, #1a1a1f 0%, #2d2d35 45%, #1a1a1f 100%);
+  border-radius: 12px;
+  color: #e8e8ec;
+}
+
+.homeSliderPlaceholderTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.homeSliderPlaceholderHint {
+  margin: 0;
+  font-size: 14px;
+  color: #a8a8b3;
+  max-width: 280px;
+  line-height: 1.45;
+}
+
+@media (min-width: 900px) {
+  .homeSliderPlaceholder {
+    width: 70%;
+    max-width: none;
+  }
 }
 
 .homeSliderWrap {
@@ -60,6 +99,10 @@
   height: 100% !important;
   min-height: 100% !important;
   max-height: 100%;
+}
+
+.homeSliderWrap ::ng-deep media-slide .slide__media {
+  z-index: 0;
 }
 
 /* ngx-vertical-slider fuerza max-width: 420px desde 700px — lo anulamos para respetar el ancho del wrap. */
@@ -109,6 +152,14 @@
 
 .homeSliderWrap ::ng-deep media-slide .slide__overlay {
   z-index: 1;
+}
+
+.homeSliderWrap ::ng-deep media-slide .slide__avatar > img {
+  cursor: pointer;
+}
+
+.homeSliderWrap ::ng-deep media-slide .slide__avatar > img:hover {
+  filter: brightness(1.08);
 }
 
 .homeSliderWrap ::ng-deep .action {

@@ -1,10 +1,16 @@
 <section class="homeSliderPage" aria-label="Inicio">
   @if (!loaded()) {
-    <p class="homeSliderLoading" aria-live="polite">Cargando…</p>
+    <p class="homeSliderLoading" aria-live="polite">Cargando reels…</p>
   } @else if (loadFailed()) {
-    <p class="homeSliderEmpty" role="status">No se pudieron cargar las promociones.</p>
+    <div class="homeSliderPlaceholder" role="status" aria-label="Error al cargar reels destacados">
+      <p class="homeSliderPlaceholderTitle">No se pudieron cargar los reels</p>
+      <p class="homeSliderPlaceholderHint">Comprueba tu conexión e inténtalo de nuevo más tarde.</p>
+    </div>
   } @else if (slides().length === 0) {
-    <p class="homeSliderEmpty" role="status">No hay contenido promocional por ahora.</p>
+    <div class="homeSliderPlaceholder" role="status" aria-label="Sin reels destacados">
+      <p class="homeSliderPlaceholderTitle">Aún no hay reels destacados</p>
+      <p class="homeSliderPlaceholderHint">Cuando haya contenido disponible, aparecerá aquí.</p>
+    </div>
   } @else {
     <div #homeSliderWrap class="homeSliderWrap">
       <media-slider

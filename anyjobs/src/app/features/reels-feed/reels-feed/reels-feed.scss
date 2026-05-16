@@ -39,3 +39,11 @@
   width: 100%;
   min-height: 0;
 }
+
+.reelsSliderWrap ::ng-deep media-slide .slide__avatar > img {
+  cursor: pointer;
+}
+
+.reelsSliderWrap ::ng-deep media-slide .slide__avatar > img:hover {
+  filter: brightness(1.08);
+}

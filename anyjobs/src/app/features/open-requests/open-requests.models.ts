@@ -1,7 +1,8 @@
 export interface OpenRequestsListParams {
   readonly page: number;
   readonly pageSize: number;
-  readonly sort?: 'publishedAtDesc';
+  readonly sort?: 'publishedAtDesc' | 'date' | 'relevance';
+  readonly anonymousId?: string;
 }
 
 export interface OpenRequestListItem {

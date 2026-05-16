@@ -21,6 +21,7 @@ const API_PREFIXES = [
   '/user-media',
   '/user-reels',
   '/feed',
+  '/home/featured-reels',
 ] as const;
 
 function normalizePathname(pathname: string): string {

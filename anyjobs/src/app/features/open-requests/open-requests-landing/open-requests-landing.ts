@@ -315,7 +315,7 @@ export class OpenRequestsLanding implements AfterViewInit {
     this.loadMoreError.set(false);
 
     this.service
-      .listOpenRequests({ page: targetPage, pageSize: 12, sort: 'publishedAtDesc' })
+      .listOpenRequests(this.listQueryParams(targetPage))
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.isLoadingMore.set(false)),
@@ -415,6 +415,15 @@ export class OpenRequestsLanding implements AfterViewInit {
     this.listImpressionObserver = null;
   }
 
+  private listQueryParams(page: number) {
+    return {
+      page,
+      pageSize: 12,
+      sort: 'relevance' as const,
+      anonymousId: this.analytics.anonymousActorId(),
+    };
+  }
+
   private loadFirstPage(): void {
     this.state.set('loading');
     this.loadMoreError.set(false);
@@ -424,7 +433,7 @@ export class OpenRequestsLanding implements AfterViewInit {
     this.hasMore.set(false);
 
     this.service
-      .listOpenRequests({ page: 1, pageSize: 12, sort: 'publishedAtDesc' })
+      .listOpenRequests(this.listQueryParams(1))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
