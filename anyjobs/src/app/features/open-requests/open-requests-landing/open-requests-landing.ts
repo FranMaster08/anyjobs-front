@@ -6,8 +6,11 @@ import {
   DestroyRef,
   ElementRef,
   ViewChild,
+  afterNextRender,
   computed,
   inject,
+  Injector,
+  runInInjectionContext,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -22,6 +25,7 @@ import {
 } from '../../../components/requests-map/requests-map';
 import { OpenRequestListItem } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
+import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { SiteConfigService } from '../../../shared/site-config/site-config.service';
 
@@ -121,11 +125,19 @@ const PREVIEW_PIN_POSITIONS: readonly Pick<PreviewPin, 'x' | 'y'>[] = [
 export class OpenRequestsLanding implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
+  private readonly analytics = inject(OpenRequestsAnalyticsService);
+  private readonly injector = inject(Injector);
   protected readonly site = inject(SiteConfigService);
   protected readonly authVm = inject(AuthSessionService).vm;
 
   @ViewChild('locationSection', { static: false })
   private readonly locationSection?: ElementRef<HTMLElement>;
+
+  @ViewChild('listGrid', { static: false })
+  private readonly listGrid?: ElementRef<HTMLElement>;
+
+  private readonly listImpressionsSent = new Set<string>();
+  private listImpressionObserver: IntersectionObserver | null = null;
 
   protected readonly skeletons = Array.from({ length: 6 });
 
@@ -256,6 +268,16 @@ export class OpenRequestsLanding implements AfterViewInit {
   constructor() {
     this.site.load();
     this.loadFirstPage();
+    this.destroyRef.onDestroy(() => this.teardownListImpressions());
+  }
+
+  protected onCardNavigate(openRequestId: string): void {
+    this.analytics.track({
+      kind: 'requestCardClick',
+      openRequestId,
+      route: '/solicitudes',
+      listPage: this.page(),
+    });
   }
 
   ngAfterViewInit(): void {
@@ -306,6 +328,7 @@ export class OpenRequestsLanding implements AfterViewInit {
           const computedNextPage = res.nextPage ?? (res.hasMore ? targetPage + 1 : null);
           this.nextPage.set(computedNextPage);
           this.hasMore.set(computedNextPage !== null);
+          this.scheduleListImpressionsAfterRender();
         },
         error: () => {
           this.loadMoreError.set(true);
@@ -355,6 +378,43 @@ export class OpenRequestsLanding implements AfterViewInit {
     );
   }
 
+  private setupListImpressions(): void {
+    const root = this.listGrid?.nativeElement;
+    if (!root) return;
+
+    if (!this.listImpressionObserver) {
+      this.listImpressionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            const id = (entry.target as HTMLElement).dataset['openRequestId'];
+            if (!id || this.listImpressionsSent.has(id)) continue;
+            this.listImpressionsSent.add(id);
+            this.analytics.track({
+              kind: 'requestListImpression',
+              openRequestId: id,
+              route: '/solicitudes',
+              listPage: this.page(),
+            });
+          }
+        },
+        { root: null, threshold: 0.5 },
+      );
+    }
+
+    const cards = root.querySelectorAll<HTMLElement>('[data-open-request-id]');
+    for (const card of cards) {
+      const id = card.dataset['openRequestId'];
+      if (!id || this.listImpressionsSent.has(id)) continue;
+      this.listImpressionObserver.observe(card);
+    }
+  }
+
+  private teardownListImpressions(): void {
+    this.listImpressionObserver?.disconnect();
+    this.listImpressionObserver = null;
+  }
+
   private loadFirstPage(): void {
     this.state.set('loading');
     this.loadMoreError.set(false);
@@ -376,10 +436,17 @@ export class OpenRequestsLanding implements AfterViewInit {
           this.hasMore.set(computedNextPage !== null);
 
           this.state.set('success');
+          this.scheduleListImpressionsAfterRender();
         },
         error: () => {
           this.state.set('error');
         },
       });
+  }
+
+  private scheduleListImpressionsAfterRender(): void {
+    runInInjectionContext(this.injector, () => {
+      afterNextRender(() => this.setupListImpressions());
+    });
   }
 }

@@ -1,0 +1,93 @@
+<section class="profileCard profileCard--wide multimedia" aria-labelledby="multimedia-heading">
+  <div class="multimediaHeader">
+    <h2 id="multimedia-heading" class="profileSectionTitle">Multimedia</h2>
+    @if (isOwnProfile()) {
+      <label class="btn btn--primary multimediaUpload" [class.is-busy]="uploadBusy()">
+        <input
+          type="file"
+          accept="video/mp4,video/webm,image/jpeg,image/png,image/webp"
+          class="multimediaUpload__input"
+          [disabled]="uploadBusy()"
+          (change)="onFileSelected($event)"
+        />
+        {{ uploadBusy() ? 'Subiendo…' : 'Subir reel' }}
+      </label>
+    }
+  </div>
+
+  <p class="profileHint multimediaHint">
+    Formato vertical 9:16 recomendado. Máx. 50 MB. Sin marcas de agua de terceros.
+  </p>
+
+  @if (error()) {
+    <p class="multimediaError" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="profileHint">Cargando contenido…</p>
+  } @else if (reels().length === 0) {
+    <p class="profileHint">
+      @if (isOwnProfile()) {
+        Aún no has publicado reels. Sube un vídeo o imagen para empezar.
+      } @else {
+        Este perfil aún no tiene contenido multimedia publicado.
+      }
+    </p>
+  } @else {
+    <ul class="multimediaGrid" role="list">
+      @for (reel of reels(); track reel.id) {
+        <li>
+          <button type="button" class="multimediaTile" (click)="openPlayer(reel)">
+            @if (isVideo(reel)) {
+              <video
+                class="multimediaTile__media"
+                [src]="reel.media?.mediaUrl"
+                muted
+                playsinline
+                preload="metadata"
+              ></video>
+            } @else {
+              <img
+                class="multimediaTile__media"
+                [src]="reel.media?.mediaUrl"
+                alt=""
+                loading="lazy"
+              />
+            }
+            <span class="multimediaTile__overlay">
+              @if (isOwnProfile() && reel.distributionStatus === 'draft') {
+                <span class="multimediaTile__badge">{{ statusLabel(reel) }}</span>
+              }
+              @if (reel.caption) {
+                <span class="multimediaTile__caption">{{ reel.caption }}</span>
+              }
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<app-modal
+  [open]="playerReel() !== null"
+  [title]="playerReel()?.caption ?? 'Reel'"
+  size="lg"
+  (closed)="closePlayer()"
+>
+  @if (playerReel(); as reel) {
+    <div class="multimediaPlayer">
+      @if (isVideo(reel)) {
+        <video
+          class="multimediaPlayer__video"
+          [src]="reel.media?.mediaUrl"
+          controls
+          playsinline
+          autoplay
+        ></video>
+      } @else {
+        <img class="multimediaPlayer__image" [src]="reel.media?.mediaUrl" [alt]="reel.caption ?? ''" />
+      }
+    </div>
+  }
+</app-modal>

@@ -220,11 +220,12 @@
       </section>
     }
 
-    @if (activeTab() === 'multimedia') {
-      <section class="profileCard profileCard--wide profileCard--muted" role="status">
-        <h2 class="profileSectionTitle">Multimedia</h2>
-        <p class="profileHint">Próximamente podrás ver reels y videos en el perfil. Aún no hay contenido multimedia.</p>
-      </section>
+    @if (activeTab() === 'multimedia' && profileSubjectUserId(); as subjectId) {
+      <app-profile-multimedia
+        [profileUserId]="subjectId"
+        [isOwnProfile]="isOwnProfile()"
+        [tabActive]="activeTab() === 'multimedia'"
+      />
     }
 
     @if (activeTab() === 'score') {

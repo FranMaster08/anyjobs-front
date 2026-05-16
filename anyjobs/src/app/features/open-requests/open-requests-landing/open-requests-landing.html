@@ -161,10 +161,11 @@
               </a>
             </div>
 
-            <div class="grid">
+            <div class="grid" #listGrid>
               <app-open-request-card
                 *ngFor="let item of listItems(); trackBy: trackById"
                 [request]="item"
+                (cardNavigate)="onCardNavigate(item.id)"
               ></app-open-request-card>
             </div>
 

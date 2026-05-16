@@ -1,0 +1,114 @@
+.multimediaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.multimediaHint {
+  margin-top: 0;
+}
+
+.multimediaError {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--aj-radius-md);
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.multimediaUpload {
+  position: relative;
+  cursor: pointer;
+
+  &.is-busy {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+
+.multimediaUpload__input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.multimediaGrid {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.multimediaTile {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  padding: 0;
+  border: none;
+  border-radius: var(--aj-radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: #111827;
+  box-shadow: var(--aj-shadow-sm);
+}
+
+.multimediaTile__media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.multimediaTile__overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 8px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.multimediaTile__badge {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111827;
+}
+
+.multimediaTile__caption {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  text-align: left;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.multimediaPlayer__video,
+.multimediaPlayer__image {
+  width: 100%;
+  max-height: min(72vh, 640px);
+  border-radius: var(--aj-radius-md);
+  object-fit: contain;
+  background: #000;
+  display: block;
+  margin: 0 auto;
+}

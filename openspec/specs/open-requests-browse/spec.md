@@ -8,15 +8,17 @@ El sistema MUST exponer una vista pública tipo landing que permita descubrir so
 - **THEN** el sistema MUST renderizar la pantalla de “solicitudes abiertas”
 
 ### Requirement: Carga inicial del listado
-La landing MUST solicitar y renderizar un listado de solicitudes abiertas ordenadas por fecha de publicación descendente (más recientes primero).
+La landing MUST solicitar y renderizar un listado de solicitudes abiertas ordenadas por fecha de publicación descendente (más recientes primero). La instrumentación de telemetría (impresiones, clics) MUST NOT impedir que la UI transicione del estado de carga al listado visible cuando la API responde correctamente.
 
 #### Scenario: La landing carga datos correctamente
-- **WHEN** la landing se inicializa
+- **WHEN** la landing se inicializa y `GET /open-requests` responde con éxito
 - **THEN** el sistema MUST solicitar la primera página del listado de solicitudes abiertas
+- **AND** MUST dejar de mostrar el estado de carga y renderizar el listado (o estado vacío)
+- **AND** MUST NOT quedar bloqueado en loading por errores de runtime en hooks de render diferido (`afterNextRender`, etc.)
 
 #### Scenario: El orden por defecto es “más recientes”
 - **WHEN** el sistema construye la solicitud de listado sin un orden explícito del usuario
-- **THEN** el sistema MUST aplicar un orden por defecto equivalente a “más recientes primero”
+- **THEN** el sistema MUST aplicar un orden por defecto equivalente a “más recientes primero” (`publishedAtDesc` o equivalente)
 
 ### Requirement: Contenido mínimo por card de solicitud
 Cada solicitud en el listado MUST renderizarse como una card con información mínima para escaneo rápido:
@@ -135,6 +137,27 @@ Los elementos interactivos de la landing MUST ser navegables por teclado y tener
 #### Scenario: Texto alternativo de imágenes
 - **WHEN** una imagen aporta información (no decorativa)
 - **THEN** el sistema MUST proveer un `alt` útil; y si es decorativa, MUST no introducir ruido para lectores de pantalla
+
+### Requirement: Telemetría de engagement en browse
+La landing y el flujo de detalle MUST enviar eventos a `POST /open-requests/interactions` sin cambiar el orden del listado (`publishedAtDesc`).
+
+#### Scenario: Impresión de card visible
+- **WHEN** una card del listado se hace visible en viewport
+- **THEN** el cliente envía `requestListImpression` con ese `openRequestId`
+
+#### Scenario: Clic en card
+- **WHEN** el usuario activa una card para abrir el detalle
+- **THEN** el cliente envía `requestCardClick` con ese `openRequestId`
+
+#### Scenario: Vista y tiempo en detalle
+- **WHEN** el detalle carga con éxito
+- **THEN** el cliente envía `requestDetailView`
+- **AND WHEN** el usuario abandona el detalle
+- **THEN** el cliente envía `timeOnDetailMs` con milisegundos transcurridos
+
+#### Scenario: Inicio de postulación
+- **WHEN** el usuario abre la pantalla de composición de propuesta
+- **THEN** el cliente envía `proposalStarted`
 
 ## MODIFIED Requirements
 

@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { OpenRequestsService } from '../open-requests.service';
+import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { ProposalsService } from '../../../shared/proposals/proposals.service';
@@ -43,6 +44,9 @@ export class OpenRequestProposalCompose {
   private readonly fb = inject(FormBuilder);
   private readonly openRequests = inject(OpenRequestsService);
   private readonly proposals = inject(ProposalsService);
+  private readonly analytics = inject(OpenRequestsAnalyticsService);
+
+  private proposalStartedSentForId: string | null = null;
   protected readonly authVm = inject(AuthSessionService).vm;
 
   protected readonly requestId = toSignal(this.route.paramMap.pipe(map((pm) => (pm.get('id') ?? '').trim())), {
@@ -154,6 +158,14 @@ export class OpenRequestProposalCompose {
           const owner = d.ownerUserId?.trim() ?? '';
           this.isOwnRequest.set(Boolean(uid && owner && uid === owner));
           this.state.set('success');
+          if (this.proposalStartedSentForId !== id) {
+            this.proposalStartedSentForId = id;
+            this.analytics.track({
+              kind: 'proposalStarted',
+              openRequestId: id,
+              route: `/solicitudes/${id}/propuesta`,
+            });
+          }
         },
         error: () => {
           this.detail.set(null);

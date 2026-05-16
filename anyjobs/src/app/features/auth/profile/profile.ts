@@ -9,6 +9,7 @@ import type { AuthUser } from '../../../shared/auth/auth.models';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { UserApi } from '../../../shared/api/user.api';
 import type { UserPrivateProfileDto, UserPublicProfileDto } from '../../../shared/api/user-profile.models';
+import { ProfileMultimediaComponent } from './profile-multimedia';
 
 type ProfileTab = 'info' | 'activity' | 'multimedia' | 'score';
 
@@ -21,7 +22,7 @@ type FetchPrivateResult =
 @Component({
   selector: 'app-profile',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ProfileMultimediaComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -101,6 +102,19 @@ export class Profile {
     const pub = this.publicProfile();
     return priv?.metrics ?? pub?.metrics ?? null;
   });
+
+  protected readonly profileSubjectUserId = computed(() => {
+    return (
+      this.routeUserId() ??
+      this.privateProfile()?.userId ??
+      this.publicProfile()?.userId ??
+      null
+    );
+  });
+
+  protected readonly isOwnProfile = computed(
+    () => this.visibilityMode() === 'private' && this.vm().isLoggedIn,
+  );
 
   constructor() {
     this.route.paramMap

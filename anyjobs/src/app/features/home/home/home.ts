@@ -7,6 +7,8 @@ import {
   effect,
   ElementRef,
   inject,
+  Injector,
+  runInInjectionContext,
   signal,
   viewChild,
 } from '@angular/core';
@@ -62,6 +64,7 @@ export class Home {
   private readonly document = inject(DOCUMENT);
   private readonly auth = inject(AuthSessionService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
   private readonly sliderWrap = viewChild<ElementRef<HTMLElement>>('homeSliderWrap');
 
@@ -109,7 +112,9 @@ export class Home {
 
     effect(() => {
       if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
-      afterNextRender(() => this.setupRetentionTracking());
+      runInInjectionContext(this.injector, () => {
+        afterNextRender(() => this.setupRetentionTracking());
+      });
     });
   }
 

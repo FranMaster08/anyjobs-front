@@ -10,6 +10,7 @@ import { ModalComponent } from '../../../components/modal/modal';
 import { UserIdentityLinkComponent } from '../../../shared/components/user-identity-link/user-identity-link';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
+import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { ProposalsService } from '../../../shared/proposals/proposals.service';
 import { Proposal } from '../../../shared/proposals/proposals.models';
@@ -32,6 +33,10 @@ export class OpenRequestDetail {
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
   private readonly proposals = inject(ProposalsService);
+  private readonly analytics = inject(OpenRequestsAnalyticsService);
+
+  private detailViewStartedAt: number | null = null;
+  private trackedDetailRequestId: string | null = null;
   protected readonly authVm = inject(AuthSessionService).vm;
 
   protected readonly requestId = toSignal(this.route.paramMap.pipe(map((pm) => pm.get('id') ?? '')), {
@@ -57,12 +62,15 @@ export class OpenRequestDetail {
   protected readonly postulantesError = signal<string | null>(null);
 
   constructor() {
+    this.destroyRef.onDestroy(() => this.flushDetailDwellTime());
+
     this.route.paramMap
       .pipe(
         map((pm) => (pm.get('id') ?? '').trim()),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((id) => {
+        this.flushDetailDwellTime();
         this.load(id);
       });
   }
@@ -97,6 +105,11 @@ export class OpenRequestDetail {
   protected goToProposal(): void {
     const id = this.requestId();
     if (!id || this.isRequestOwner()) return;
+    this.analytics.track({
+      kind: 'proposalStarted',
+      openRequestId: id,
+      route: `/solicitudes/${id}/propuesta`,
+    });
     this.router.navigate(['/solicitudes', id, 'propuesta']);
   }
 
@@ -162,6 +175,22 @@ export class OpenRequestDetail {
       });
   }
 
+  private flushDetailDwellTime(): void {
+    const id = this.trackedDetailRequestId;
+    const startedAt = this.detailViewStartedAt;
+    this.detailViewStartedAt = null;
+    this.trackedDetailRequestId = null;
+    if (!id || startedAt === null) return;
+
+    const viewDurationMs = Math.max(0, Date.now() - startedAt);
+    this.analytics.track({
+      kind: 'timeOnDetailMs',
+      openRequestId: id,
+      route: `/solicitudes/${id}`,
+      viewDurationMs,
+    });
+  }
+
   private load(id: string): void {
     if (!id) {
       this.detail.set(null);
@@ -182,6 +211,15 @@ export class OpenRequestDetail {
           this.detail.set(detail);
           this.activeImageIndex.set(0);
           this.state.set('success');
+          this.detailViewStartedAt = Date.now();
+          if (this.trackedDetailRequestId !== id) {
+            this.trackedDetailRequestId = id;
+            this.analytics.track({
+              kind: 'requestDetailView',
+              openRequestId: id,
+              route: `/solicitudes/${id}`,
+            });
+          }
           this.loadPostulantesIfOwner(id, detail);
         },
         error: () => {

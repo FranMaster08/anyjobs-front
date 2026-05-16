@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { OpenRequestListItem } from '../../features/open-requests/open-requests.models';
@@ -17,7 +17,13 @@ import { OpenRequestListItem } from '../../features/open-requests/open-requests.
 })
 export class OpenRequestCardComponent {
   readonly request = input.required<OpenRequestListItem>();
+  readonly cardNavigate = output<string>();
+
   protected readonly ariaLabel = 'Ver detalle de la solicitud';
+
+  protected onCardNavigate(): void {
+    this.cardNavigate.emit(this.request().id);
+  }
 
   protected readonly trackByValue = (_: number, v: string) => v;
 

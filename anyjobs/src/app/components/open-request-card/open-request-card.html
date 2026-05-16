@@ -1,5 +1,10 @@
-<article class="card">
-  <a class="mediaLink" [routerLink]="detailLink" [attr.aria-label]="ariaLabel">
+<article class="card" [attr.data-open-request-id]="request().id">
+  <a
+    class="mediaLink"
+    [routerLink]="detailLink"
+    [attr.aria-label]="ariaLabel"
+    (click)="onCardNavigate()"
+  >
     <div class="media">
       <div class="mediaBadges" *ngIf="request().tags?.length">
         <span class="badge" *ngFor="let t of request().tags; let i = index" [hidden]="i > 1">{{
@@ -22,7 +27,7 @@
   </a>
 
   <div class="body">
-    <a class="titleLink" [routerLink]="detailLink">{{ request().excerpt }}</a>
+    <a class="titleLink" [routerLink]="detailLink" (click)="onCardNavigate()">{{ request().excerpt }}</a>
 
     <div
       class="meta"
@@ -42,7 +47,7 @@
     </div>
 
     <div class="actions">
-      <a class="btn" [routerLink]="detailLink">Ver detalles</a>
+      <a class="btn" [routerLink]="detailLink" (click)="onCardNavigate()">Ver detalles</a>
       <button
         type="button"
         class="btn btn--secondary"

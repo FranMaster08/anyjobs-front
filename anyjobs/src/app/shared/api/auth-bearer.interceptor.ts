@@ -8,6 +8,7 @@ import { USERS_API_URL } from './user.api';
 import { OPEN_REQUESTS_API_URL } from '../../features/open-requests/open-requests.service';
 import { PROPOSALS_API_URL } from '../proposals/proposals.service';
 import { SITE_CONFIG_URL } from '../site-config/site-config.service';
+import { USER_MEDIA_API_URL } from './user-media.api';
 
 /** Rutas con prefijo en `API_PREFIXES` (+ subrutas) reciben `Authorization: Bearer` si hay token (p. ej. POST/PATCH `/open-requests`, `/open-requests/mine`, `/proposals`). */
 const API_PREFIXES = [
@@ -17,6 +18,8 @@ const API_PREFIXES = [
   '/proposals',
   '/site-config',
   '/promo-slides',
+  '/user-media',
+  '/user-reels',
 ] as const;
 
 function normalizePathname(pathname: string): string {
@@ -45,6 +48,7 @@ export const authBearerInterceptor: HttpInterceptorFn = (req, next) => {
     new URL(inject(OPEN_REQUESTS_API_URL)).origin,
     new URL(inject(PROPOSALS_API_URL)).origin,
     new URL(inject(SITE_CONFIG_URL)).origin,
+    new URL(inject(USER_MEDIA_API_URL)).origin,
   ]);
 
   if (!allowedOrigins.has(resolved.origin)) return next(req);
