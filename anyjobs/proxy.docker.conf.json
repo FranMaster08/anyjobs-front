@@ -24,6 +24,26 @@
     "secure": false,
     "changeOrigin": true
   },
+  "/user-media": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/user-reels": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/feed": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/uploads": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
   "/site-config": {
     "target": "http://anyjobs-back:3000",
     "secure": false,
