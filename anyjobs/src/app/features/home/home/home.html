@@ -6,7 +6,7 @@
   } @else if (slides().length === 0) {
     <p class="homeSliderEmpty" role="status">No hay contenido promocional por ahora.</p>
   } @else {
-    <div class="homeSliderWrap">
+    <div #homeSliderWrap class="homeSliderWrap">
       <media-slider
         [slides]="slides()"
         (doubleTap)="onDoubleTap()"
