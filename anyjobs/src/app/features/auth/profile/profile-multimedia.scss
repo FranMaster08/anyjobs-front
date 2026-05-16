@@ -95,6 +95,84 @@
   scroll-snap-align: start;
 }
 
+.multimediaTileWrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.multimediaTile__delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(185, 28, 28, 0.92);
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.multimediaTile__deleteIcon {
+  display: block;
+}
+
+.multimediaConfirm__text {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.multimediaConfirm__error {
+  margin-bottom: 12px;
+}
+
+.multimediaConfirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.multimediaConfirm__deleteBtn {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #991b1b;
+    border-color: #991b1b;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+  }
+}
+
 .multimediaTile {
   position: relative;
   width: 112px;

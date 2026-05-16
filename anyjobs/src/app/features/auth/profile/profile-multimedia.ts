@@ -11,7 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, finalize, of, Subscription, switchMap } from 'rxjs';
+import { catchError, EMPTY, finalize, of, Subscription, switchMap } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
 import type { UserReelDto } from '../../../shared/api/user-media.api';
@@ -43,6 +43,9 @@ export class ProfileMultimediaComponent {
   protected readonly loadError = signal<string | null>(null);
   protected readonly uploadBusy = signal(false);
   protected readonly playerReel = signal<UserReelDto | null>(null);
+  protected readonly reelPendingDelete = signal<UserReelDto | null>(null);
+  protected readonly deleteBusy = signal(false);
+  protected readonly deleteError = signal<string | null>(null);
 
   private loadSub: Subscription | null = null;
 
@@ -113,6 +116,46 @@ export class ProfileMultimediaComponent {
 
   protected closePlayer(): void {
     this.playerReel.set(null);
+  }
+
+  protected requestDelete(reel: UserReelDto, event: Event): void {
+    event.stopPropagation();
+    this.deleteError.set(null);
+    this.reelPendingDelete.set(reel);
+  }
+
+  protected cancelDelete(): void {
+    if (this.deleteBusy()) return;
+    this.reelPendingDelete.set(null);
+    this.deleteError.set(null);
+  }
+
+  protected confirmDelete(): void {
+    const reel = this.reelPendingDelete();
+    if (!reel || this.deleteBusy()) return;
+
+    this.deleteBusy.set(true);
+    this.deleteError.set(null);
+
+    this.mediaApi
+      .deleteReel(reel.id)
+      .pipe(
+        catchError((err: unknown) => {
+          this.deleteError.set(this.resolveDeleteErrorMessage(err));
+          return EMPTY;
+        }),
+        finalize(() => this.deleteBusy.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        const id = reel.id;
+        this.reels.update((items) => items.filter((r) => r.id !== id));
+        if (this.playerReel()?.id === id) {
+          this.closePlayer();
+        }
+        this.reelPendingDelete.set(null);
+        this.reelsChanged.emit();
+      });
   }
 
   protected isVideo(reel: UserReelDto): boolean {
@@ -195,5 +238,24 @@ export class ProfileMultimediaComponent {
       return null;
     }
     return 'No se pudo cargar el contenido multimedia.';
+  }
+
+  private resolveDeleteErrorMessage(err: unknown): string {
+    if (!(err instanceof HttpErrorResponse)) {
+      return 'No se pudo eliminar el reel.';
+    }
+    if (err.status === 0) {
+      return 'Sin conexión con el servidor.';
+    }
+    if (err.status === 401) {
+      return 'Debes iniciar sesión para eliminar reels.';
+    }
+    if (err.status === 403) {
+      return 'No tienes permiso para eliminar este reel.';
+    }
+    if (err.status === 404) {
+      return 'El reel ya no existe o no se encontró.';
+    }
+    return 'No se pudo eliminar el reel.';
   }
 }

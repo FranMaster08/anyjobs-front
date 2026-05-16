@@ -49,38 +49,92 @@
       <ul class="multimediaGrid" role="list">
         @for (reel of reels(); track reel.id) {
           <li class="multimediaGrid__item">
-            <button type="button" class="multimediaTile" (click)="openPlayer(reel)">
-              @if (isVideo(reel)) {
-                <video
-                  class="multimediaTile__media"
-                  [src]="reel.media?.mediaUrl"
-                  muted
-                  playsinline
-                  preload="metadata"
-                ></video>
-              } @else {
-                <img
-                  class="multimediaTile__media"
-                  [src]="reel.media?.mediaUrl"
-                  alt=""
-                  loading="lazy"
-                />
+            <div class="multimediaTileWrap">
+              @if (isOwnProfile()) {
+                <button
+                  type="button"
+                  class="multimediaTile__delete"
+                  aria-label="Eliminar reel"
+                  (click)="requestDelete(reel, $event)"
+                >
+                  <svg
+                    class="multimediaTile__deleteIcon"
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"
+                    />
+                  </svg>
+                </button>
               }
-              <span class="multimediaTile__overlay">
-                @if (isOwnProfile() && reel.distributionStatus === 'draft') {
-                  <span class="multimediaTile__badge">{{ statusLabel(reel) }}</span>
+              <button type="button" class="multimediaTile" (click)="openPlayer(reel)">
+                @if (isVideo(reel)) {
+                  <video
+                    class="multimediaTile__media"
+                    [src]="reel.media?.mediaUrl"
+                    muted
+                    playsinline
+                    preload="metadata"
+                  ></video>
+                } @else {
+                  <img
+                    class="multimediaTile__media"
+                    [src]="reel.media?.mediaUrl"
+                    alt=""
+                    loading="lazy"
+                  />
                 }
-                @if (reel.caption) {
-                  <span class="multimediaTile__caption">{{ reel.caption }}</span>
-                }
-              </span>
-            </button>
+                <span class="multimediaTile__overlay">
+                  @if (isOwnProfile() && reel.distributionStatus === 'draft') {
+                    <span class="multimediaTile__badge">{{ statusLabel(reel) }}</span>
+                  }
+                  @if (reel.caption) {
+                    <span class="multimediaTile__caption">{{ reel.caption }}</span>
+                  }
+                </span>
+              </button>
+            </div>
           </li>
         }
       </ul>
     }
   </div>
 </section>
+
+<app-modal
+  [open]="reelPendingDelete() !== null"
+  title="Eliminar reel"
+  size="sm"
+  (closed)="cancelDelete()"
+>
+  <p class="multimediaConfirm__text">¿Estás seguro de que quieres borrar este reel?</p>
+  @if (deleteError()) {
+    <p class="multimediaError multimediaConfirm__error" role="alert">{{ deleteError() }}</p>
+  }
+  <div class="multimediaConfirm__actions">
+    <button
+      type="button"
+      class="btn btn--secondary"
+      [disabled]="deleteBusy()"
+      (click)="cancelDelete()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="btn multimediaConfirm__deleteBtn"
+      [disabled]="deleteBusy()"
+      (click)="confirmDelete()"
+    >
+      {{ deleteBusy() ? 'Eliminando…' : 'Eliminar' }}
+    </button>
+  </div>
+</app-modal>
 
 <app-modal
   [open]="playerReel() !== null"
