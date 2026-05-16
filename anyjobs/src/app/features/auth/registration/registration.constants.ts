@@ -44,11 +44,12 @@ export const PAYMENT_METHOD_LABEL_KEY: Record<PaymentMethod, string> = {
   WALLET: 'payment.wallet',
 };
 
-export const DOCUMENT_TYPE_OPTIONS: readonly DocumentType[] = ['DNI', 'NIE', 'PASSPORT'] as const;
+export const DOCUMENT_TYPE_OPTIONS: readonly DocumentType[] = ['DNI', 'NIE', 'PASSPORT', 'CC'] as const;
 export const DOCUMENT_TYPE_LABEL_KEY: Record<DocumentType, string> = {
   DNI: 'doc.dni',
   NIE: 'doc.nie',
   PASSPORT: 'doc.passport',
+  CC: 'doc.cc',
 };
 
 export const GENDER_OPTIONS: readonly Gender[] = ['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'] as const;
@@ -58,4 +59,18 @@ export const GENDER_LABEL_KEY: Record<Gender, string> = {
   OTHER: 'gender.other',
   PREFER_NOT_TO_SAY: 'gender.pnts',
 };
+
+export const SUPPORTED_COUNTRY_OPTIONS = [
+  { code: 'CO', labelKey: 'country.colombia' },
+  { code: 'AR', labelKey: 'country.argentina' },
+] as const;
+
+export type SupportedCountryCode = (typeof SUPPORTED_COUNTRY_OPTIONS)[number]['code'];
+
+export {
+  getDivisionsForCountry,
+  getMunicipalitiesForDivision,
+  getNeighborhoodsForMunicipality,
+  municipalityCatalogKey,
+} from '../../../shared/location/location-geography.data';
 

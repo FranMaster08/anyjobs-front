@@ -9,7 +9,19 @@ import type { AuthUser } from '../../../shared/auth/auth.models';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { UserApi } from '../../../shared/api/user.api';
 import type { UserPrivateProfileDto, UserPublicProfileDto } from '../../../shared/api/user-profile.models';
+import { I18nService } from '../../../shared/i18n/i18n.service';
 import { ProfileMultimediaComponent } from './profile-multimedia';
+import { ROLE_LABEL_KEY } from '../registration/registration.constants';
+import type { UserRole } from '../registration/registration.models';
+import {
+  capitalizeLabel,
+  documentTypeLabelKey,
+  formatNationalityLabel,
+  formatProfileLocationLine,
+  genderLabelKey,
+  residenceCountryLabelKey,
+  type ProfileLocationParts,
+} from './profile-display.utils';
 
 type ProfileTab = 'info' | 'activity' | 'multimedia' | 'score';
 
@@ -29,6 +41,7 @@ type FetchPrivateResult =
 export class Profile {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly i18n = inject(I18nService);
   protected readonly auth = inject(AuthSessionService);
   protected readonly userApi = inject(UserApi);
   protected readonly vm = this.auth.vm;
@@ -68,14 +81,61 @@ export class Profile {
     return name.slice(0, 1).toUpperCase();
   });
 
-  protected readonly locationLine = computed(() => {
+  private readonly locationParts = computed((): ProfileLocationParts => {
     const priv = this.privateProfile();
     const pub = this.publicProfile();
-    const city = priv?.city ?? pub?.city;
-    const area = priv?.area ?? pub?.area;
-    const cc = priv?.countryCode ?? pub?.countryCode;
-    const bits = [city, area, cc].filter(Boolean);
-    return bits.length ? bits.join(' · ') : null;
+    const session = this.vm().user;
+    return {
+      countryCode: priv?.countryCode ?? pub?.countryCode ?? session?.countryCode,
+      division: priv?.city ?? pub?.city ?? session?.city,
+      municipality: priv?.municipality ?? pub?.municipality ?? session?.municipality,
+      area: priv?.area ?? pub?.area ?? session?.area,
+    };
+  });
+
+  protected readonly locationLine = computed(() =>
+    formatProfileLocationLine(this.locationParts(), (code) => {
+      const key = residenceCountryLabelKey(code);
+      return key ? this.i18n.t(key) : undefined;
+    }),
+  );
+
+  protected readonly locationCountryLabel = computed(() => {
+    const code = this.locationParts().countryCode?.trim().toUpperCase();
+    if (!code) return null;
+    const key = residenceCountryLabelKey(code);
+    return key ? this.i18n.t(key) : code;
+  });
+
+  protected readonly locationDivision = computed(() => this.locationParts().division?.trim() || null);
+  protected readonly locationMunicipality = computed(() => this.locationParts().municipality?.trim() || null);
+  protected readonly locationArea = computed(() => this.locationParts().area?.trim() || null);
+
+  protected readonly documentTypeLabel = computed(() => {
+    const type = this.privateProfile()?.documentType;
+    if (!type) return null;
+    const key = documentTypeLabelKey(type);
+    return key ? this.i18n.t(key) : capitalizeLabel(type);
+  });
+
+  protected readonly nationalityLabel = computed(() => {
+    const code = this.privateProfile()?.nationality;
+    return formatNationalityLabel(code, this.i18n.lang());
+  });
+
+  protected readonly genderLabel = computed(() => {
+    const gender = this.privateProfile()?.gender;
+    if (!gender) return null;
+    const key = genderLabelKey(gender);
+    return key ? this.i18n.t(key) : capitalizeLabel(gender);
+  });
+
+  protected readonly statusLabel = computed(() => {
+    const status = this.privateProfile()?.status;
+    if (!status) return null;
+    if (status === 'ACTIVE') return 'Activo';
+    if (status === 'PENDING') return 'Pendiente';
+    return capitalizeLabel(status);
   });
 
   protected readonly bioText = computed(() => {
@@ -94,7 +154,14 @@ export class Profile {
     const priv = this.privateProfile();
     const pub = this.publicProfile();
     const roles = priv?.roles ?? pub?.roles ?? this.vm().user?.roles;
-    return roles?.length ? roles.join(', ') : null;
+    if (!roles?.length) return null;
+    const labels = roles
+      .map((role) => {
+        const key = ROLE_LABEL_KEY[role as UserRole];
+        return key ? this.i18n.t(key) : capitalizeLabel(role);
+      })
+      .filter(Boolean);
+    return labels.length ? labels.join(', ') : null;
   });
 
   protected readonly metrics = computed(() => {
@@ -185,6 +252,7 @@ export class Profile {
       phoneVerified: u.phoneVerified,
       countryCode: u.countryCode,
       city: u.city,
+      municipality: u.municipality,
       area: u.area,
       coverageRadiusKm: u.coverageRadiusKm,
       workerHeadline: u.workerHeadline,

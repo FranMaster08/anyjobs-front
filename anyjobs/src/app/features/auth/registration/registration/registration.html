@@ -17,19 +17,25 @@
 
   @if (stage() === 'ACCOUNT') {
     <form class="regCard" [formGroup]="accountForm" (ngSubmit)="onAccountContinue()">
+      @if (resumedRegistration()) {
+        <p class="regHint">{{ t('reg.resumeHint') }}</p>
+      }
       <div class="regGrid">
         <div class="regField">
           <label class="fieldLabel" for="fullName">{{ t('field.fullName') }}</label>
           <input id="fullName" class="fieldControl" formControlName="fullName" autocomplete="name" />
-          @if (accountForm.controls.fullName.touched && accountForm.controls.fullName.invalid) {
+          @if (showAccountError(accountForm.controls.fullName)) {
             <p class="regError">{{ t('error.fullNameMin') }}</p>
           }
         </div>
 
         <div class="regField">
           <label class="fieldLabel" for="email">{{ t('field.email') }}</label>
-          <input id="email" class="fieldControl" formControlName="email" autocomplete="email" />
-          @if (accountForm.controls.email.touched && accountForm.controls.email.invalid) {
+          <input id="email" type="email" class="fieldControl" formControlName="email" autocomplete="email" />
+          @if (accountForm.controls.email.pending) {
+            <p class="regHint">{{ t('reg.checkingAvailability') }}</p>
+          }
+          @if (showAccountError(accountForm.controls.email)) {
             @if (accountForm.controls.email.errors?.['email']) {
               <p class="regError">{{ t('error.emailInvalid') }}</p>
             }
@@ -43,12 +49,16 @@
           <label class="fieldLabel" for="phoneNumber">{{ t('field.phone') }}</label>
           <input
             id="phoneNumber"
+            type="tel"
             class="fieldControl"
             formControlName="phoneNumber"
             placeholder="+34123456789"
             autocomplete="tel"
           />
-          @if (accountForm.controls.phoneNumber.touched && accountForm.controls.phoneNumber.invalid) {
+          @if (accountForm.controls.phoneNumber.pending) {
+            <p class="regHint">{{ t('reg.checkingAvailability') }}</p>
+          }
+          @if (showAccountError(accountForm.controls.phoneNumber)) {
             @if (accountForm.controls.phoneNumber.errors?.['e164Phone']) {
               <p class="regError">{{ t('error.phoneE164') }}</p>
             }
@@ -61,7 +71,7 @@
         <div class="regField">
           <label class="fieldLabel" for="password">{{ t('field.password') }}</label>
           <input id="password" type="password" class="fieldControl" formControlName="password" />
-          @if (accountForm.controls.password.touched && accountForm.controls.password.invalid) {
+          @if (showAccountError(accountForm.controls.password)) {
             <p class="regError">{{ t('error.passwordWeak') }}</p>
           }
         </div>
@@ -81,7 +91,7 @@
             </button>
           }
         </div>
-        @if (accountForm.controls.selectedRoles.touched && accountForm.controls.selectedRoles.invalid) {
+        @if (showAccountError(accountForm.controls.selectedRoles)) {
           <p class="regError">{{ t('error.rolesRequired') }}</p>
         }
       </div>
@@ -91,7 +101,7 @@
           <input type="checkbox" formControlName="acceptTerms" />
           <span>{{ t('field.terms') }}</span>
         </label>
-        @if (accountForm.controls.acceptTerms.touched && accountForm.controls.acceptTerms.invalid) {
+        @if (showAccountError(accountForm.controls.acceptTerms)) {
           <p class="regError">{{ t('error.termsRequired') }}</p>
         }
       </div>
@@ -100,8 +110,22 @@
         <p class="regError">{{ accountForm.errors?.['api'] }}</p>
       }
 
+      @if (accountErrorSummary().length > 0) {
+        <div class="regErrorSummary" role="alert" aria-live="polite">
+          <p class="regErrorSummary__title">{{ t('reg.error.fixFollowing') }}</p>
+          <ul class="regErrorSummary__list">
+            @for (msg of accountErrorSummary(); track msg) {
+              <li class="regErrorSummary__item">{{ msg }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (accountValidationAttempted() && accountFormPending()) {
+        <p class="regHint">{{ t('reg.checkingAvailability') }}</p>
+      }
+
       <footer class="regActions">
-        <button class="btn" type="submit" [disabled]="accountForm.invalid || isBusy()">{{ t('btn.continue') }}</button>
+        <button class="btn" type="submit" [disabled]="accountContinueBlocked()">{{ t('btn.continue') }}</button>
       </footer>
     </form>
   }
@@ -122,7 +146,7 @@
       <div class="regGrid" [formGroup]="verifyForm">
         <div class="regField">
           <label class="fieldLabel" for="emailOtp">{{ t('verify.otp.email') }}</label>
-          <input id="emailOtp" class="fieldControl" formControlName="emailOtp" inputmode="numeric" />
+          <input id="emailOtp" type="text" class="fieldControl" formControlName="emailOtp" inputmode="numeric" autocomplete="one-time-code" />
           <div class="regInlineActions">
             <button type="button" class="btn btn--secondary btn--sm" [disabled]="isBusy()" (click)="verifyEmail()">
               {{ t('btn.verifyEmail') }}
@@ -141,7 +165,7 @@
 
         <div class="regField">
           <label class="fieldLabel" for="smsOtp">{{ t('verify.otp.sms') }}</label>
-          <input id="smsOtp" class="fieldControl" formControlName="smsOtp" inputmode="numeric" />
+          <input id="smsOtp" type="text" class="fieldControl" formControlName="smsOtp" inputmode="numeric" autocomplete="one-time-code" />
           <div class="regInlineActions">
             <button type="button" class="btn btn--secondary btn--sm" [disabled]="isBusy()" (click)="verifyPhone()">
               {{ t('btn.verifyPhone') }}
@@ -158,6 +182,10 @@
           }
         </div>
       </div>
+
+      @if (verifyContinueHint(); as hint) {
+        <p class="regHint">{{ hint }}</p>
+      }
 
       <footer class="regActions regActions--split">
         <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
@@ -177,21 +205,94 @@
 
       <div class="regGrid">
         <div class="regField">
-          <label class="fieldLabel" for="city">{{ t('location.city') }}</label>
-          <input id="city" class="fieldControl" formControlName="city" />
-          @if (locationForm.controls.city.touched && locationForm.controls.city.invalid) {
-            <p class="regError">{{ t('error.cityRequired') }}</p>
+          <label class="fieldLabel" for="countryCode">{{ t('location.country') }}</label>
+          <select id="countryCode" class="fieldControl" formControlName="countryCode">
+            <option value="">{{ t('location.selectCountry') }}</option>
+            @for (c of countryOptions; track c.code) {
+              <option [value]="c.code">{{ t(c.labelKey) }}</option>
+            }
+          </select>
+          @if (showLocationError(locationForm.controls.countryCode)) {
+            <p class="regError">{{ t('reg.error.countryCode') }}</p>
           }
         </div>
 
         <div class="regField">
-          <label class="fieldLabel" for="area">{{ t('location.areaOptional') }}</label>
-          <input id="area" class="fieldControl" formControlName="area" />
+          <label class="fieldLabel" for="city">{{ t('location.city') }}</label>
+          <select
+            id="city"
+            class="fieldControl"
+            formControlName="city"
+            [disabled]="!locationForm.controls.countryCode.value"
+          >
+            <option value="">{{ t('location.selectCity') }}</option>
+            @for (city of locationCityOptions(); track city) {
+              <option [value]="city">{{ city }}</option>
+            }
+          </select>
+          @if (!locationForm.controls.countryCode.value) {
+            <p class="regHint">{{ t('location.cityHint') }}</p>
+          }
+          @if (showLocationError(locationForm.controls.city)) {
+            @if (locationForm.controls.city.errors?.['required']) {
+              <p class="regError">{{ t('error.cityRequired') }}</p>
+            }
+            @if (locationForm.controls.city.errors?.['cityNotInCountry']) {
+              <p class="regError">{{ t('reg.error.cityInvalid') }}</p>
+            }
+          }
         </div>
 
         <div class="regField">
-          <label class="fieldLabel" for="countryCode">{{ t('location.countryOptional') }}</label>
-          <input id="countryCode" class="fieldControl" formControlName="countryCode" placeholder="ES" />
+          <label class="fieldLabel" for="municipality">{{ t('location.municipality') }}</label>
+          <select
+            id="municipality"
+            class="fieldControl"
+            formControlName="municipality"
+            [disabled]="!locationForm.controls.city.value"
+          >
+            <option value="">{{ t('location.selectMunicipality') }}</option>
+            @for (municipality of locationMunicipalityOptions(); track municipality) {
+              <option [value]="municipality">{{ municipality }}</option>
+            }
+          </select>
+          @if (!locationForm.controls.city.value) {
+            <p class="regHint">{{ t('location.municipalityHint') }}</p>
+          }
+          @if (showLocationError(locationForm.controls.municipality)) {
+            @if (locationForm.controls.municipality.errors?.['required']) {
+              <p class="regError">{{ t('reg.error.municipalityRequired') }}</p>
+            }
+            @if (locationForm.controls.municipality.errors?.['municipalityNotInDivision']) {
+              <p class="regError">{{ t('reg.error.municipalityInvalid') }}</p>
+            }
+          }
+        </div>
+
+        <div class="regField">
+          <label class="fieldLabel" for="area">{{ t('location.neighborhood') }}</label>
+          <input
+            id="area"
+            class="fieldControl"
+            type="text"
+            formControlName="area"
+            [attr.placeholder]="t('location.neighborhoodPlaceholder')"
+            [disabled]="!locationForm.controls.municipality.value"
+          />
+          @if (!locationForm.controls.municipality.value) {
+            <p class="regHint">{{ t('location.neighborhoodHint') }}</p>
+          }
+          @if (showLocationError(locationForm.controls.area)) {
+            @if (locationForm.controls.area.errors?.['required']) {
+              <p class="regError">{{ t('reg.error.areaRequired') }}</p>
+            }
+            @if (locationForm.controls.area.errors?.['minlength']) {
+              <p class="regError">{{ t('reg.error.areaTooShort') }}</p>
+            }
+            @if (locationForm.controls.area.errors?.['maxlength']) {
+              <p class="regError">{{ t('reg.error.areaTooLong') }}</p>
+            }
+          }
         </div>
 
         @if (isWorker()) {
@@ -208,9 +309,20 @@
         }
       </div>
 
+      @if (locationErrorSummary().length > 0) {
+        <div class="regErrorSummary" role="alert" aria-live="polite">
+          <p class="regErrorSummary__title">{{ t('reg.error.fixFollowing') }}</p>
+          <ul class="regErrorSummary__list">
+            @for (msg of locationErrorSummary(); track msg) {
+              <li class="regErrorSummary__item">{{ msg }}</li>
+            }
+          </ul>
+        </div>
+      }
+
       <footer class="regActions regActions--split">
         <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
-        <button class="btn" type="submit" [disabled]="locationForm.invalid || isBusy()">{{ t('btn.continue') }}</button>
+        <button class="btn" type="submit" [disabled]="isBusy()">{{ t('btn.continue') }}</button>
       </footer>
     </form>
   }
@@ -241,7 +353,7 @@
             {{ t('profile.categoriesSelected') }}:
             {{ workerProfileForm.controls.categories.value.join(', ') || '—' }}
           </p>
-          @if (workerProfileForm.controls.categories.touched && workerProfileForm.controls.categories.invalid) {
+          @if (showProfileCategoriesError()) {
             <p class="regError">{{ t('error.categoriesRequired') }}</p>
           }
         </div>
@@ -259,8 +371,15 @@
         </div>
       }
 
-      @if (workerProfileForm.errors?.['api']) {
-        <p class="regError">{{ workerProfileForm.errors?.['api'] }}</p>
+      @if (profileErrorSummary().length > 0) {
+        <div class="regErrorSummary" role="alert" aria-live="polite">
+          <p class="regErrorSummary__title">{{ t('reg.error.fixFollowing') }}</p>
+          <ul class="regErrorSummary__list">
+            @for (msg of profileErrorSummary(); track msg) {
+              <li class="regErrorSummary__item">{{ msg }}</li>
+            }
+          </ul>
+        </div>
       }
 
       <footer class="regActions regActions--split">
@@ -291,7 +410,7 @@
               <option [value]="d">{{ t(documentTypeLabelKey[d]) }}</option>
             }
           </select>
-          @if (personalForm.controls.documentType.touched && personalForm.controls.documentType.invalid) {
+          @if (showPersonalError(personalForm.controls.documentType)) {
             <p class="regError">{{ t('error.docTypeRequired') }}</p>
           }
         </div>
@@ -299,16 +418,38 @@
         <div class="regField">
           <label class="fieldLabel" for="documentNumber">{{ t('personal.docNumber') }}</label>
           <input id="documentNumber" class="fieldControl" formControlName="documentNumber" autocomplete="off" />
-          @if (personalForm.controls.documentNumber.touched && personalForm.controls.documentNumber.invalid) {
-            <p class="regError">{{ t('error.docNumberRequired') }}</p>
+          @if (showPersonalError(personalForm.controls.documentNumber)) {
+            @if (personalForm.controls.documentNumber.errors?.['required']) {
+              <p class="regError">{{ t('error.docNumberRequired') }}</p>
+            }
+            @if (personalForm.controls.documentNumber.errors?.['minlength']) {
+              <p class="regError">{{ t('reg.error.documentNumberMin') }}</p>
+            }
+            @if (personalForm.controls.documentNumber.errors?.['maxlength']) {
+              <p class="regError">{{ t('reg.error.documentNumberMax') }}</p>
+            }
           }
         </div>
 
         <div class="regField">
           <label class="fieldLabel" for="birthDate">{{ t('personal.birthDate') }}</label>
-          <input id="birthDate" type="date" class="fieldControl" formControlName="birthDate" />
-          @if (personalForm.controls.birthDate.touched && personalForm.controls.birthDate.invalid) {
-            <p class="regError">{{ t('error.birthDateRequired') }}</p>
+          <input
+            id="birthDate"
+            type="date"
+            class="fieldControl"
+            formControlName="birthDate"
+            [attr.max]="birthDateMax()"
+          />
+          @if (showPersonalError(personalForm.controls.birthDate)) {
+            @if (personalForm.controls.birthDate.errors?.['required']) {
+              <p class="regError">{{ t('error.birthDateRequired') }}</p>
+            }
+            @if (personalForm.controls.birthDate.errors?.['underage']) {
+              <p class="regError">{{ t('reg.error.birthDateUnderage') }}</p>
+            }
+            @if (personalForm.controls.birthDate.errors?.['invalidBirthDate']) {
+              <p class="regError">{{ t('reg.error.birthDate') }}</p>
+            }
           }
         </div>
 
@@ -320,27 +461,44 @@
               <option [value]="g">{{ t(genderLabelKey[g]) }}</option>
             }
           </select>
+          @if (showPersonalError(personalForm.controls.gender)) {
+            <p class="regError">{{ t('reg.error.gender') }}</p>
+          }
         </div>
 
         <div class="regField">
           <label class="fieldLabel" for="nationality">{{ t('personal.nationality') }}</label>
-          <input id="nationality" class="fieldControl" formControlName="nationality" placeholder="ES" />
+          <select id="nationality" class="fieldControl" formControlName="nationality">
+            <option value="">{{ t('personal.selectNationality') }}</option>
+            @for (country of nationalityOptions(); track country.code) {
+              <option [value]="country.code">{{ country.label }}</option>
+            }
+          </select>
+          @if (showPersonalError(personalForm.controls.nationality)) {
+            @if (personalForm.controls.nationality.errors?.['required']) {
+              <p class="regError">{{ t('reg.error.nationality') }}</p>
+            }
+            @if (personalForm.controls.nationality.errors?.['isoCountryCode']) {
+              <p class="regError">{{ t('reg.error.nationalityInvalid') }}</p>
+            }
+          }
         </div>
       </div>
 
-      @if (personalForm.errors?.['api']) {
-        <p class="regError">{{ personalForm.errors?.['api'] }}</p>
+      @if (personalErrorSummary().length > 0) {
+        <div class="regErrorSummary" role="alert" aria-live="polite">
+          <p class="regErrorSummary__title">{{ t('reg.error.fixFollowing') }}</p>
+          <ul class="regErrorSummary__list">
+            @for (msg of personalErrorSummary(); track msg) {
+              <li class="regErrorSummary__item">{{ msg }}</li>
+            }
+          </ul>
+        </div>
       }
 
       <footer class="regActions regActions--split">
         <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
-        <button
-          class="btn"
-          type="submit"
-          [disabled]="(isWorker() && personalForm.invalid) || isBusy()"
-        >
-          {{ t('btn.continue') }}
-        </button>
+        <button class="btn" type="submit" [disabled]="isBusy()">{{ t('btn.continue') }}</button>
       </footer>
     </form>
   }

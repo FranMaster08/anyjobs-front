@@ -19,7 +19,7 @@ export interface RegistrationStateVM {
   workerCategoriesCount?: number;
 }
 
-export type DocumentType = 'DNI' | 'NIE' | 'PASSPORT';
+export type DocumentType = 'DNI' | 'NIE' | 'PASSPORT' | 'CC';
 
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
 
@@ -33,9 +33,10 @@ export interface RegisterFormVM {
 }
 
 export interface LocationFormVM {
-  countryCode?: string;
+  countryCode: string;
   city: string;
-  area?: string;
+  municipality: string;
+  area: string;
   coverageRadiusKm?: number;
 }
 

@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { Registration } from './registration';
 import { RegistrationStateService } from '../registration-state.service';
 import { AuthApi } from '../../../../shared/api/auth.api';
+import { buildLocationCatalogResponse } from '../../../../shared/location/location-geography.data';
 
 /** Expone en tests la API `protected` del componente sin usar `any`. */
 interface RegistrationTestHarness {
@@ -33,33 +34,33 @@ describe('Registration', () => {
   let reg: RegistrationStateService;
 
   beforeEach(async () => {
+    const catalog = buildLocationCatalogResponse();
     const authMock: Pick<
       AuthApi,
-      | 'register'
-      | 'verifyEmail'
-      | 'verifyPhone'
-      | 'updateRegistrationLocation'
-      | 'updateRegistrationWorkerProfile'
-      | 'updateRegistrationClientProfile'
-      | 'updateRegistrationPersonalInfo'
-      | 'completeRegistration'
+      | 'completeOnboardingRegistration'
+      | 'getLocationCatalog'
+      | 'getDivisionsByCountry'
+      | 'getMunicipalitiesByDivision'
       | 'isEmailAvailable'
       | 'isPhoneAvailable'
     > = {
-      register: () =>
+      completeOnboardingRegistration: () => of(void 0),
+      getLocationCatalog: () => of(catalog),
+      getDivisionsByCountry: (countryCode: string) =>
         of({
-          status: 'PENDING',
-          emailVerificationRequired: true,
-          phoneVerificationRequired: false,
-          nextStage: 'VERIFY',
+          countryCode: countryCode.toUpperCase(),
+          divisions: [...(catalog[countryCode.toUpperCase() as keyof typeof catalog]?.divisions ?? [])],
         }),
-      verifyEmail: () => of(void 0),
-      verifyPhone: () => of(void 0),
-      updateRegistrationLocation: () => of(void 0),
-      updateRegistrationWorkerProfile: () => of(void 0),
-      updateRegistrationClientProfile: () => of(void 0),
-      updateRegistrationPersonalInfo: () => of(void 0),
-      completeRegistration: () => of(void 0),
+      getMunicipalitiesByDivision: (countryCode: string, division: string) =>
+        of({
+          countryCode: countryCode.toUpperCase(),
+          division,
+          municipalities: [
+            ...(catalog[countryCode.toUpperCase() as keyof typeof catalog]?.municipalitiesByDivision[
+              division
+            ] ?? []),
+          ],
+        }),
       isEmailAvailable: () => of(true),
       isPhoneAvailable: () => of(true),
     };
@@ -91,6 +92,9 @@ describe('Registration', () => {
       acceptTerms: true,
       selectedRoles: ['CLIENT'],
     });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
     c.onAccountContinue();
     fixture.detectChanges();
@@ -112,9 +116,10 @@ describe('Registration', () => {
     expect(reg.vm().stage).toBe('LOCATION');
 
     c.locationForm.setValue({
-      countryCode: 'ES',
-      city: 'Madrid',
-      area: '',
+      countryCode: 'CO',
+      city: 'Bogotá D.C.',
+      municipality: 'Bogotá',
+      area: 'Chapinero',
       coverageRadiusKm: null,
     });
 
@@ -152,6 +157,9 @@ describe('Registration', () => {
       acceptTerms: true,
       selectedRoles: ['WORKER'],
     });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
     c.onAccountContinue();
     fixture.detectChanges();
@@ -172,7 +180,13 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('LOCATION');
 
-    c.locationForm.controls['city'].setValue('Barcelona');
+    c.locationForm.setValue({
+      countryCode: 'AR',
+      city: 'Ciudad Autónoma de Buenos Aires',
+      municipality: 'Ciudad Autónoma de Buenos Aires',
+      area: 'Palermo',
+      coverageRadiusKm: null,
+    });
     c.onLocationContinue();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -196,11 +210,11 @@ describe('Registration', () => {
     expect(reg.vm().stage).toBe('PERSONAL_INFO');
 
     c.personalForm.setValue({
-      documentType: 'DNI',
-      documentNumber: '12345678A',
+      documentType: 'CC',
+      documentNumber: '1234567890',
       birthDate: '1990-01-01',
-      gender: '',
-      nationality: 'ES',
+      gender: 'MALE',
+      nationality: 'CO',
     });
     c.onPersonalContinue();
     fixture.detectChanges();
@@ -208,6 +222,32 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('DONE');
     expect(reg.vm().listable).toBe(true);
+  });
+
+  it('does not complete WORKER personal step without required fields', async () => {
+    reg.reset();
+    reg.setStage('PERSONAL_INFO');
+    reg.setEmailVerified(true);
+    reg.setPhoneVerified(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const c = registrationHarness(component);
+    c.accountForm.controls['selectedRoles'].setValue(['WORKER']);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    c.personalForm.setValue({
+      documentType: 'PASSPORT',
+      documentNumber: 'AB123456',
+      birthDate: '1990-01-01',
+      gender: '',
+      nationality: '',
+    });
+    c.onPersonalContinue();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(reg.vm().stage).toBe('PERSONAL_INFO');
   });
 });
 

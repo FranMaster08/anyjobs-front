@@ -147,10 +147,30 @@
           <h2 class="profileSectionTitle">Ubicación</h2>
           <div class="profileList">
             @if (locationLine()) {
-              <p class="profileRow">
-                <span class="profileLabel">Zona</span>
-                <span class="profileValue">{{ locationLine() }}</span>
-              </p>
+              @if (locationCountryLabel()) {
+                <p class="profileRow">
+                  <span class="profileLabel">País</span>
+                  <span class="profileValue">{{ locationCountryLabel() }}</span>
+                </p>
+              }
+              @if (locationDivision()) {
+                <p class="profileRow">
+                  <span class="profileLabel">Departamento / Provincia</span>
+                  <span class="profileValue">{{ locationDivision() }}</span>
+                </p>
+              }
+              @if (locationMunicipality()) {
+                <p class="profileRow">
+                  <span class="profileLabel">Municipio</span>
+                  <span class="profileValue">{{ locationMunicipality() }}</span>
+                </p>
+              }
+              @if (locationArea()) {
+                <p class="profileRow">
+                  <span class="profileLabel">Barrio</span>
+                  <span class="profileValue">{{ locationArea() }}</span>
+                </p>
+              }
             } @else {
               <p class="profileHint">Sin datos de ubicación.</p>
             }
@@ -160,7 +180,7 @@
           <section class="profileCard">
             <h2 class="profileSectionTitle">Estado</h2>
             <div class="profileBadges" aria-label="Estado de cuenta">
-              <span class="profileBadge profileBadge--ok">Status: {{ privateProfile()!.status ?? '—' }}</span>
+              <span class="profileBadge profileBadge--ok">Estado: {{ statusLabel() ?? '—' }}</span>
               <span class="profileBadge" [class.profileBadge--ok]="privateProfile()!.emailVerified">
                 Email: {{ privateProfile()!.emailVerified ? 'sí' : 'no' }}
               </span>
@@ -175,7 +195,7 @@
               <p class="profileRow">
                 <span class="profileLabel">Documento</span>
                 <span class="profileValue">
-                  {{ privateProfile()!.documentType ?? '—' }} {{ privateProfile()!.documentNumber ?? '' }}
+                  {{ documentTypeLabel() ?? '—' }} {{ privateProfile()!.documentNumber ?? '' }}
                 </span>
               </p>
               <p class="profileRow">
@@ -184,11 +204,11 @@
               </p>
               <p class="profileRow">
                 <span class="profileLabel">Género</span>
-                <span class="profileValue">{{ privateProfile()!.gender ?? '—' }}</span>
+                <span class="profileValue">{{ genderLabel() ?? '—' }}</span>
               </p>
               <p class="profileRow">
                 <span class="profileLabel">Nacionalidad</span>
-                <span class="profileValue">{{ privateProfile()!.nationality ?? '—' }}</span>
+                <span class="profileValue">{{ nationalityLabel() ?? '—' }}</span>
               </p>
             </div>
           </section>

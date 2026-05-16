@@ -69,7 +69,7 @@ o, si quieres algo más estructurado:
 - **UserRole**: `"CLIENT" | "WORKER"`
 - **RegistrationStatus**: `"PENDING" | "ACTIVE"`
 - **RegistrationStage**: `"ACCOUNT" | "VERIFY" | "LOCATION" | "ROLE_PROFILE" | "PERSONAL_INFO" | "DONE"`
-- **DocumentType**: `"DNI" | "NIE" | "PASSPORT"`
+- **DocumentType**: `"DNI" | "NIE" | "PASSPORT" | "CC"` (`CC` = cédula de ciudadanía, Colombia)
 - **Gender**: `"MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY"`
 - **PreferredPaymentMethod**: `"CARD" | "TRANSFER" | "CASH" | "WALLET"`
 
@@ -258,10 +258,10 @@ Estos endpoints se usan en el wizard de registro para completar perfil. El front
 }
 ```
 
-**Reglas según el front**:
-- `city` es requerido en UI.
+**Reglas según el front** (onboarding registro):
+- `city`, `area` y `countryCode` son **obligatorios** en UI y en `PATCH /auth/registration/location`.
+- `countryCode` y `nationality` usan código ISO-3166 alpha-2 en mayúsculas (ej. `ES`, `CO`).
 - `coverageRadiusKm` se envía solo si el usuario eligió rol `WORKER` y el valor es numérico.
-- `area`, `countryCode` se envían solo si no están vacíos.
 
 **Response**: `204 No Content` recomendado.
 
@@ -316,9 +316,10 @@ Estos endpoints se usan en el wizard de registro para completar perfil. El front
 }
 ```
 
-**Reglas según el front**:
-- Si el usuario NO es `WORKER` y no completa nada, el front ni siquiera llama al endpoint.
-- Para `WORKER`, UI exige `documentType`, `documentNumber` (min 5, max 24) y `birthDate`.
+**Reglas según el front** (onboarding registro):
+- Si el usuario **no** es `WORKER`, el front llama solo a `POST /auth/registration/complete` sin datos personales.
+- Para `WORKER`, el front envía en **un solo body completo** a `PATCH /auth/registration/personal-info`: `documentType`, `documentNumber` (min 5, max 24), `birthDate` (`YYYY-MM-DD`), `gender` y `nationality` (ISO-2).
+- Errores de validación: `400` con `errorCode: "VALIDATION.INVALID_INPUT"` y `details.fieldErrors` por campo; el front mapea a mensajes accionables (no “Error inesperado” para validaciones previsibles).
 
 **Response**: `204` recomendado.
 

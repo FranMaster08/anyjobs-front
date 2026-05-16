@@ -15,6 +15,7 @@ export interface AuthUser {
   // Location (MVP)
   countryCode?: string;
   city?: string;
+  municipality?: string;
   area?: string;
   coverageRadiusKm?: number;
 

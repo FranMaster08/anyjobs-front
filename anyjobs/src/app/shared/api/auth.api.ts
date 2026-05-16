@@ -3,7 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { delay, map, Observable, of } from 'rxjs';
 
-import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, VerifyOtpRequest } from './auth.models';
+import {
+  CompleteOnboardingRegistrationRequest,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  RegistrationStatusResponse,
+  VerifyOtpRequest,
+} from './auth.models';
+import { buildLocationCatalogResponse, type LocationCatalog } from '../location/location-geography.data';
 import { createMockId } from './api.utils';
 import {
   UpdateClientProfileRequest,
@@ -84,6 +93,59 @@ export class AuthApi {
   completeRegistration(): Observable<void> {
     if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
     return this.http.post<void>(`${this.apiUrl}/registration/complete`, {});
+  }
+
+  completeOnboardingRegistration(req: CompleteOnboardingRegistrationRequest): Observable<void> {
+    if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(350));
+    return this.http.post<void>(`${this.apiUrl}/register/complete`, req);
+  }
+
+  getLocationCatalog(): Observable<LocationCatalog> {
+    if (this.apiUrl.includes('/mock/')) {
+      return of(buildLocationCatalogResponse()).pipe(delay(100));
+    }
+    return this.http.get<LocationCatalog>(`${this.apiUrl}/location-catalog`);
+  }
+
+  getDivisionsByCountry(countryCode: string): Observable<{ countryCode: string; divisions: string[] }> {
+    const code = countryCode.trim().toUpperCase();
+    if (this.apiUrl.includes('/mock/')) {
+      const catalog = buildLocationCatalogResponse();
+      return of({
+        countryCode: code,
+        divisions: [...(catalog[code as keyof LocationCatalog]?.divisions ?? [])],
+      }).pipe(delay(100));
+    }
+    return this.http.get<{ countryCode: string; divisions: string[] }>(`${this.apiUrl}/location-catalog`, {
+      params: { countryCode: code },
+    });
+  }
+
+  getMunicipalitiesByDivision(
+    countryCode: string,
+    division: string,
+  ): Observable<{ countryCode: string; division: string; municipalities: string[] }> {
+    const code = countryCode.trim().toUpperCase();
+    const divisionName = division.trim();
+    if (this.apiUrl.includes('/mock/')) {
+      const catalog = buildLocationCatalogResponse();
+      const municipalities =
+        catalog[code as keyof LocationCatalog]?.municipalitiesByDivision[divisionName] ?? [];
+      return of({ countryCode: code, division: divisionName, municipalities: [...municipalities] }).pipe(
+        delay(100),
+      );
+    }
+    return this.http.get<{ countryCode: string; division: string; municipalities: string[] }>(
+      `${this.apiUrl}/location-catalog`,
+      { params: { countryCode: code, division: divisionName } },
+    );
+  }
+
+  getRegistrationStatus(): Observable<RegistrationStatusResponse> {
+    if (this.apiUrl.includes('/mock/')) {
+      return of({ active: false });
+    }
+    return this.http.get<RegistrationStatusResponse>(`${this.apiUrl}/registration/status`);
   }
 
   isEmailAvailable(email: string): Observable<boolean> {

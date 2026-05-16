@@ -1,7 +1,13 @@
 import { FormControl } from '@angular/forms';
 
 import { UserRole } from './registration.models';
-import { e164PhoneValidator, rolesRequiredValidator, strongPasswordValidator } from './registration.validators';
+import {
+  e164PhoneValidator,
+  minimumAgeValidator,
+  rolesRequiredValidator,
+  strongPasswordValidator,
+  isoCountryCodeValidator,
+} from './registration.validators';
 
 describe('registration.validators', () => {
   describe('strongPasswordValidator', () => {
@@ -25,6 +31,30 @@ describe('registration.validators', () => {
     it('rejects non E.164 numbers', () => {
       const c = new FormControl('123456', { nonNullable: true });
       expect(e164PhoneValidator()(c)).toEqual({ e164Phone: true });
+    });
+  });
+
+  describe('minimumAgeValidator', () => {
+    it('rejects underage birth dates', () => {
+      const c = new FormControl('2015-01-01', { nonNullable: true });
+      expect(minimumAgeValidator(18)(c)).toEqual({ underage: true });
+    });
+
+    it('accepts adult birth dates', () => {
+      const c = new FormControl('1990-01-01', { nonNullable: true });
+      expect(minimumAgeValidator(18)(c)).toBeNull();
+    });
+  });
+
+  describe('isoCountryCodeValidator', () => {
+    it('accepts any ISO country code', () => {
+      const c = new FormControl('ES', { nonNullable: true });
+      expect(isoCountryCodeValidator()(c)).toBeNull();
+    });
+
+    it('rejects invalid country codes', () => {
+      const c = new FormControl('XX', { nonNullable: true });
+      expect(isoCountryCodeValidator()(c)).toEqual({ isoCountryCode: true });
     });
   });
 

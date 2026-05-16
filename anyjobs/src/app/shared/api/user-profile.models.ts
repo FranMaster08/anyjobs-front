@@ -10,6 +10,7 @@ export interface UserPublicProfileDto {
   roles: string[];
   countryCode?: string;
   city?: string;
+  municipality?: string;
   area?: string;
   workerHeadline?: string;
   workerBio?: string;
@@ -29,6 +30,7 @@ export interface UserPrivateProfileDto {
   phoneVerified?: boolean;
   countryCode?: string;
   city?: string;
+  municipality?: string;
   area?: string;
   coverageRadiusKm?: number;
   workerHeadline?: string;

@@ -4,11 +4,12 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { authBearerInterceptor } from './shared/api/auth-bearer.interceptor';
+import { authCredentialsInterceptor } from './shared/api/auth-credentials.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptors([authBearerInterceptor])),
+    provideHttpClient(withInterceptors([authCredentialsInterceptor, authBearerInterceptor])),
     provideRouter(routes),
   ],
 };
