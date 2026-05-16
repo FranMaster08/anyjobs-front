@@ -13,7 +13,6 @@
         <p class="state__title">No se pudo cargar el detalle.</p>
         <p class="state__hint">Intenta de nuevo en unos segundos.</p>
         <button type="button" class="btn" (click)="retry()">Reintentar</button>
-        <p class="muted">ID: {{ requestId() || '—' }}</p>
       </div>
 
       <ng-container *ngSwitchCase="'success'">
@@ -44,13 +43,6 @@
             </div>
 
             <div class="headerActions">
-              <a
-                *ngIf="d.ownerUserId && !isRequestOwner()"
-                class="btn btn--secondary btn--sm"
-                [routerLink]="['/usuarios', d.ownerUserId]"
-              >
-                Ver perfil
-              </a>
               <button
                 type="button"
                 class="btn btn--sm"
@@ -58,9 +50,6 @@
                 *ngIf="!isRequestOwner()"
               >
                 Postular
-              </button>
-              <button type="button" class="btn btn--secondary btn--sm" (click)="scrollToApply()">
-                Contactar
               </button>
             </div>
           </header>
@@ -96,7 +85,7 @@
                 </div>
               </section>
 
-              <section class="contentCard" *ngIf="isRequestOwner()">
+              <section class="contentCard" *ngIf="showPostulantesSection()">
                 <h2 class="sectionTitle">Postulantes</h2>
 
                 <ng-container [ngSwitch]="postulantesState()">
@@ -132,50 +121,34 @@
               <section class="contentCard">
                 <h2 class="sectionTitle">Descripción</h2>
                 <p class="paragraph">{{ d.description ?? d.excerpt }}</p>
-                <p class="muted">ID: {{ d.id }}</p>
               </section>
 
-              <section class="providerCard" *ngIf="d.provider">
-                <div class="providerHeader">
-                  <h2 class="sectionTitle">Ofrecido por</h2>
-                  <div class="providerHeaderRight">
-                    <span class="providerBadge" *ngIf="d.provider.badge">{{
-                      d.provider.badge
-                    }}</span>
-
-                    <div
-                      class="ratingInline"
-                      *ngIf="d.reputation !== undefined"
-                      aria-label="Reputación del oferente"
+              <section class="publisherCard" *ngIf="d.ownerUserId; else publisherUnavailable">
+                <div class="publisherHeader">
+                  <h2 class="sectionTitle">Publicado por</h2>
+                  <div
+                    class="ratingInline"
+                    *ngIf="showPublisherReputation(d)"
+                    aria-label="Reputación del publicador"
+                  >
+                    <span class="ratingInlineStar" aria-hidden="true">★</span>
+                    <span class="ratingInlineValue">{{ d.reputation | number: '1.1-2' }}</span>
+                    <span class="ratingInlineSep" *ngIf="d.reviewsCount !== undefined" aria-hidden="true"
+                      >·</span
                     >
-                      <span class="ratingInlineStar" aria-hidden="true">★</span>
-                      <span class="ratingInlineValue">{{ d.reputation | number: '1.1-2' }}</span>
-                      <span
-                        class="ratingInlineSep"
-                        *ngIf="d.reviewsCount !== undefined"
-                        aria-hidden="true"
-                        >·</span
-                      >
-                      <span class="ratingInlineSub" *ngIf="d.reviewsCount !== undefined"
-                        >{{ d.reviewsCount }} reseñas</span
-                      >
-                    </div>
+                    <span class="ratingInlineSub" *ngIf="d.reviewsCount !== undefined"
+                      >{{ d.reviewsCount }} reseñas</span
+                    >
                   </div>
                 </div>
 
-                <div class="providerRow">
-                  <div class="providerAvatar" aria-hidden="true">
-                    {{ d.provider.name.slice(0, 1) }}
-                  </div>
-                  <div class="providerBody">
-                    <p class="providerName">{{ d.provider.name }}</p>
-                    <p class="providerSubtitle" *ngIf="d.provider.subtitle">
-                      {{ d.provider.subtitle }}
-                    </p>
-                  </div>
-                </div>
+                <app-user-identity-link
+                  [userId]="d.ownerUserId"
+                  [displayName]="publisherDisplayName(d)"
+                  [subtitle]="publisherSubtitle(d)"
+                />
 
-                <div class="providerReviews" *ngIf="d.providerReviews?.length">
+                <div class="providerReviews" *ngIf="!isDemoProviderData(d) && d.providerReviews?.length">
                   <h3 class="providerReviewsTitle">Comentarios</h3>
                   <ul class="providerReviewsList" aria-label="Comentarios de usuarios">
                     <li class="providerReview" *ngFor="let r of d.providerReviews">
@@ -207,6 +180,13 @@
                   </ul>
                 </div>
               </section>
+
+              <ng-template #publisherUnavailable>
+                <section class="publisherCard publisherCard--empty contentCard">
+                  <h2 class="sectionTitle">Publicado por</h2>
+                  <p class="muted">Publicador no disponible.</p>
+                </section>
+              </ng-template>
             </section>
 
             <aside class="sidebar" aria-label="Acción principal">
@@ -245,23 +225,27 @@
 
           <app-modal [open]="isGalleryOpen()" title="Galería" size="lg" (closed)="closeGallery()">
             <div class="galleryModal" *ngIf="d.images.length > 0">
-              <div class="galleryModalTop">
+              <div class="galleryModalTop" role="toolbar" aria-label="Navegación de galería">
                 <button
                   type="button"
-                  class="btn btn--secondary"
+                  class="galleryNavBtn"
                   (click)="prevImage()"
                   [disabled]="d.images.length < 2"
+                  aria-label="Imagen anterior"
                 >
-                  ← Anterior
+                  <span class="galleryNavIcon" aria-hidden="true">‹</span>
                 </button>
-                <p class="galleryCount">{{ activeImageIndex() + 1 }} / {{ d.images.length }}</p>
+                <p class="galleryCount" aria-live="polite">
+                  {{ activeImageIndex() + 1 }} / {{ d.images.length }}
+                </p>
                 <button
                   type="button"
-                  class="btn btn--secondary"
+                  class="galleryNavBtn"
                   (click)="nextImage()"
                   [disabled]="d.images.length < 2"
+                  aria-label="Imagen siguiente"
                 >
-                  Siguiente →
+                  <span class="galleryNavIcon" aria-hidden="true">›</span>
                 </button>
               </div>
 

@@ -421,6 +421,8 @@ El servicio expone `patchOpenRequest(id, patch)`; la pantalla de edición MVP pu
 
 **Nota**: `ownerUserId` identifica al creador (UUID). Puede ser `null` en datos legacy; el front lo usa para ocultar la acción de postular y para cargar postulantes solo al dueño.
 
+**Nota**: `publishedAtLabel` en respuestas de lectura (`GET` listado y detalle) se calcula en el servidor a partir de `publishedAtSort` (antigüedad relativa en español, p. ej. «Hace 2 días»). El valor persistido al crear puede quedar obsoleto; no usarlo como fuente de verdad en cliente.
+
 ```json
 {
   "id": "string",
