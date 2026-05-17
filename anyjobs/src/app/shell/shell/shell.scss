@@ -56,12 +56,37 @@
 .nav.nav--desktop {
   gap: 4px;
   max-width: fit-content;
-  margin-inline: auto;
   padding: 5px 8px;
   border-radius: 14px;
   border: 1px solid var(--aj-color-border);
   background: var(--aj-color-surface);
   box-shadow: var(--aj-shadow-lg);
+}
+
+@media (min-width: 901px) {
+  .headerInner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .brand {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .nav.nav--desktop {
+    grid-column: 2;
+    justify-self: center;
+    flex: none;
+    margin-inline: 0;
+  }
+
+  .headerEnd {
+    grid-column: 3;
+    justify-self: end;
+    margin-left: 0;
+  }
 }
 
 .mainNavLink {
@@ -106,12 +131,20 @@
   gap: 10px;
 }
 
-.headerTrailing {
+.headerEnd {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
   margin-left: auto;
+  min-width: fit-content;
+}
+
+.headerTrailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
   min-width: fit-content;
 }
 

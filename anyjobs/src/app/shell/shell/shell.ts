@@ -22,6 +22,8 @@ import { LoginRequest } from '../../shared/api/auth.models';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
 import { buildProfileRouterLink } from '../../shared/navigation/profile-router-link';
 import { HeaderNotificationsBellComponent } from '../header-notifications-bell/header-notifications-bell';
+import { HeaderOpenRequestsFiltersToggleComponent } from '../header-open-requests-filters-toggle/header-open-requests-filters-toggle';
+import { OpenRequestsFiltersUiService } from '../../features/open-requests/open-requests-filters-ui.service';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 
 /** Breakpoint alineado con `shell.scss` (cabecera compacta ≤900px). */
@@ -49,6 +51,7 @@ export interface ShellMainNavItem {
     ReactiveFormsModule,
     ModalComponent,
     HeaderNotificationsBellComponent,
+    HeaderOpenRequestsFiltersToggleComponent,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -63,6 +66,7 @@ export class Shell {
   private readonly authApi = inject(AuthApi);
   protected readonly auth = inject(AuthSessionService);
   private readonly notifications = inject(NotificationsService);
+  private readonly openRequestsFiltersUi = inject(OpenRequestsFiltersUiService);
   private readonly loginRequests = new Subject<LoginRequest>();
 
   protected readonly t = (key: string) => this.i18n.t(key);
@@ -79,6 +83,7 @@ export class Shell {
   protected readonly isMobileNavOpen = signal(false);
   protected readonly showLanguageSelector = SHELL_SHOW_LANGUAGE_SELECTOR;
   protected readonly showMobilePublishCta = SHELL_SHOW_MOBILE_PUBLISH_CTA;
+  protected readonly showOpenRequestsFiltersInHeader = signal(false);
 
   private fragmentScrollHandle: ReturnType<typeof setTimeout> | null = null;
 
@@ -97,6 +102,7 @@ export class Shell {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearFragmentScrollSchedule());
+    this.updateOpenRequestsFiltersHeaderVisibility();
     this.site.load();
     if (this.authVm().isLoggedIn) {
       this.notifications.refreshUnreadCount();
@@ -142,6 +148,7 @@ export class Shell {
         this.clearFragmentScrollSchedule();
         this.isAccountMenuOpen.set(false);
         this.isMobileNavOpen.set(false);
+        this.updateOpenRequestsFiltersHeaderVisibility();
         const urlTree = this.router.parseUrl(this.router.url);
         const fragment = urlTree.fragment;
 
@@ -246,6 +253,16 @@ export class Shell {
 
   protected closeAccountMenu(): void {
     this.isAccountMenuOpen.set(false);
+  }
+
+  private updateOpenRequestsFiltersHeaderVisibility(): void {
+    const path = this.router.url.split('?')[0]?.split('#')[0] ?? '';
+    const onLanding = path === '/solicitudes';
+    this.showOpenRequestsFiltersInHeader.set(onLanding);
+    if (!onLanding) {
+      this.openRequestsFiltersUi.close();
+    }
+    this.cdr.markForCheck();
   }
 
   protected toggleMobileNav(): void {

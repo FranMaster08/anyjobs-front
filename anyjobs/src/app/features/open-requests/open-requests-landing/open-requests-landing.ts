@@ -28,6 +28,9 @@ import { OpenRequestsService } from '../open-requests.service';
 import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { SiteConfigService } from '../../../shared/site-config/site-config.service';
+import { applyOpenRequestListFilters } from '../open-requests-filter-items';
+import { OpenRequestsFiltersUiService } from '../open-requests-filters-ui.service';
+import { openRequestsFiltersSortChanged$ } from '../../../shell/header-open-requests-filters-toggle/header-open-requests-filters-toggle';
 
 // Offsets (en grados) para simular solicitudes cercanas (radio ~0.3–1.2 km).
 const REQUEST_MARKER_OFFSETS: readonly { lat: number; lng: number }[] = [
@@ -129,6 +132,7 @@ export class OpenRequestsLanding implements AfterViewInit {
   private readonly injector = inject(Injector);
   protected readonly site = inject(SiteConfigService);
   protected readonly authVm = inject(AuthSessionService).vm;
+  protected readonly filtersUi = inject(OpenRequestsFiltersUiService);
 
   @ViewChild('locationSection', { static: false })
   private readonly locationSection?: ElementRef<HTMLElement>;
@@ -144,13 +148,19 @@ export class OpenRequestsLanding implements AfterViewInit {
   protected readonly state = signal<'loading' | 'success' | 'error'>('loading');
   protected readonly items = signal<readonly OpenRequestListItem[]>([]);
 
-  protected readonly featured = computed(() => this.items()[0] ?? null);
+  protected readonly visibleItems = computed(() =>
+    applyOpenRequestListFilters(this.items(), this.filtersUi.filters()),
+  );
+
+  protected readonly featured = computed(() => this.visibleItems()[0] ?? null);
   protected readonly listItems = computed(() => {
-    const items = this.items();
+    const items = this.visibleItems();
     return items.length > 1 ? items.slice(1) : items;
   });
 
-  protected readonly nearbyPreview = computed(() => this.items().slice(0, 3));
+  protected readonly hasFilterEmptyResults = computed(
+    () => this.items().length > 0 && this.visibleItems().length === 0,
+  );
 
   protected readonly page = signal(1);
   protected readonly nextPage = signal<number | null>(null);
@@ -269,6 +279,14 @@ export class OpenRequestsLanding implements AfterViewInit {
     this.site.load();
     this.loadFirstPage();
     this.destroyRef.onDestroy(() => this.teardownListImpressions());
+
+    openRequestsFiltersSortChanged$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.state() === 'success') {
+          this.loadFirstPage();
+        }
+      });
   }
 
   protected onCardNavigate(openRequestId: string): void {
@@ -419,7 +437,7 @@ export class OpenRequestsLanding implements AfterViewInit {
     return {
       page,
       pageSize: 12,
-      sort: 'relevance' as const,
+      sort: this.filtersUi.sort(),
       anonymousId: this.analytics.anonymousActorId(),
     };
   }

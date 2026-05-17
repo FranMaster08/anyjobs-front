@@ -17,8 +17,12 @@
 .heroLayout {
   display: grid;
   gap: 20px;
-  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  grid-template-columns: 1fr;
   align-items: stretch;
+  margin-bottom: 20px;
+}
+
+.state--filterEmpty {
   margin-bottom: 20px;
 }
 
@@ -30,12 +34,19 @@
 }
 
 .heroLeft {
+  display: grid;
+  gap: 18px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.heroLeft--filtersExpanded {
   border-radius: 20px;
   background: var(--aj-color-surface);
   padding: clamp(18px, 3vw, 28px);
   box-shadow: var(--aj-shadow-sm);
-  display: grid;
-  gap: 18px;
 }
 
 .heroIntro {
@@ -114,6 +125,14 @@
 
 .filtersCard {
   display: grid;
+  gap: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.filtersCard--expanded {
   gap: 12px;
   padding: 16px;
   border-radius: 18px;
@@ -121,12 +140,114 @@
   border: 1px solid rgba(17, 24, 39, 0.06);
 }
 
+.filtersCard--expanded .filtersTitle {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  border: 0;
+}
+
 .filtersCardHeader {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-end;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.filtersCard--expanded .filtersCardHeader {
+  justify-content: space-between;
+}
+
+.filtersCard:not(.filtersCard--expanded) .filtersTitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .filtersToggle--inHero {
+    display: none;
+  }
+
+  .filtersCard:not(.filtersCard--expanded) {
+    display: none;
+  }
+
+  .heroLeft:not(.heroLeft--filtersExpanded) {
+    display: none;
+  }
+
+  .heroLeft--filtersExpanded {
+    margin-top: 4px;
+  }
+}
+
+.filtersToggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--aj-color-border-strong);
+  border-radius: 12px;
+  background: var(--aj-color-surface);
+  color: var(--aj-color-ink);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.filtersToggle:hover {
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.filtersToggle:focus-visible {
+  outline: 3px solid var(--aj-color-focus);
+  outline-offset: 2px;
+}
+
+.filtersCard--expanded .filtersToggle {
+  background: color-mix(in srgb, var(--aj-color-ink) 8%, transparent);
+  border-color: color-mix(in srgb, var(--aj-color-ink) 18%, transparent);
+}
+
+.filtersToggleIcon {
+  display: block;
+}
+
+.filtersPanel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.filtersPanel--expanded {
+  grid-template-rows: 1fr;
+}
+
+.filtersPanelInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.filtersPanel:not(.filtersPanel--expanded) .filters {
+  visibility: hidden;
 }
 
 .filtersTitle,

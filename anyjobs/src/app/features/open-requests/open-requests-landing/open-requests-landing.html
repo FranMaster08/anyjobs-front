@@ -13,97 +13,12 @@
 
       <ng-container *ngSwitchCase="'success'">
         <ng-container *ngIf="items().length > 0; else empty">
+          <div *ngIf="hasFilterEmptyResults()" class="state state--filterEmpty" role="status">
+            <p class="state__title">Ninguna solicitud coincide con los filtros</p>
+            <p class="state__hint">Prueba con otros criterios o limpia los filtros desde la lupa del header.</p>
+          </div>
+          <ng-container *ngIf="!hasFilterEmptyResults()">
           <section id="inicio" class="heroLayout">
-            <div class="heroLeft">
-              <div class="heroIntro">
-                <p class="heroEyebrow">Solicitudes abiertas</p>
-
-                <div class="chips">
-                  <span class="chip" *ngIf="featured()!.locationLabel">{{
-                    featured()!.locationLabel
-                  }}</span>
-                  <span class="chip" *ngIf="featured()!.budgetLabel">{{
-                    featured()!.budgetLabel
-                  }}</span>
-                  <span class="chip" *ngIf="featured()!.publishedAtLabel">{{
-                    featured()!.publishedAtLabel
-                  }}</span>
-                </div>
-
-                <h1 class="heroTitle">
-                  {{ site.config()?.hero?.title ?? 'Tu trabajo ideal te espera' }}
-                </h1>
-                <p class="heroSubtitle">
-                  {{
-                    site.config()?.hero?.subtitle ??
-                      'Explora solicitudes abiertas, filtra rápido y conecta con clientes en minutos.'
-                  }}
-                </p>
-              </div>
-
-              <div class="heroMetrics" aria-label="Resumen">
-                <div class="heroMetric">
-                  <span class="heroMetricValue">{{ items().length }}</span>
-                  <span class="heroMetricLabel">solicitudes abiertas</span>
-                </div>
-                <div class="heroMetric">
-                  <span class="heroMetricValue">{{ nearbyPreview().length }}</span>
-                  <span class="heroMetricLabel">destacadas cerca de ti</span>
-                </div>
-              </div>
-
-              <div class="filtersCard">
-                <div class="filtersCardHeader">
-                  <p class="filtersTitle">Filtros rápidos</p>
-                  <p class="filtersHint">Próximamente</p>
-                </div>
-
-                <div class="filters" aria-label="Filtros (próximamente)">
-                  <label class="field">
-                    <span class="fieldLabel">Ubicación</span>
-                    <input class="fieldControl" type="text" placeholder="Ciudad o zona" />
-                  </label>
-                  <label class="field">
-                    <span class="fieldLabel">Tipo</span>
-                    <select class="fieldControl">
-                      <option value="">Cualquiera</option>
-                      <option value="hogar">Hogar</option>
-                      <option value="oficio">Oficio</option>
-                      <option value="servicio">Servicio</option>
-                    </select>
-                  </label>
-                  <label class="field field--full">
-                    <span class="fieldLabel">Necesidad</span>
-                    <input
-                      class="fieldControl"
-                      type="text"
-                      placeholder="Ej. electricista, pintura, mudanza"
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div class="heroActions">
-                <a
-                  *ngIf="featured()"
-                  class="btn btnLink"
-                  [routerLink]="['/solicitudes', featured()!.id]"
-                >
-                  Ver detalle
-                </a>
-                <a class="btn btn--link" [routerLink]="['/solicitudes']" fragment="contacto"
-                  >Solicitar info</a
-                >
-                <a
-                  *ngIf="authVm().isLoggedIn"
-                  class="btn btn--secondary"
-                  routerLink="/solicitudes/nueva"
-                >
-                  ¿Necesitas algo? Publica tu solicitud
-                </a>
-              </div>
-            </div>
-
             <div class="heroRight">
               <div class="mediaHero">
                 <span class="badge">Galería destacada</span>
@@ -377,6 +292,7 @@
               </div>
             </div>
           </app-modal>
+          </ng-container>
         </ng-container>
 
         <ng-template #empty>

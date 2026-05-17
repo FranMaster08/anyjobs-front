@@ -1,0 +1,131 @@
+<div class="headerFilters" (click)="$event.stopPropagation()">
+  <button
+    type="button"
+    class="headerFiltersToggle"
+    (click)="togglePanel(); $event.stopPropagation()"
+    [attr.aria-expanded]="filtersUi.expanded()"
+    aria-haspopup="dialog"
+    aria-controls="open-requests-filters-panel"
+    [attr.aria-label]="
+      filtersUi.expanded() ? 'Ocultar filtros de solicitudes' : 'Filtrar solicitudes'
+    "
+  >
+    <svg
+      class="headerFiltersToggleIcon"
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20 16 16" stroke-linecap="round" />
+    </svg>
+    @if (filtersUi.hasActiveFilters()) {
+      <span class="headerFiltersBadge" aria-hidden="true"></span>
+    }
+  </button>
+
+  @if (filtersUi.expanded()) {
+    <button
+      type="button"
+      class="headerFiltersBackdrop"
+      (click)="closePanel()"
+      tabindex="-1"
+      aria-label="Cerrar filtros"
+    ></button>
+    <div
+      id="open-requests-filters-panel"
+      class="headerFiltersPanel"
+      role="dialog"
+      aria-label="Filtros de solicitudes"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="headerFiltersPanelHeader">
+        <div class="headerFiltersPanelHeading">
+          <h2 class="headerFiltersPanelTitle">Filtrar solicitudes</h2>
+        </div>
+        @if (filtersUi.hasActiveFilters()) {
+          <button type="button" class="headerFiltersClear" (click)="clearFilters()">
+            Limpiar
+          </button>
+        }
+      </div>
+
+      <div class="headerFiltersBody">
+        <div class="headerFiltersField headerFiltersField--full">
+          <label class="fieldLabel" for="open-requests-filter-query">Buscar</label>
+          <div class="headerFiltersSearchWrap">
+            <svg
+              class="headerFiltersSearchIcon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20 16 16" stroke-linecap="round" />
+            </svg>
+            <input
+              id="open-requests-filter-query"
+              type="search"
+              class="fieldControl headerFiltersSearchInput"
+              placeholder="Palabra clave, oficio o etiqueta"
+              autocomplete="off"
+              [value]="filtersUi.query()"
+              (input)="onQueryInput($event)"
+            />
+          </div>
+        </div>
+
+        <div class="headerFiltersGrid">
+          <div class="headerFiltersField">
+            <label class="fieldLabel" for="open-requests-filter-location">Ubicación</label>
+            <input
+              id="open-requests-filter-location"
+              type="text"
+              class="fieldControl"
+              placeholder="Ciudad o zona"
+              autocomplete="off"
+              [value]="filtersUi.location()"
+              (input)="onLocationInput($event)"
+            />
+          </div>
+
+          <div class="headerFiltersField">
+            <label class="fieldLabel" for="open-requests-filter-category">Categoría</label>
+            <select
+              id="open-requests-filter-category"
+              class="fieldControl headerFiltersSelect"
+              [value]="filtersUi.category()"
+              (change)="onCategoryChange($event)"
+            >
+              <option value="">Todas</option>
+              <option value="hogar">Hogar</option>
+              <option value="oficio">Oficio</option>
+              <option value="servicio">Servicio</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="headerFiltersField headerFiltersField--sort">
+          <label class="fieldLabel" for="open-requests-filter-sort">Orden</label>
+          <select
+            id="open-requests-filter-sort"
+            class="fieldControl headerFiltersSelect"
+            [value]="filtersUi.sort()"
+            (change)="onSortChange($event)"
+          >
+            <option value="relevance">Más relevantes</option>
+            <option value="publishedAtDesc">Más recientes</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  }
+</div>

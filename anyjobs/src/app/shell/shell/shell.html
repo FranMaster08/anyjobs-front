@@ -19,6 +19,7 @@
       }
     </nav>
 
+    <div class="headerEnd">
     <div class="headerActions headerActions--desktop" aria-label="Acciones de cabecera">
       @if (showLanguageSelector) {
         <select
@@ -31,10 +32,6 @@
           <option value="en">{{ t('lang.en') }}</option>
         </select>
       }
-
-      <a class="cta" [routerLink]="['/solicitudes']" fragment="contacto">
-        {{ site.config()?.sections?.requests?.cta ?? t('cta.publicar') }}
-      </a>
 
       @if (authVm().isLoggedIn) {
         <div class="accountWrap">
@@ -95,6 +92,10 @@
     </div>
 
     <div class="headerTrailing">
+      @if (showOpenRequestsFiltersInHeader()) {
+        <app-header-open-requests-filters-toggle />
+      }
+
       @if (authVm().isLoggedIn) {
         <app-header-notifications-bell />
       }
@@ -114,6 +115,7 @@
           <span class="menuToggleBar"></span>
         </span>
       </button>
+    </div>
     </div>
   </div>
 
