@@ -21,6 +21,8 @@ import { mapLoginErrorToMessage } from '../../shared/api/auth-login-error.utils'
 import { LoginRequest } from '../../shared/api/auth.models';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
 import { buildProfileRouterLink } from '../../shared/navigation/profile-router-link';
+import { HeaderNotificationsBellComponent } from '../header-notifications-bell/header-notifications-bell';
+import { NotificationsService } from '../../shared/notifications/notifications.service';
 
 /** Breakpoint alineado con `shell.scss` (cabecera compacta ≤900px). */
 export const SHELL_HEADER_COMPACT_MAX_PX = 900;
@@ -34,7 +36,14 @@ export interface ShellMainNavItem {
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterOutlet, RouterLink, ReactiveFormsModule, ModalComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    RouterLink,
+    ReactiveFormsModule,
+    ModalComponent,
+    HeaderNotificationsBellComponent,
+  ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
@@ -47,6 +56,7 @@ export class Shell {
   protected readonly site = inject(SiteConfigService);
   private readonly authApi = inject(AuthApi);
   protected readonly auth = inject(AuthSessionService);
+  private readonly notifications = inject(NotificationsService);
   private readonly loginRequests = new Subject<LoginRequest>();
 
   protected readonly t = (key: string) => this.i18n.t(key);
@@ -80,6 +90,9 @@ export class Shell {
   constructor() {
     this.destroyRef.onDestroy(() => this.clearFragmentScrollSchedule());
     this.site.load();
+    if (this.authVm().isLoggedIn) {
+      this.notifications.refreshUnreadCount();
+    }
 
     this.loginRequests
       .pipe(
@@ -100,6 +113,7 @@ export class Shell {
       .subscribe({
         next: (res) => {
           this.auth.setSession({ token: res.token, user: res.user });
+          this.notifications.refreshUnreadCount();
           this.isLoginOpen.set(false);
           this.isAccountMenuOpen.set(false);
           this.isMobileNavOpen.set(false);
@@ -245,6 +259,7 @@ export class Shell {
     this.isAccountMenuOpen.set(false);
     this.isMobileNavOpen.set(false);
     this.auth.clear();
+    this.notifications.reset();
     this.router.navigateByUrl('/home');
   }
 

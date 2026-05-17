@@ -9,6 +9,7 @@ import { OPEN_REQUESTS_API_URL } from '../../features/open-requests/open-request
 import { PROPOSALS_API_URL } from '../proposals/proposals.service';
 import { SITE_CONFIG_URL } from '../site-config/site-config.service';
 import { USER_MEDIA_API_URL } from './user-media.api';
+import { NOTIFICATIONS_API_URL } from '../notifications/notifications.api';
 
 /** Rutas con prefijo en `API_PREFIXES` (+ subrutas) reciben `Authorization: Bearer` si hay token (p. ej. POST/PATCH `/open-requests`, `/open-requests/mine`, `/proposals`). */
 const API_PREFIXES = [
@@ -16,6 +17,7 @@ const API_PREFIXES = [
   '/users',
   '/open-requests',
   '/proposals',
+  '/notifications',
   '/site-config',
   '/promo-slides',
   '/user-media',
@@ -51,6 +53,7 @@ export const authBearerInterceptor: HttpInterceptorFn = (req, next) => {
     new URL(inject(PROPOSALS_API_URL)).origin,
     new URL(inject(SITE_CONFIG_URL)).origin,
     new URL(inject(USER_MEDIA_API_URL)).origin,
+    new URL(inject(NOTIFICATIONS_API_URL)).origin,
   ]);
 
   if (!allowedOrigins.has(resolved.origin)) return next(req);

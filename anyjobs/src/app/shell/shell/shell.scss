@@ -10,6 +10,7 @@
   z-index: 50;
   border-bottom: 1px solid var(--aj-color-border);
   background: var(--aj-color-surface);
+  overflow: visible;
 }
 
 .headerInner {
@@ -19,7 +20,8 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  justify-content: space-between;
+  justify-content: flex-start;
+  overflow: visible;
 }
 
 .brand {
@@ -102,6 +104,15 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.headerTrailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+  min-width: fit-content;
 }
 
 .accountWrap {
@@ -245,7 +256,6 @@
 .menuToggle {
   display: none;
   flex-shrink: 0;
-  margin-left: auto;
   align-items: center;
   justify-content: center;
   width: 44px;

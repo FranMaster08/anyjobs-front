@@ -92,21 +92,27 @@
       }
     </div>
 
-    <button
-      type="button"
-      class="menuToggle"
-      [class.menuToggle--open]="isMobileNavOpen()"
-      (click)="toggleMobileNav()"
-      [attr.aria-expanded]="isMobileNavOpen()"
-      [attr.aria-controls]="isMobileNavOpen() ? 'shell-mobile-nav' : null"
-      [attr.aria-label]="isMobileNavOpen() ? t('nav.menuClose') : t('nav.menuOpen')"
-    >
-      <span class="menuToggleBars" aria-hidden="true">
-        <span class="menuToggleBar"></span>
-        <span class="menuToggleBar"></span>
-        <span class="menuToggleBar"></span>
-      </span>
-    </button>
+    <div class="headerTrailing">
+      @if (authVm().isLoggedIn) {
+        <app-header-notifications-bell />
+      }
+
+      <button
+        type="button"
+        class="menuToggle"
+        [class.menuToggle--open]="isMobileNavOpen()"
+        (click)="toggleMobileNav()"
+        [attr.aria-expanded]="isMobileNavOpen()"
+        [attr.aria-controls]="isMobileNavOpen() ? 'shell-mobile-nav' : null"
+        [attr.aria-label]="isMobileNavOpen() ? t('nav.menuClose') : t('nav.menuOpen')"
+      >
+        <span class="menuToggleBars" aria-hidden="true">
+          <span class="menuToggleBar"></span>
+          <span class="menuToggleBar"></span>
+          <span class="menuToggleBar"></span>
+        </span>
+      </button>
+    </div>
   </div>
 
   @if (isMobileNavOpen()) {

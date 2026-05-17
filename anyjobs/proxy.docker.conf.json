@@ -19,6 +19,11 @@
     "secure": false,
     "changeOrigin": true
   },
+  "/notifications": {
+    "target": "http://anyjobs-back:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
   "/promo-slides": {
     "target": "http://anyjobs-back:3000",
     "secure": false,
