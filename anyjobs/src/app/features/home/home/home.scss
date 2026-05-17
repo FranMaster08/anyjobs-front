@@ -14,8 +14,12 @@
 
 @media (max-width: 900px) {
   :host {
-    --home-bottom-nav-height: calc(56px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: var(--home-bottom-nav-height);
+    --home-bottom-nav-height: calc(59px + env(safe-area-inset-bottom, 0px));
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding-bottom: 0;
   }
 }
 
@@ -26,6 +30,18 @@
   width: 100%;
   min-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
   padding: 0;
+}
+
+@media (max-width: 900px) {
+  .homeSliderPage {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    padding-bottom: var(--home-bottom-nav-height);
+    box-sizing: border-box;
+  }
 }
 
 .homeSliderLoading {
@@ -53,6 +69,16 @@
   background: linear-gradient(165deg, #1a1a1f 0%, #2d2d35 45%, #1a1a1f 100%);
   border-radius: 12px;
   color: #e8e8ec;
+}
+
+@media (max-width: 900px) {
+  .homeSliderLoading,
+  .homeSliderPlaceholder {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
 }
 
 .homeSliderPlaceholderTitle {
@@ -86,6 +112,15 @@
   margin: 0 auto;
   height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
   min-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
+}
+
+@media (max-width: 900px) {
+  .homeSliderWrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
 }
 
 /* La librería fija cada slide a `100dvh` y el host del slider también; si el wrap es

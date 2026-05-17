@@ -27,6 +27,12 @@ import { NotificationsService } from '../../shared/notifications/notifications.s
 /** Breakpoint alineado con `shell.scss` (cabecera compacta ≤900px). */
 export const SHELL_HEADER_COMPACT_MAX_PX = 900;
 
+/** Selector de idioma en cabecera (desktop y drawer móvil). */
+export const SHELL_SHOW_LANGUAGE_SELECTOR = false;
+
+/** CTA «publicar / ver más» en el drawer del menú móvil. */
+export const SHELL_SHOW_MOBILE_PUBLISH_CTA = false;
+
 export interface ShellMainNavItem {
   i18nKey: string;
   routerLink: readonly string[];
@@ -71,6 +77,8 @@ export class Shell {
   protected readonly loginError = signal<string | null>(null);
   protected readonly isAccountMenuOpen = signal(false);
   protected readonly isMobileNavOpen = signal(false);
+  protected readonly showLanguageSelector = SHELL_SHOW_LANGUAGE_SELECTOR;
+  protected readonly showMobilePublishCta = SHELL_SHOW_MOBILE_PUBLISH_CTA;
 
   private fragmentScrollHandle: ReturnType<typeof setTimeout> | null = null;
 

@@ -634,11 +634,23 @@ main.app-main router-outlet {
   display: contents;
 }
 
-main.app-main app-home {
+main.app-main app-home,
+main.app-main app-reels-feed {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - 56px);
   width: 100%;
+}
+
+@media (max-width: 900px) {
+  main.app-main app-home,
+  main.app-main app-reels-feed {
+    /* El header ya ocupa su fila en el shell; no restar otra vez 56px (provocaba scroll). */
+    min-height: 0;
+    height: auto;
+    max-height: 100%;
+    overflow: hidden;
+  }
 }
 

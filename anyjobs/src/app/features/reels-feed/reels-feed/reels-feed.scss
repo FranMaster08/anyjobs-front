@@ -11,8 +11,12 @@
 
 @media (max-width: 900px) {
   :host {
-    --reels-bottom-nav-height: calc(56px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: var(--reels-bottom-nav-height);
+    --reels-bottom-nav-height: calc(59px + env(safe-area-inset-bottom, 0px));
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding-bottom: 0;
   }
 }
 
@@ -23,6 +27,27 @@
   width: 100%;
   min-height: calc(100dvh - var(--reels-slider-header-offset) - var(--reels-bottom-nav-height));
   padding: 0;
+}
+
+@media (max-width: 900px) {
+  .reelsSliderPage {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    padding-bottom: var(--reels-bottom-nav-height);
+    box-sizing: border-box;
+  }
+
+  .reelsSliderLoading,
+  .reelsSliderEmpty,
+  .reelsSliderWrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
 }
 
 .reelsSliderLoading,

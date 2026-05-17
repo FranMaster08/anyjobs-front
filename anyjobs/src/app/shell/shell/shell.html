@@ -20,15 +20,17 @@
     </nav>
 
     <div class="headerActions headerActions--desktop" aria-label="Acciones de cabecera">
-      <select
-        class="langSelect"
-        [value]="i18n.lang()"
-        (change)="onLangChange($event)"
-        aria-label="Idioma"
-      >
-        <option value="es">{{ t('lang.es') }}</option>
-        <option value="en">{{ t('lang.en') }}</option>
-      </select>
+      @if (showLanguageSelector) {
+        <select
+          class="langSelect"
+          [value]="i18n.lang()"
+          (change)="onLangChange($event)"
+          aria-label="Idioma"
+        >
+          <option value="es">{{ t('lang.es') }}</option>
+          <option value="en">{{ t('lang.en') }}</option>
+        </select>
+      }
 
       <a class="cta" [routerLink]="['/solicitudes']" fragment="contacto">
         {{ site.config()?.sections?.requests?.cta ?? t('cta.publicar') }}
@@ -153,31 +155,44 @@
             >
               {{ t(item.i18nKey) }}
             </a>
+            @if (item.i18nKey === 'nav.inicio' && authVm().isLoggedIn) {
+              <a
+                class="mainNavLink"
+                routerLink="/mis-solicitudes"
+                (click)="closeMobileNav()"
+              >
+                Mis solicitudes
+              </a>
+            }
           }
         </nav>
 
-        <div class="mobileNavSection">
-          <label class="mobileNavLabel" for="shell-mobile-lang">{{ t('nav.language') }}</label>
-          <select
-            id="shell-mobile-lang"
-            class="langSelect langSelect--block"
-            [value]="i18n.lang()"
-            (change)="onLangChange($event)"
-            aria-label="Idioma"
-          >
-            <option value="es">{{ t('lang.es') }}</option>
-            <option value="en">{{ t('lang.en') }}</option>
-          </select>
-        </div>
+        @if (showLanguageSelector) {
+          <div class="mobileNavSection">
+            <label class="mobileNavLabel" for="shell-mobile-lang">{{ t('nav.language') }}</label>
+            <select
+              id="shell-mobile-lang"
+              class="langSelect langSelect--block"
+              [value]="i18n.lang()"
+              (change)="onLangChange($event)"
+              aria-label="Idioma"
+            >
+              <option value="es">{{ t('lang.es') }}</option>
+              <option value="en">{{ t('lang.en') }}</option>
+            </select>
+          </div>
+        }
 
-        <a
-          class="cta cta--block"
-          [routerLink]="['/solicitudes']"
-          fragment="contacto"
-          (click)="closeMobileNav()"
-        >
-          {{ site.config()?.sections?.requests?.cta ?? t('cta.publicar') }}
-        </a>
+        @if (showMobilePublishCta) {
+          <a
+            class="cta cta--block"
+            [routerLink]="['/solicitudes']"
+            fragment="contacto"
+            (click)="closeMobileNav()"
+          >
+            {{ site.config()?.sections?.requests?.cta ?? t('cta.publicar') }}
+          </a>
+        }
       </div>
 
       <div class="mobileNavDrawerFooter">
@@ -219,14 +234,6 @@
                   (click)="closeAccountMenu(); closeMobileNav()"
                 >
                   {{ t('auth.myProfile') }}
-                </a>
-                <a
-                  class="accountMenuItem"
-                  role="menuitem"
-                  routerLink="/mis-solicitudes"
-                  (click)="closeAccountMenu(); closeMobileNav()"
-                >
-                  Mis solicitudes
                 </a>
                 <button type="button" class="accountMenuItem" role="menuitem" (click)="logout()">
                   {{ t('auth.logout') }}
