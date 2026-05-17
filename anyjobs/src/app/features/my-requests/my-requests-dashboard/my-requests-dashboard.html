@@ -1,11 +1,21 @@
 <section class="page myRequests">
   <div class="container">
-    <header class="header">
-      <p class="kicker">CUENTA</p>
+    <header class="myRequestsHero">
+      <p class="kicker">Cuenta</p>
       <h1 class="title">Mis solicitudes</h1>
       <p class="subtitle">Revisa lo que publicaste y dónde postulaste.</p>
+      <ul class="myRequestsStats" *ngIf="authVm().isLoggedIn" aria-label="Resumen de actividad">
+        <li class="myRequestsStat">
+          <span class="myRequestsStatValue">{{ publishedCount() }}</span>
+          <span class="myRequestsStatLabel">Publicadas</span>
+        </li>
+        <li class="myRequestsStat">
+          <span class="myRequestsStatValue">{{ appliedCount() }}</span>
+          <span class="myRequestsStatLabel">Postulaciones</span>
+        </li>
+      </ul>
       <div class="actions" *ngIf="authVm().isLoggedIn">
-        <a class="btn" routerLink="/solicitudes/nueva">Publicar solicitud</a>
+        <a class="btn btn--profile btn--profile-accent" routerLink="/solicitudes/nueva">Publicar solicitud</a>
       </div>
     </header>
 
@@ -14,35 +24,35 @@
         <p class="state__title">Inicia sesión para ver tus solicitudes</p>
         <p class="state__hint">Tus propuestas se guardan de forma local para esta demo.</p>
         <div class="actions">
-          <button type="button" class="btn" (click)="openLogin()">Iniciar sesión</button>
-          <a class="btn btn--secondary" routerLink="/registro">Crear cuenta</a>
+          <button type="button" class="btn btn--profile btn--profile-accent" (click)="openLogin()">Iniciar sesión</button>
+          <a class="btn btn--profile" routerLink="/registro">Crear cuenta</a>
         </div>
       </div>
     </ng-container>
 
     <ng-template #logged>
-      <div class="tabs" role="tablist" aria-label="Vistas de mis solicitudes">
+      <div class="myRequestsTabs" role="tablist" aria-label="Vistas de mis solicitudes">
         <button
           type="button"
           role="tab"
-          class="tab"
-          [class.tab--active]="activeTab() === 'published'"
+          class="myRequestsTab"
+          [class.myRequestsTab--active]="activeTab() === 'published'"
           [attr.aria-selected]="activeTab() === 'published'"
           (click)="setTab('published')"
         >
           Publicadas por mí
-          <span class="tabBadge" aria-hidden="true">{{ publishedCount() }}</span>
+          <span class="myRequestsTabBadge" aria-hidden="true">{{ publishedCount() }}</span>
         </button>
         <button
           type="button"
           role="tab"
-          class="tab"
-          [class.tab--active]="activeTab() === 'applied'"
+          class="myRequestsTab"
+          [class.myRequestsTab--active]="activeTab() === 'applied'"
           [attr.aria-selected]="activeTab() === 'applied'"
           (click)="setTab('applied')"
         >
           Postulé a estas
-          <span class="tabBadge" aria-hidden="true">{{ appliedCount() }}</span>
+          <span class="myRequestsTabBadge" aria-hidden="true">{{ appliedCount() }}</span>
         </button>
       </div>
 
@@ -57,7 +67,7 @@
           <div *ngSwitchCase="'error'" class="state state--error" role="status">
             <p class="state__title">No pudimos cargar tus solicitudes publicadas.</p>
             <p class="state__hint">Intenta de nuevo en unos segundos.</p>
-            <button type="button" class="btn" (click)="retryPublished()">Reintentar</button>
+            <button type="button" class="btn btn--profile btn--profile-accent" (click)="retryPublished()">Reintentar</button>
           </div>
 
           <ng-container *ngSwitchCase="'success'">
@@ -93,12 +103,12 @@
                       </div>
 
                       <div class="itemActions" role="group" aria-label="Acciones">
-                        <a class="btn btn--secondary btn--sm" [routerLink]="['/solicitudes', it.id]">
+                        <a class="btn btn--profile btn--sm" [routerLink]="['/solicitudes', it.id]">
                           Ver detalle
                         </a>
                         <button
                           type="button"
-                          class="btn btn--sm"
+                          class="btn btn--profile btn--sm"
                           (click)="togglePublishedPostulantes(it.id)"
                           [attr.aria-expanded]="isPublishedPostulantesExpanded(it.id)"
                         >
@@ -155,13 +165,13 @@
 
                           <div class="proposalHeaderActions" role="group" aria-label="Acciones de propuesta">
                             <a
-                              class="btn btn--secondary btn--sm"
+                              class="btn btn--profile btn--sm"
                               [routerLink]="['/usuarios', p.userId]"
                               *ngIf="p.userId.trim()"
                             >
                               Ver perfil
                             </a>
-                            <button type="button" class="btn btn--sm" (click)="openChooseWip(p)">
+                            <button type="button" class="btn btn--profile btn--profile-accent btn--sm" (click)="openChooseWip(p)">
                               Elegir
                             </button>
                           </div>
@@ -194,7 +204,7 @@
                 <p class="state__title">No has publicado solicitudes todavía.</p>
                 <p class="state__hint">Crea tu primera solicitud para que otros puedan proponerte ayuda.</p>
                 <div class="actions">
-                  <a class="btn" routerLink="/solicitudes/nueva">Publicar solicitud</a>
+                  <a class="btn btn--profile btn--profile-accent" routerLink="/solicitudes/nueva">Publicar solicitud</a>
                 </div>
               </div>
             </ng-template>
@@ -213,7 +223,7 @@
           <div *ngSwitchCase="'error'" class="state state--error" role="status">
             <p class="state__title">No se pudieron cargar tus postulaciones.</p>
             <p class="state__hint">Intenta de nuevo en unos segundos.</p>
-            <button type="button" class="btn" (click)="retryApplied()">Reintentar</button>
+            <button type="button" class="btn btn--profile btn--profile-accent" (click)="retryApplied()">Reintentar</button>
           </div>
 
           <ng-container *ngSwitchCase="'success'">
@@ -250,12 +260,12 @@
                       </div>
 
                       <div class="itemActions" role="group" aria-label="Acciones">
-                        <a class="btn btn--secondary btn--sm" [routerLink]="['/solicitudes', it.proposal.requestId]">
+                        <a class="btn btn--profile btn--sm" [routerLink]="['/solicitudes', it.proposal.requestId]">
                           Ver detalle
                         </a>
                         <button
                           type="button"
-                          class="btn btn--sm"
+                          class="btn btn--profile btn--sm"
                           (click)="toggleAppliedProposalDetail(it.proposal.id)"
                           [attr.aria-expanded]="isAppliedProposalExpanded(it.proposal.id)"
                         >
@@ -292,13 +302,13 @@
 
                         <div class="proposalHeaderActions" role="group" aria-label="Acciones de propuesta">
                           <a
-                            class="btn btn--secondary btn--sm"
+                            class="btn btn--profile btn--sm"
                             [routerLink]="['/usuarios', it.proposal.userId]"
                             *ngIf="it.proposal.userId.trim()"
                           >
                             Ver perfil
                           </a>
-                          <button type="button" class="btn btn--sm" (click)="openChooseWip(it.proposal)">
+                          <button type="button" class="btn btn--profile btn--profile-accent btn--sm" (click)="openChooseWip(it.proposal)">
                             Elegir
                           </button>
                         </div>
@@ -330,7 +340,7 @@
                 <p class="state__title">Todavía no postulaste a ninguna solicitud.</p>
                 <p class="state__hint">Explora solicitudes abiertas y envía tu primera propuesta.</p>
                 <div class="actions">
-                  <a class="btn" routerLink="/solicitudes">Explorar solicitudes</a>
+                  <a class="btn btn--profile btn--profile-accent" routerLink="/solicitudes">Explorar solicitudes</a>
                 </div>
               </div>
             </ng-template>
@@ -347,6 +357,6 @@
     <p class="state__hint">
       Muy pronto podrás elegir a <strong>{{ chooseWipName() }}</strong> para esta solicitud desde aquí.
     </p>
-    <button type="button" class="btn" (click)="closeChooseWip()">Entendido</button>
+    <button type="button" class="btn btn--profile btn--profile-accent" (click)="closeChooseWip()">Entendido</button>
   </div>
 </app-modal>
