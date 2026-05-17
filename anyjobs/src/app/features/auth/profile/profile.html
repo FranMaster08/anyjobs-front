@@ -22,61 +22,64 @@
       <div class="profileBanner" role="status">{{ profileBanner() }}</div>
     }
     <section class="profileHero">
-      <div class="profileHeroTop">
-        <div class="profileAvatar" aria-hidden="true">{{ initials() }}</div>
-        <div class="profileHeroText">
-          <p class="profileKicker">{{ visibilityMode() === 'private' ? 'Tu perfil' : 'Perfil público' }}</p>
-          <h1 class="profileTitle">{{ displayName() }}</h1>
-          @if (rolesLine()) {
-            <p class="profileRoles">{{ rolesLine() }}</p>
-          }
-          @if (headlineText()) {
-            <p class="profileHeadline">{{ headlineText() }}</p>
-          }
-          @if (locationLine()) {
-            <p class="profileHint profileLocation">{{ locationLine() }}</p>
-          } @else {
-            <p class="profileHint profileLocation profileLocation--muted">Ubicación no indicada</p>
-          }
-          @if (bioText()) {
-            <p class="profileBio">{{ bioText() }}</p>
-          } @else {
-            <p class="profileBio profileBio--placeholder">Sin descripción todavía.</p>
-          }
-        </div>
+      <p class="profileKicker">{{ visibilityMode() === 'private' ? 'Tu perfil' : 'Perfil público' }}</p>
+
+      <div class="profileAvatarRing" aria-hidden="true">
+        <div class="profileAvatar">{{ initials() }}</div>
+      </div>
+
+      <div class="profileIdentity">
+        <h1 class="profileTitle">{{ displayName() }}</h1>
+        @if (rolesLine()) {
+          <p class="profileRoles">{{ rolesLine() }}</p>
+        }
+        @if (headlineText()) {
+          <p class="profileHeadline">{{ headlineText() }}</p>
+        }
+        @if (locationLine()) {
+          <p class="profileLocation">{{ locationLine() }}</p>
+        } @else {
+          <p class="profileLocation profileLocation--muted">Ubicación no indicada</p>
+        }
       </div>
 
       @if (metrics()) {
-        <div class="profileMetrics" aria-label="Métricas de actividad">
-          <div class="profileMetric">
-            <span class="profileMetricValue">{{ metrics()!.openRequestsPublished }}</span>
-            <span class="profileMetricLabel">Solicitudes publicadas</span>
-          </div>
-          <div class="profileMetric">
-            <span class="profileMetricValue">{{ metrics()!.proposalsSent }}</span>
-            <span class="profileMetricLabel">Propuestas enviadas</span>
-          </div>
-        </div>
+        <ul class="profileStats" aria-label="Métricas de actividad">
+          <li class="profileStat">
+            <span class="profileStatValue">{{ metrics()!.openRequestsPublished }}</span>
+            <span class="profileStatLabel">Solicitudes</span>
+          </li>
+          <li class="profileStat">
+            <span class="profileStatValue">{{ metrics()!.proposalsSent }}</span>
+            <span class="profileStatLabel">Propuestas</span>
+          </li>
+        </ul>
+      }
+
+      @if (bioText()) {
+        <p class="profileBio">{{ bioText() }}</p>
+      } @else {
+        <p class="profileBio profileBio--placeholder">Sin descripción todavía.</p>
       }
 
       <footer class="profileActions">
         @if (visibilityMode() === 'private') {
-          <a class="btn btn--secondary" routerLink="/mis-solicitudes">Mis solicitudes</a>
+          <a class="btn btn--profile" routerLink="/mis-solicitudes">Mis solicitudes</a>
         } @else {
-          <a class="btn btn--secondary" routerLink="/solicitudes">Ver solicitudes abiertas</a>
+          <a class="btn btn--profile" routerLink="/solicitudes">Ver solicitudes</a>
           @if (!vm().isLoggedIn) {
-            <a class="btn" routerLink="/home">Inicio</a>
+            <a class="btn btn--profile btn--profile-accent" routerLink="/home">Inicio</a>
           }
         }
       </footer>
     </section>
 
-    <div class="tabs profileTabs" role="tablist" aria-label="Secciones del perfil">
+    <div class="profileTabs" role="tablist" aria-label="Secciones del perfil">
       <button
         type="button"
         role="tab"
-        class="tab"
-        [class.tab--active]="activeTab() === 'info'"
+        class="profileTab"
+        [class.profileTab--active]="activeTab() === 'info'"
         [attr.aria-selected]="activeTab() === 'info'"
         (click)="setTab('info')"
       >
@@ -85,8 +88,8 @@
       <button
         type="button"
         role="tab"
-        class="tab"
-        [class.tab--active]="activeTab() === 'activity'"
+        class="profileTab"
+        [class.profileTab--active]="activeTab() === 'activity'"
         [attr.aria-selected]="activeTab() === 'activity'"
         (click)="setTab('activity')"
       >
@@ -95,8 +98,8 @@
       <button
         type="button"
         role="tab"
-        class="tab"
-        [class.tab--active]="activeTab() === 'multimedia'"
+        class="profileTab"
+        [class.profileTab--active]="activeTab() === 'multimedia'"
         [attr.aria-selected]="activeTab() === 'multimedia'"
         (click)="setTab('multimedia')"
       >
@@ -105,8 +108,8 @@
       <button
         type="button"
         role="tab"
-        class="tab"
-        [class.tab--active]="activeTab() === 'score'"
+        class="profileTab"
+        [class.profileTab--active]="activeTab() === 'score'"
         [attr.aria-selected]="activeTab() === 'score'"
         (click)="setTab('score')"
       >
@@ -231,8 +234,8 @@
         }
         @if (visibilityMode() === 'private') {
           <p class="profileHint">Para listados completos usa Mis solicitudes.</p>
-          <div class="profileActions">
-            <a class="btn" routerLink="/mis-solicitudes">Ir a Mis solicitudes</a>
+          <div class="profileActions profileActions--inline">
+            <a class="btn btn--profile" routerLink="/mis-solicitudes">Ir a Mis solicitudes</a>
           </div>
         } @else {
           <p class="profileHint">El detalle de actividad pública avanzará en próximas versiones.</p>
