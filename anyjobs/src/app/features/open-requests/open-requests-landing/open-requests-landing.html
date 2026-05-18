@@ -115,40 +115,62 @@
             </div>
 
             <div class="locationCard">
-              <div class="locationMedia" role="img" aria-label="Sección de mapa">
-                <div class="mapCanvas mapCanvas--preview" aria-hidden="true">
-                  <div
-                    class="mapPin"
-                    *ngFor="let p of previewPins(); trackBy: trackByPreviewPinId"
-                    [class.mapPin--user]="p.kind === 'user'"
-                    [style.left.%]="p.x"
-                    [style.top.%]="p.y"
-                  >
-                    <span class="mapPinDot" aria-hidden="true"></span>
-                    <span class="mapPinLabel">{{ p.label }}</span>
-                  </div>
+              <div class="locationMedia" aria-label="Mapa de solicitudes cercanas">
+                <app-requests-map
+                  *ngIf="mapCenter()"
+                  class="mapCanvas mapCanvas--preview"
+                  [center]="mapCenter()"
+                  [markers]="mapMarkers()"
+                  [zoom]="11"
+                ></app-requests-map>
 
-                  <div class="mapPreviewOverlay">
-                    <p class="mapPreviewTitle">
-                      {{
-                        site.config()?.sections?.location?.preview?.title ??
-                          'Ubicación y solicitudes cercanas'
-                      }}
-                    </p>
-                    <p class="mapPreviewHint" *ngIf="!userLocation()">
-                      {{
-                        site.config()?.sections?.location?.preview?.hintNoLocation ??
-                          'Activa tu ubicación para ver el mapa con marcadores reales.'
-                      }}
-                    </p>
-                    <p class="mapPreviewHint" *ngIf="userLocation()">
-                      {{
-                        site.config()?.sections?.location?.preview?.hintWithLocation ??
-                          'Mostrando marcadores cerca de ti (ejemplo).'
-                      }}
-                    </p>
-                  </div>
+                <div
+                  class="mapPreviewOverlay"
+                  *ngIf="!mapCenter()"
+                >
+                  <p class="mapPreviewTitle">
+                    {{
+                      site.config()?.sections?.location?.preview?.title ??
+                        'Ubicación y solicitudes cercanas'
+                    }}
+                  </p>
+                  <p class="mapPreviewHint">
+                    {{
+                      site.config()?.sections?.location?.preview?.hintNoLocation ??
+                        'Cargando mapa de solicitudes…'
+                    }}
+                  </p>
                 </div>
+
+                <div
+                  class="mapPreviewStatus"
+                  *ngIf="mapCenter() && (isLocating() || nearbyState() === 'loading')"
+                  aria-live="polite"
+                >
+                  <span *ngIf="isLocating()">Obteniendo tu ubicación…</span>
+                  <span *ngIf="!isLocating() && nearbyState() === 'loading'">
+                    Buscando solicitudes abiertas…
+                  </span>
+                </div>
+
+                <div
+                  class="mapPreviewBanner"
+                  *ngIf="locationError() && mapCenter()"
+                  role="status"
+                >
+                  <span>{{ locationError() }}</span>
+                  <button type="button" class="btn btn--link btn--sm" (click)="retryLocation()">
+                    Reintentar ubicación
+                  </button>
+                </div>
+
+                <p
+                  class="mapPreviewEmpty"
+                  *ngIf="mapCenter() && nearbyState() === 'empty' && !isLocating()"
+                  role="status"
+                >
+                  No hay solicitudes abiertas con ubicación en esta zona.
+                </p>
               </div>
               <div class="locationBody" id="ubicacion">
                 <p class="locationText">
@@ -158,10 +180,15 @@
                   }}
                 </p>
 
+                <p class="locationStatus" *ngIf="nearbyState() === 'error'" role="status">
+                  {{ nearbyError() }}
+                  <button type="button" class="btn btn--link" (click)="retryNearby()">Reintentar</button>
+                </p>
+
                 <div
                   class="nearbyList"
                   *ngIf="nearbyWithDistance().length"
-                  aria-label="Solicitudes cercanas (demo)"
+                  aria-label="Solicitudes cercanas"
                 >
                   <div
                     class="nearbyItem"
@@ -170,7 +197,7 @@
                     <span class="nearbyDot" aria-hidden="true"></span>
                     <span class="nearbyText">
                       {{ nearbyZoneLabel(it.item.locationLabel) }}
-                      <span *ngIf="it.distanceKm !== null">
+                      <span *ngIf="it.distanceKm != null">
                         · ~{{ it.distanceKm | number: '1.0-1' }} km</span
                       >
                     </span>
@@ -273,15 +300,29 @@
               <div class="mapStatus mapStatus--error" *ngIf="locationError()" role="status">
                 {{ locationError() }}
               </div>
+              <div class="mapStatus" *ngIf="mapCenter() && nearbyState() === 'loading'">
+                Cargando solicitudes cercanas…
+              </div>
+              <div
+                class="mapStatus"
+                *ngIf="mapCenter() && nearbyState() === 'empty' && !isLocating()"
+                role="status"
+              >
+                No hay solicitudes abiertas cerca de esta zona.
+              </div>
+              <div class="mapStatus mapStatus--error" *ngIf="nearbyState() === 'error'" role="status">
+                {{ nearbyError() }}
+                <button type="button" class="btn btn--link" (click)="retryNearby()">Reintentar</button>
+              </div>
 
               <app-requests-map
-                *ngIf="userLocation()"
-                [center]="userLocation()"
+                *ngIf="mapCenter()"
+                [center]="mapCenter()"
                 [markers]="mapMarkers()"
               ></app-requests-map>
 
               <div class="mapLegend" aria-label="Leyenda">
-                <div class="legendItem">
+                <div class="legendItem" *ngIf="userLocation()">
                   <span class="legendDot legendDot--user" aria-hidden="true"></span>
                   <span>Tu dirección</span>
                 </div>

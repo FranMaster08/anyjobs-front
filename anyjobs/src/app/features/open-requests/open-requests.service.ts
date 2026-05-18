@@ -10,6 +10,8 @@ import {
   OpenRequestImage,
   OpenRequestListItem,
   OpenRequestProviderReview,
+  NearbyOpenRequestItem,
+  NearbyOpenRequestsResponse,
   OpenRequestsListParams,
   OpenRequestsListResponse,
   PatchOpenRequestInput,
@@ -42,8 +44,20 @@ interface OpenRequestListItemDto {
   excerpt?: string | null;
   tags?: string[] | null;
   locationLabel?: string | null;
+  locationLat?: number | null;
+  locationLng?: number | null;
   publishedAtLabel?: string | null;
   budgetLabel?: string | null;
+}
+
+interface NearbyOpenRequestListItemDto extends OpenRequestListItemDto {
+  locationLat: number;
+  locationLng: number;
+  distanceKm: number;
+}
+
+interface NearbyOpenRequestsResponseDto {
+  items?: NearbyOpenRequestListItemDto[];
 }
 
 interface OpenRequestImageDto {
@@ -106,6 +120,24 @@ export class OpenRequestsService {
     return this.http.get<OpenRequestsListResponseDto>(this.apiUrl, { params: httpParams }).pipe(
       map((dto) => toListResponse(dto, pageSize)),
     );
+  }
+
+  listNearbyOpenRequests(
+    lat: number,
+    lng: number,
+    options?: { limit?: number; radiusKm?: number },
+  ): Observable<NearbyOpenRequestsResponse> {
+    if (this.apiUrl.includes('/mock/')) {
+      return throwError(() => new Error('listNearbyOpenRequests no está disponible en modo mock'));
+    }
+
+    let params = new HttpParams().set('lat', lat).set('lng', lng);
+    if (options?.limit != null) params = params.set('limit', options.limit);
+    if (options?.radiusKm != null) params = params.set('radiusKm', options.radiusKm);
+
+    return this.http
+      .get<NearbyOpenRequestsResponseDto>(`${this.apiUrl}/nearby`, { params })
+      .pipe(map((dto) => ({ items: (dto.items ?? []).map(normalizeNearbyItem) })));
   }
 
   createOpenRequest(input: CreateOpenRequestInput): Observable<OpenRequestDetail> {
@@ -194,8 +226,21 @@ function normalizeListItem(dto: OpenRequestListItemDto): OpenRequestListItem {
     imageAlt: imageAlt.length > 0 ? imageAlt : undefined,
     tags: dto.tags ?? undefined,
     locationLabel: dto.locationLabel ?? undefined,
+    ...(dto.locationLat != null && dto.locationLng != null
+      ? { locationLat: dto.locationLat, locationLng: dto.locationLng }
+      : {}),
     publishedAtLabel: dto.publishedAtLabel ?? undefined,
     budgetLabel: dto.budgetLabel ?? undefined,
+  };
+}
+
+function normalizeNearbyItem(dto: NearbyOpenRequestListItemDto): NearbyOpenRequestItem {
+  const base = normalizeListItem(dto);
+  return {
+    ...base,
+    locationLat: dto.locationLat,
+    locationLng: dto.locationLng,
+    distanceKm: dto.distanceKm,
   };
 }
 

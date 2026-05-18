@@ -494,8 +494,73 @@
   overflow: hidden;
 }
 
+.locationMedia .mapCanvas--preview {
+  display: block;
+  width: 100%;
+  min-height: 280px;
+}
+
+.locationMedia .mapCanvas--preview .mapHost {
+  height: 280px;
+  border-radius: 0;
+}
+
 .locationMedia .mapPreviewOverlay {
-  max-width: min(320px, calc(100% - 28px));
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  display: grid;
+  align-content: end;
+  padding: 14px;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(17, 24, 39, 0.55), transparent 55%);
+  max-width: none;
+}
+
+.locationMedia .mapPreviewStatus {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 550;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+  box-shadow: var(--aj-shadow-sm);
+}
+
+.locationMedia .mapPreviewBanner {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 600;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  line-height: 1.35;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.locationMedia .mapPreviewEmpty {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 600;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
 }
 
 .locationBody {

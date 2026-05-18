@@ -327,6 +327,40 @@ Estos endpoints se usan en el wizard de registro para completar perfil. El front
 
 ## Endpoints — Solicitudes abiertas (`OPEN_REQUESTS_API_URL`)
 
+### GET `/nearby` (solicitudes cercanas para mapa)
+
+**Uso en front**: `OpenRequestsLanding` (sección ubicación y modal de mapa).
+
+**Query params**:
+- `lat` (number, obligatorio, -90…90)
+- `lng` (number, obligatorio, -180…180)
+- `limit` (opcional, default 100, máximo 100)
+- `radiusKm` (opcional, default 50)
+
+**Response 200 (JSON)**:
+
+```json
+{
+  "items": [
+    {
+      "id": "string",
+      "excerpt": "string",
+      "tags": ["string"],
+      "locationLabel": "string",
+      "locationLat": 41.3874,
+      "locationLng": 2.1686,
+      "distanceKm": 1.2,
+      "publishedAtLabel": "string",
+      "budgetLabel": "string",
+      "imageUrl": "string",
+      "imageAlt": "string"
+    }
+  ]
+}
+```
+
+Solo incluye solicitudes no eliminadas con `locationLat`/`locationLng` persistidos. Orden: `distanceKm` ascendente.
+
 ### GET `/` (listado paginado)
 
 **Uso en front**: `OpenRequestsLanding` (home/listado + “cargar más”).

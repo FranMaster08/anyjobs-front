@@ -12,8 +12,20 @@ export interface OpenRequestListItem {
   readonly excerpt: string;
   readonly tags?: readonly string[];
   readonly locationLabel?: string;
+  readonly locationLat?: number;
+  readonly locationLng?: number;
   readonly publishedAtLabel?: string;
   readonly budgetLabel?: string;
+}
+
+export interface NearbyOpenRequestItem extends OpenRequestListItem {
+  readonly locationLat: number;
+  readonly locationLng: number;
+  readonly distanceKm: number;
+}
+
+export interface NearbyOpenRequestsResponse {
+  readonly items: readonly NearbyOpenRequestItem[];
 }
 
 export interface OpenRequestImage {

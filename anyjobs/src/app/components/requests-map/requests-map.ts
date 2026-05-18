@@ -21,6 +21,40 @@ export interface RequestsMapMarker {
   readonly label: string;
   readonly lat: number;
   readonly lng: number;
+  readonly openRequestId?: string;
+  readonly excerpt?: string;
+  readonly tags?: readonly string[];
+  readonly distanceKm?: number;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function requestPopupHtml(marker: RequestsMapMarker): string {
+  const tags = (marker.tags ?? []).slice(0, 3).join(', ');
+  const distance =
+    marker.distanceKm != null
+      ? `<p class="mapPopupMeta">~${marker.distanceKm.toFixed(1)} km</p>`
+      : '';
+  const excerpt = marker.excerpt
+    ? `<p class="mapPopupExcerpt">${escapeHtml(marker.excerpt)}</p>`
+    : '';
+  const tagsHtml = tags ? `<p class="mapPopupMeta">${escapeHtml(tags)}</p>` : '';
+  const href = `/solicitudes/${encodeURIComponent(marker.openRequestId!)}`;
+  return [
+    '<div class="mapPopup">',
+    `<p class="mapPopupTitle">${escapeHtml(marker.label)}</p>`,
+    excerpt,
+    tagsHtml,
+    distance,
+    `<a class="mapPopupLink" href="${href}">Ver detalle</a>`,
+    '</div>',
+  ].join('');
 }
 
 @Component({
@@ -43,8 +77,8 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
   private layerGroup: L.LayerGroup | null = null;
 
   ngAfterViewInit(): void {
-    // Initialize only if we already have a center.
     if (this.center) this.ensureMap();
+    this.observeMapVisibility();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -84,7 +118,6 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
     this.layerGroup = L.layerGroup().addTo(map);
     this.map = map;
 
-    // Cuando el mapa se monta dentro de un modal, Leaflet puede necesitar recalcular tamaños.
     setTimeout(() => {
       try {
         map.invalidateSize();
@@ -93,10 +126,30 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
       }
     }, 0);
 
-    // Cleanup
     this.destroyRef.onDestroy(() => map.remove());
 
     this.renderMarkers();
+  }
+
+  /** Leaflet suele quedar en gris si el contenedor estaba oculto al montar (p. ej. primera visita). */
+  private observeMapVisibility(): void {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const el = this.mapEl.nativeElement;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        try {
+          this.map?.invalidateSize();
+        } catch {
+          // noop
+        }
+      },
+      { threshold: 0.05 },
+    );
+
+    obs.observe(el);
+    this.destroyRef.onDestroy(() => obs.disconnect());
   }
 
   private renderMarkers(): void {
@@ -113,12 +166,23 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
         fillOpacity: 1,
       });
 
-      circle.addTo(this.layerGroup).bindTooltip(m.label, {
-        direction: 'top',
-        opacity: 0.95,
-        offset: L.point(0, -10),
-      });
+      if (isUser) {
+        circle.bindTooltip(m.label, {
+          direction: 'top',
+          opacity: 0.95,
+          offset: L.point(0, -10),
+        });
+      } else if (m.openRequestId) {
+        circle.bindPopup(requestPopupHtml(m), { maxWidth: 280 });
+      } else {
+        circle.bindTooltip(m.label, {
+          direction: 'top',
+          opacity: 0.95,
+          offset: L.point(0, -10),
+        });
+      }
+
+      circle.addTo(this.layerGroup);
     }
   }
 }
-
