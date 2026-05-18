@@ -17,8 +17,8 @@ export const routes: Routes = [
       },
       {
         path: 'registro',
-        loadChildren: () =>
-          import('./features/auth/registration/registration.routes').then((m) => m.registrationRoutes),
+        loadComponent: () =>
+          import('./features/auth/registration/registration/registration').then((m) => m.Registration),
       },
       {
         path: 'perfil',

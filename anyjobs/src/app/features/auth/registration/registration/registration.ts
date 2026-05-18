@@ -414,7 +414,10 @@ export class Registration {
   }
 
   private applyDraft(draft: RegistrationDraft): void {
-    if (draft.stage === 'DONE') return;
+    if (draft.stage === 'DONE' || !REGISTRATION_STAGES.includes(draft.stage)) {
+      this.draftService.clear();
+      return;
+    }
 
     this.resumedRegistration.set(true);
     this.reg.setStage(draft.stage);

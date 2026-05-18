@@ -245,6 +245,25 @@ export class Shell {
 
   protected closeLogin(): void {
     this.isLoginOpen.set(false);
+    this.unlockBodyScroll();
+  }
+
+  /** Cierra el modal y navega; el scroll del body se restaura aunque la ruta ya sea /registro. */
+  protected goToRegistration(event: Event): void {
+    event.preventDefault();
+    this.closeLogin();
+    this.closeMobileNav();
+    void this.router.navigateByUrl('/registro').then(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
+  }
+
+  private unlockBodyScroll(): void {
+    try {
+      document.body.style.overflow = '';
+    } catch {
+      // ignore
+    }
   }
 
   protected toggleAccountMenu(): void {

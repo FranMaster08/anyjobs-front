@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
@@ -15,6 +15,7 @@ import { LoginResponse } from '../../shared/api/auth.models';
 interface ShellLoginTestView {
   openLogin(): void;
   submitLogin(): void;
+  goToRegistration(event: Event): void;
   isLoginOpen(): boolean;
   loginError(): string | null;
   loginForm: {
@@ -116,6 +117,23 @@ describe('Shell', () => {
     expect(shell.loginError()).toBe(
       'Las credenciales ingresadas no son válidas o no fue posible iniciar sesión.',
     );
+  });
+
+  it('navigates to /registro when goToRegistration is triggered', async () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    const shell = component as unknown as ShellLoginTestView;
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    const preventSpy = vi.spyOn(event, 'preventDefault');
+
+    shell.openLogin();
+    shell.goToRegistration(event);
+    await Promise.resolve();
+    await fixture.whenStable();
+
+    expect(preventSpy).toHaveBeenCalled();
+    expect(shell.isLoginOpen()).toBe(false);
+    expect(navigateSpy).toHaveBeenCalledWith('/registro');
   });
 
   it('does not start a second login request while the first is in flight', () => {
