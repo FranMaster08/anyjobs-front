@@ -25,6 +25,10 @@ import { HeaderNotificationsBellComponent } from '../header-notifications-bell/h
 import { HeaderOpenRequestsFiltersToggleComponent } from '../header-open-requests-filters-toggle/header-open-requests-filters-toggle';
 import { OpenRequestsFiltersUiService } from '../../features/open-requests/open-requests-filters-ui.service';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
+import {
+  isOpenRequestsLandingPath,
+  pathOnlyFromUrl,
+} from '../../features/open-requests/open-requests-navigation';
 
 /** Breakpoint alineado con `shell.scss` (cabecera compacta ≤900px). */
 export const SHELL_HEADER_COMPACT_MAX_PX = 900;
@@ -38,7 +42,8 @@ export const SHELL_SHOW_MOBILE_PUBLISH_CTA = false;
 export interface ShellMainNavItem {
   i18nKey: string;
   routerLink: readonly string[];
-  fragment?: string;
+  /** Ancla en la landing de solicitudes; scroll sin `fragment` en la URL. */
+  scrollTarget?: string;
 }
 
 @Component({
@@ -86,13 +91,14 @@ export class Shell {
   protected readonly showOpenRequestsFiltersInHeader = signal(false);
 
   private fragmentScrollHandle: ReturnType<typeof setTimeout> | null = null;
+  private pendingScrollTarget: string | null = null;
 
-  /** Una sola fuente de verdad para desktop y panel móvil (mismas rutas y fragmentos). */
+  /** Una sola fuente de verdad para desktop y panel móvil. */
   protected readonly mainNavItems: readonly ShellMainNavItem[] = [
     { i18nKey: 'nav.inicio', routerLink: ['/home'] },
-    { i18nKey: 'nav.solicitudes', routerLink: ['/solicitudes'], fragment: 'solicitudes' },
-    { i18nKey: 'nav.ubicacion', routerLink: ['/solicitudes'], fragment: 'ubicacion' },
-    { i18nKey: 'nav.contacto', routerLink: ['/solicitudes'], fragment: 'contacto' },
+    { i18nKey: 'nav.solicitudes', routerLink: ['/solicitudes'], scrollTarget: 'solicitudes' },
+    { i18nKey: 'nav.ubicacion', routerLink: ['/solicitudes'], scrollTarget: 'ubicacion' },
+    { i18nKey: 'nav.contacto', routerLink: ['/solicitudes'], scrollTarget: 'contacto' },
   ] as const;
 
   protected readonly loginForm = this.fb.nonNullable.group({
@@ -151,6 +157,7 @@ export class Shell {
         this.updateOpenRequestsFiltersHeaderVisibility();
         const urlTree = this.router.parseUrl(this.router.url);
         const fragment = urlTree.fragment;
+        const pathOnly = pathOnlyFromUrl(this.router.url);
 
         const loginParam = urlTree.queryParams?.['login'];
         if (String(loginParam) === '1') {
@@ -162,7 +169,7 @@ export class Shell {
           });
         }
 
-        if (fragment) {
+        if (fragment && isOpenRequestsLandingPath(pathOnly)) {
           // Los anclas de `/solicitudes` viven dentro del *ngSwitch* de la landing y solo
           // existen tras `success`; un solo `setTimeout(0)` corre demasiado pronto.
           this.scheduleScrollToFragment(fragment);
@@ -196,20 +203,21 @@ export class Shell {
       clearTimeout(this.fragmentScrollHandle);
       this.fragmentScrollHandle = null;
     }
+    this.pendingScrollTarget = null;
   }
 
   /**
    * Reintenta hasta que el ancla exista en el DOM (p. ej. landing async) o hasta timeout.
-   * Cancela si la URL pierde el fragmento (nueva navegación).
+   * No depende del fragmento en la URL (evita `#solicitudes` al navegar al detalle).
    */
   private scheduleScrollToFragment(fragment: string): void {
     this.clearFragmentScrollSchedule();
+    this.pendingScrollTarget = fragment;
     const deadline = Date.now() + 6000;
     const stepMs = 48;
 
     const tick = (): void => {
-      const current = this.router.parseUrl(this.router.url).fragment;
-      if (current !== fragment) {
+      if (this.pendingScrollTarget !== fragment) {
         this.clearFragmentScrollSchedule();
         return;
       }
@@ -249,6 +257,25 @@ export class Shell {
   }
 
   /** Cierra el modal y navega; el scroll del body se restaura aunque la ruta ya sea /registro. */
+  /** Navega a la landing de solicitudes y hace scroll a una sección, sin `#fragment` en la URL. */
+  protected scrollToOpenRequestsSection(event: Event, sectionId: string): void {
+    event.preventDefault();
+    this.closeMobileNav();
+    this.closeAccountMenu();
+
+    const target = sectionId.trim();
+    if (!target) return;
+
+    if (isOpenRequestsLandingPath(pathOnlyFromUrl(this.router.url))) {
+      this.scheduleScrollToFragment(target);
+      return;
+    }
+
+    void this.router.navigateByUrl('/solicitudes').then(() => {
+      this.scheduleScrollToFragment(target);
+    });
+  }
+
   protected goToRegistration(event: Event): void {
     event.preventDefault();
     this.closeLogin();

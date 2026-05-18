@@ -12,8 +12,14 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
+import { Router } from '@angular/router';
 
 import * as L from 'leaflet';
+
+import {
+  navigateToOpenRequestDetail,
+  openRequestDetailPath,
+} from '../../features/open-requests/open-requests-navigation';
 
 export interface RequestsMapMarker {
   readonly id: string;
@@ -26,6 +32,8 @@ export interface RequestsMapMarker {
   readonly tags?: readonly string[];
   readonly distanceKm?: number;
 }
+
+type LeafletMapInternals = L.Map & { _containerId?: number };
 
 function escapeHtml(value: string): string {
   return value
@@ -45,7 +53,7 @@ function requestPopupHtml(marker: RequestsMapMarker): string {
     ? `<p class="mapPopupExcerpt">${escapeHtml(marker.excerpt)}</p>`
     : '';
   const tagsHtml = tags ? `<p class="mapPopupMeta">${escapeHtml(tags)}</p>` : '';
-  const href = `/solicitudes/${encodeURIComponent(marker.openRequestId!)}`;
+  const href = openRequestDetailPath(marker.openRequestId!);
   return [
     '<div class="mapPopup">',
     `<p class="mapPopupTitle">${escapeHtml(marker.label)}</p>`,
@@ -57,6 +65,26 @@ function requestPopupHtml(marker: RequestsMapMarker): string {
   ].join('');
 }
 
+/** Evita el error de Leaflet al llamar `remove()` dos veces o sobre un contenedor reutilizado. */
+function safeRemoveLeafletMap(map: L.Map | null): void {
+  if (!map) return;
+
+  try {
+    const container = map.getContainer?.();
+    if (!container) return;
+
+    const mapId = (map as LeafletMapInternals)._containerId;
+    const containerId = (container as HTMLElement & { _leaflet_id?: number })._leaflet_id;
+    if (mapId != null && containerId != null && mapId !== containerId) {
+      return;
+    }
+
+    map.remove();
+  } catch {
+    // Contenedor ya reutilizado o mapa ya destruido.
+  }
+}
+
 @Component({
   selector: 'app-requests-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,6 +94,7 @@ function requestPopupHtml(marker: RequestsMapMarker): string {
 })
 export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   @Input() center: { lat: number; lng: number } | null = null;
   @Input() markers: readonly RequestsMapMarker[] = [];
@@ -75,6 +104,7 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
 
   private map: L.Map | null = null;
   private layerGroup: L.LayerGroup | null = null;
+  private invalidateSizeHandle: ReturnType<typeof setTimeout> | null = null;
 
   ngAfterViewInit(): void {
     if (this.center) this.ensureMap();
@@ -82,7 +112,11 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['center'] && this.center) {
+    if (changes['center']) {
+      if (!this.center) {
+        this.destroyMap();
+        return;
+      }
       this.ensureMap();
       this.map?.setView([this.center.lat, this.center.lng], this.zoom, { animate: false });
     }
@@ -93,18 +127,53 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   ngOnDestroy(): void {
-    try {
-      this.map?.remove();
-    } finally {
-      this.map = null;
-      this.layerGroup = null;
+    this.clearInvalidateSizeSchedule();
+    this.destroyMap();
+  }
+
+  private destroyMap(): void {
+    this.clearInvalidateSizeSchedule();
+    const map = this.map;
+    this.map = null;
+    this.layerGroup = null;
+    safeRemoveLeafletMap(map);
+  }
+
+  private clearInvalidateSizeSchedule(): void {
+    if (this.invalidateSizeHandle !== null) {
+      clearTimeout(this.invalidateSizeHandle);
+      this.invalidateSizeHandle = null;
     }
   }
 
+  private scheduleInvalidateSize(): void {
+    this.clearInvalidateSizeSchedule();
+    this.invalidateSizeHandle = setTimeout(() => {
+      this.invalidateSizeHandle = null;
+      if (!this.map) return;
+      try {
+        this.map.invalidateSize();
+      } catch {
+        // Mapa destruido o contenedor reutilizado.
+      }
+    }, 0);
+  }
+
   private ensureMap(): void {
-    if (this.map || !this.center) return;
+    if (!this.center) return;
+
+    if (this.map) {
+      this.renderMarkers();
+      return;
+    }
 
     const el = this.mapEl.nativeElement;
+    const staleId = (el as HTMLElement & { _leaflet_id?: number })._leaflet_id;
+    if (staleId != null) {
+      el.querySelectorAll('.leaflet-container, .leaflet-pane').forEach((node) => node.remove());
+      delete (el as HTMLElement & { _leaflet_id?: number })._leaflet_id;
+    }
+
     const map = L.map(el, {
       zoomControl: true,
       attributionControl: true,
@@ -118,16 +187,7 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
     this.layerGroup = L.layerGroup().addTo(map);
     this.map = map;
 
-    setTimeout(() => {
-      try {
-        map.invalidateSize();
-      } catch {
-        // noop
-      }
-    }, 0);
-
-    this.destroyRef.onDestroy(() => map.remove());
-
+    this.scheduleInvalidateSize();
     this.renderMarkers();
   }
 
@@ -139,11 +199,7 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
     const obs = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
-        try {
-          this.map?.invalidateSize();
-        } catch {
-          // noop
-        }
+        this.scheduleInvalidateSize();
       },
       { threshold: 0.05 },
     );
@@ -173,7 +229,24 @@ export class RequestsMapComponent implements AfterViewInit, OnChanges, OnDestroy
           offset: L.point(0, -10),
         });
       } else if (m.openRequestId) {
+        const requestId = m.openRequestId;
         circle.bindPopup(requestPopupHtml(m), { maxWidth: 280 });
+        circle.on('click', () => {
+          void navigateToOpenRequestDetail(this.router, requestId);
+        });
+        circle.on('popupopen', () => {
+          const popupEl = circle.getPopup()?.getElement();
+          const link = popupEl?.querySelector<HTMLAnchorElement>('.mapPopupLink');
+          if (!link) return;
+          link.addEventListener(
+            'click',
+            (ev) => {
+              ev.preventDefault();
+              void navigateToOpenRequestDetail(this.router, requestId);
+            },
+            { once: true },
+          );
+        });
       } else {
         circle.bindTooltip(m.label, {
           direction: 'top',

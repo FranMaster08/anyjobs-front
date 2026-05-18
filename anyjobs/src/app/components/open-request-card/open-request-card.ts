@@ -1,8 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { OpenRequestListItem } from '../../features/open-requests/open-requests.models';
+import {
+  navigateToOpenRequestDetail,
+  openRequestDetailPath,
+} from '../../features/open-requests/open-requests-navigation';
 
 /**
  * Card para mostrar una solicitud abierta en listados (imagen + extracto + metadatos).
@@ -11,23 +15,30 @@ import { OpenRequestListItem } from '../../features/open-requests/open-requests.
 @Component({
   selector: 'app-open-request-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './open-request-card.html',
   styleUrl: './open-request-card.scss',
 })
 export class OpenRequestCardComponent {
+  private readonly router = inject(Router);
+
   readonly request = input.required<OpenRequestListItem>();
   readonly cardNavigate = output<string>();
 
   protected readonly ariaLabel = 'Ver detalle de la solicitud';
 
-  protected onCardNavigate(): void {
-    this.cardNavigate.emit(this.request().id);
-  }
-
   protected readonly trackByValue = (_: number, v: string) => v;
 
-  protected get detailLink(): (string | number)[] {
-    return ['/solicitudes', this.request().id];
+  protected detailHref(): string {
+    return openRequestDetailPath(this.request().id);
+  }
+
+  protected openDetail(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const id = this.request().id?.trim();
+    if (!id) return;
+    this.cardNavigate.emit(id);
+    void navigateToOpenRequestDetail(this.router, id);
   }
 }

@@ -6,13 +6,19 @@
 
     <nav class="nav nav--desktop" aria-label="Navegación principal">
       @for (item of mainNavItems; track item.i18nKey) {
-        <a
-          class="mainNavLink"
-          [routerLink]="item.routerLink"
-          [fragment]="item.fragment"
-        >
-          {{ t(item.i18nKey) }}
-        </a>
+        @if (item.scrollTarget) {
+          <a
+            class="mainNavLink"
+            href="/solicitudes"
+            (click)="scrollToOpenRequestsSection($event, item.scrollTarget)"
+          >
+            {{ t(item.i18nKey) }}
+          </a>
+        } @else {
+          <a class="mainNavLink" [routerLink]="item.routerLink">
+            {{ t(item.i18nKey) }}
+          </a>
+        }
       }
       @if (authVm().isLoggedIn) {
         <a class="mainNavLink" [routerLink]="profileRouterLink()">{{ t('auth.myProfile') }}</a>
@@ -149,14 +155,19 @@
       <div class="mobileNavDrawerBody">
         <nav class="mobileNavLinks" aria-label="Navegación principal">
           @for (item of mainNavItems; track item.i18nKey) {
-            <a
-              class="mainNavLink"
-              [routerLink]="item.routerLink"
-              [fragment]="item.fragment"
-              (click)="closeMobileNav()"
-            >
-              {{ t(item.i18nKey) }}
-            </a>
+            @if (item.scrollTarget) {
+              <a
+                class="mainNavLink"
+                href="/solicitudes"
+                (click)="scrollToOpenRequestsSection($event, item.scrollTarget)"
+              >
+                {{ t(item.i18nKey) }}
+              </a>
+            } @else {
+              <a class="mainNavLink" [routerLink]="item.routerLink" (click)="closeMobileNav()">
+                {{ t(item.i18nKey) }}
+              </a>
+            }
             @if (item.i18nKey === 'nav.inicio' && authVm().isLoggedIn) {
               <a
                 class="mainNavLink"
@@ -188,9 +199,8 @@
         @if (showMobilePublishCta) {
           <a
             class="cta cta--block"
-            [routerLink]="['/solicitudes']"
-            fragment="contacto"
-            (click)="closeMobileNav()"
+            href="/solicitudes"
+            (click)="scrollToOpenRequestsSection($event, 'contacto')"
           >
             {{ site.config()?.sections?.requests?.cta ?? t('cta.publicar') }}
           </a>
@@ -324,13 +334,13 @@
     <div class="footerBrand">{{ site.config()?.brandName ?? t('brand.name') }}</div>
     <div class="footerLinks">
       <a class="footerLink" routerLink="/home">{{ t('nav.inicio') }}</a>
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="solicitudes">{{
+      <a class="footerLink" href="/solicitudes" (click)="scrollToOpenRequestsSection($event, 'solicitudes')">{{
         t('nav.solicitudes')
       }}</a>
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="ubicacion">{{
+      <a class="footerLink" href="/solicitudes" (click)="scrollToOpenRequestsSection($event, 'ubicacion')">{{
         t('nav.ubicacion')
       }}</a>
-      <a class="footerLink" [routerLink]="['/solicitudes']" fragment="contacto">{{
+      <a class="footerLink" href="/solicitudes" (click)="scrollToOpenRequestsSection($event, 'contacto')">{{
         t('nav.contacto')
       }}</a>
     </div>

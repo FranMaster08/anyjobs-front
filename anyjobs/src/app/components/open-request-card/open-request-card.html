@@ -1,9 +1,9 @@
 <article class="card" [attr.data-open-request-id]="request().id">
   <a
     class="mediaLink"
-    [routerLink]="detailLink"
+    [href]="detailHref()"
     [attr.aria-label]="ariaLabel"
-    (click)="onCardNavigate()"
+    (click)="openDetail($event)"
   >
     <div class="media">
       <div class="mediaBadges" *ngIf="request().tags?.length">
@@ -27,7 +27,7 @@
   </a>
 
   <div class="body">
-    <a class="titleLink" [routerLink]="detailLink" (click)="onCardNavigate()">{{ request().excerpt }}</a>
+    <a class="titleLink" [href]="detailHref()" (click)="openDetail($event)">{{ request().excerpt }}</a>
 
     <div
       class="meta"
@@ -47,11 +47,11 @@
     </div>
 
     <div class="actions">
-      <a class="btn" [routerLink]="detailLink" (click)="onCardNavigate()">Ver detalles</a>
+      <button type="button" class="btn" (click)="openDetail($event)">Ver detalles</button>
       <button
         type="button"
         class="btn btn--secondary"
-        (click)="$event.preventDefault()"
+        (click)="$event.preventDefault(); $event.stopPropagation()"
         aria-label="Comparar solicitud"
       >
         Comparar

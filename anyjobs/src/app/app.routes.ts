@@ -36,37 +36,32 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'solicitudes/nueva',
+        loadComponent: () =>
+          import('./features/open-requests/open-request-create/open-request-create').then(
+            (m) => m.OpenRequestCreate,
+          ),
+      },
+      {
+        path: 'solicitudes/:id/propuesta',
+        loadComponent: () =>
+          import('./features/open-requests/open-request-proposal-compose/open-request-proposal-compose').then(
+            (m) => m.OpenRequestProposalCompose,
+          ),
+      },
+      {
+        path: 'solicitudes/:id',
+        loadComponent: () =>
+          import('./features/open-requests/open-request-detail/open-request-detail').then(
+            (m) => m.OpenRequestDetail,
+          ),
+      },
+      {
         path: 'solicitudes',
-        children: [
-          {
-            path: '',
-            loadComponent: () =>
-              import('./features/open-requests/open-requests-landing/open-requests-landing').then(
-                (m) => m.OpenRequestsLanding,
-              ),
-          },
-          {
-            path: 'nueva',
-            loadComponent: () =>
-              import('./features/open-requests/open-request-create/open-request-create').then(
-                (m) => m.OpenRequestCreate,
-              ),
-          },
-          {
-            path: ':id/propuesta',
-            loadComponent: () =>
-              import('./features/open-requests/open-request-proposal-compose/open-request-proposal-compose').then(
-                (m) => m.OpenRequestProposalCompose,
-              ),
-          },
-          {
-            path: ':id',
-            loadComponent: () =>
-              import('./features/open-requests/open-request-detail/open-request-detail').then(
-                (m) => m.OpenRequestDetail,
-              ),
-          },
-        ],
+        loadComponent: () =>
+          import('./features/open-requests/open-requests-landing/open-requests-landing').then(
+            (m) => m.OpenRequestsLanding,
+          ),
       },
     ],
   },

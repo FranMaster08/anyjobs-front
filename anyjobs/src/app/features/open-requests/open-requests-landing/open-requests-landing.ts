@@ -14,7 +14,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
@@ -31,6 +31,10 @@ import { SiteConfigService } from '../../../shared/site-config/site-config.servi
 import { applyOpenRequestListFilters } from '../open-requests-filter-items';
 import { OpenRequestsFiltersUiService } from '../open-requests-filters-ui.service';
 import { openRequestsFiltersSortChanged$ } from '../../../shell/header-open-requests-filters-toggle/header-open-requests-filters-toggle';
+import {
+  navigateToOpenRequestDetail,
+  openRequestDetailPath,
+} from '../open-requests-navigation';
 
 type NearbyLoadState = 'idle' | 'loading' | 'success' | 'empty' | 'error';
 
@@ -92,6 +96,7 @@ function locationLabelZoneOnly(raw: string | undefined | null): string {
   styleUrl: './open-requests-landing.scss',
 })
 export class OpenRequestsLanding implements AfterViewInit {
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
   private readonly analytics = inject(OpenRequestsAnalyticsService);
@@ -225,6 +230,42 @@ export class OpenRequestsLanding implements AfterViewInit {
       route: '/solicitudes',
       listPage: this.page(),
     });
+  }
+
+  protected featuredDetailHref(): string {
+    const id = this.featured()?.id?.trim();
+    return id ? openRequestDetailPath(id) : '/solicitudes';
+  }
+
+  protected openFeaturedDetail(event: Event): void {
+    const id = this.featured()?.id?.trim();
+    if (!id) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.onCardNavigate(id);
+    void navigateToOpenRequestDetail(this.router, id);
+  }
+
+  protected onListGridClick(event: MouseEvent): void {
+    const card = (event.target as HTMLElement | null)?.closest?.('[data-open-request-id]');
+    if (!(card instanceof HTMLElement)) return;
+
+    const id = card.dataset['openRequestId']?.trim();
+    if (!id) return;
+
+    const interactive = (event.target as HTMLElement | null)?.closest?.('a, button');
+    if (!interactive || !card.contains(interactive)) return;
+    if (
+      interactive instanceof HTMLButtonElement &&
+      interactive.classList.contains('btn--secondary')
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.onCardNavigate(id);
+    void navigateToOpenRequestDetail(this.router, id);
   }
 
   ngAfterViewInit(): void {
