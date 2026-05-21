@@ -1,3 +1,4 @@
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
 <div class="headerFilters" (click)="$event.stopPropagation()">
   <button
     type="button"
@@ -41,7 +42,9 @@
       class="headerFiltersPanel"
       role="dialog"
       aria-label="Filtros de solicitudes"
+      tabindex="-1"
       (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
     >
       <div class="headerFiltersPanelHeader">
         <div class="headerFiltersPanelHeading">

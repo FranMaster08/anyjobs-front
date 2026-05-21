@@ -6,7 +6,7 @@ import {
   readRegistrationFieldErrors,
 } from '../../../shared/api/registration-error.utils';
 
-export type ControlErrorRule = { readonly error: string; readonly messageKey: string };
+export interface ControlErrorRule { readonly error: string; readonly messageKey: string }
 
 export const ACCOUNT_CONTROL_ERRORS: Record<string, readonly ControlErrorRule[]> = {
   fullName: [

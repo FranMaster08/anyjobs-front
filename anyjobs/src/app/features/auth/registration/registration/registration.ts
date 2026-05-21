@@ -42,12 +42,10 @@ import {
   STAGE_LABEL_KEY,
   WORKER_CATEGORY_LABEL_KEY,
   WORKER_CATEGORY_OPTIONS,
-  type SupportedCountryCode,
   type WorkerCategory,
 } from '../registration.constants';
 import {
   cityInCountryValidator,
-  e164PhoneValidator,
   isoCountryCodeValidator,
   minimumAgeValidator,
   municipalityInDivisionValidator,
@@ -59,7 +57,7 @@ import {
   WORLD_COUNTRY_OPTIONS,
 } from '../../../../shared/location/world-countries.data';
 import { LocationGeographyService } from '../../../../shared/location/location-geography.service';
-import { emailTakenAsyncValidator, phoneTakenAsyncValidator } from '../registration.async-validators';
+import { emailTakenAsyncValidator } from '../registration.async-validators';
 import { AuthApi } from '../../../../shared/api/auth.api';
 import { clearApiError } from '../../../../shared/api/api-error.utils';
 import {

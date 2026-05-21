@@ -1,3 +1,4 @@
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
 <div class="notifBell" (click)="$event.stopPropagation()">
   <button
     type="button"
@@ -39,7 +40,9 @@
       class="notifPanel"
       role="dialog"
       aria-label="Lista de notificaciones"
+      tabindex="-1"
       (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
     >
       <div class="notifPanelHeader">
         <h2 class="notifPanelTitle">Notificaciones</h2>

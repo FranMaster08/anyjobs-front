@@ -1,6 +1,6 @@
 import type { MediaSliderComponent } from 'ngx-vertical-slider';
 
-type SliderMuteState = { muted: { set(value: boolean): void } };
+interface SliderMuteState { muted: { set(value: boolean): void } }
 
 /** ngx-vertical-slider inicia con `muted=true`; no expone input para cambiarlo. */
 export function setMediaSliderMuted(slider: MediaSliderComponent | undefined, muted: boolean): void {

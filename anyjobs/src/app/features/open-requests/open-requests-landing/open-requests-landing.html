@@ -77,6 +77,7 @@
               </a>
             </div>
 
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div class="grid" #listGrid (click)="onListGridClick($event)">
               <app-open-request-card
                 *ngFor="let item of listItems(); trackBy: trackById"
@@ -189,7 +190,7 @@
                     <span class="nearbyDot" aria-hidden="true"></span>
                     <span class="nearbyText">
                       {{ nearbyZoneLabel(it.item.locationLabel) }}
-                      <span *ngIf="it.distanceKm != null">
+                      <span *ngIf="it.distanceKm !== null">
                         · ~{{ it.distanceKm | number: '1.0-1' }} km</span
                       >
                     </span>
