@@ -189,6 +189,18 @@ export class Registration {
 
   protected readonly isBusy = signal(false);
   protected readonly resumedRegistration = signal(false);
+  /** Refleja si la verificación por teléfono/SMS está habilitada. False por defecto mientras SMS esté deshabilitado. */
+  protected readonly phoneVerificationEnabled = signal(false);
+
+  /** Dígitos individuales del código de seguridad de email (6 cajas). */
+  protected readonly emailOtpDigits = signal<string[]>(['', '', '', '', '', '']);
+  /** Error visible bajo las cajas OTP del email. */
+  protected readonly emailOtpError = signal<string | null>(null);
+  /** Índices 0-5 para el @for del template. */
+  protected readonly otpIndices = [0, 1, 2, 3, 4, 5] as const;
+  /** True durante ~3 s después de reenviar el código para dar feedback visual. */
+  protected readonly resendSent = signal(false);
+  private resendTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly accountForm = this.fb.nonNullable.group({
     fullName: this.fb.nonNullable.control<RegisterFormVM['fullName']>('', [
@@ -200,11 +212,7 @@ export class Registration {
       [Validators.required, Validators.email],
       [emailTakenAsyncValidator(this.authApi)],
     ),
-    phoneNumber: this.fb.nonNullable.control<RegisterFormVM['phoneNumber']>(
-      '',
-      [Validators.required, e164PhoneValidator()],
-      [phoneTakenAsyncValidator(this.authApi)],
-    ),
+    phoneNumber: this.fb.nonNullable.control<RegisterFormVM['phoneNumber']>(''),
     password: this.fb.nonNullable.control<RegisterFormVM['password']>('', [
       Validators.required,
       strongPasswordValidator(),
@@ -268,13 +276,17 @@ export class Registration {
     nationality: this.fb.nonNullable.control<PersonalInfoFormVM['nationality']>(''),
   });
 
+  protected isStepDone(s: (typeof REGISTRATION_STAGES)[number]): boolean {
+    return REGISTRATION_STAGES.indexOf(s) < REGISTRATION_STAGES.indexOf(this.stage());
+  }
+
   protected readonly roles = computed(() => this.vm().roles);
   protected readonly isWorker = computed(() => this.roles().includes('WORKER'));
   protected readonly isClient = computed(() => this.roles().includes('CLIENT'));
 
   protected readonly accountFormPending = computed(() => {
     this.formStatusTick();
-    return this.accountForm.controls.email.pending || this.accountForm.controls.phoneNumber.pending;
+    return this.accountForm.controls.email.pending;
   });
 
   protected readonly accountContinueBlocked = computed(
@@ -283,27 +295,30 @@ export class Registration {
 
   protected readonly verifyContinueHint = computed(() => {
     const s = this.vm();
-    if (this.isWorker() && !s.phoneVerified) {
-      return this.t('reg.error.phoneVerification');
-    }
-    if (this.isClient() && !this.isWorker() && !(s.emailVerified || s.phoneVerified)) {
-      return this.t('reg.error.contactVerification');
-    }
     if (!this.isWorker() && !this.isClient()) {
       return this.t('error.rolesRequired');
+    }
+    if (this.phoneVerificationEnabled() && this.isWorker() && !s.phoneVerified) {
+      return this.t('reg.error.phoneVerification');
+    }
+    if (!s.emailVerified && !(this.phoneVerificationEnabled() && s.phoneVerified)) {
+      return this.t('reg.error.emailVerification');
     }
     return null;
   });
 
   protected readonly canContinueVerify = computed(() => {
     const s = this.vm();
-    if (this.isWorker() && !s.phoneVerified) return false;
     if (!this.isWorker() && !this.isClient()) return false;
-    // CLIENT: allow continue with at least one verification
-    if (this.isClient() && !this.isWorker() && !(s.emailVerified || s.phoneVerified)) return false;
-    // WORKER: phone verified is enough for MVP
-    if (this.isWorker() && s.phoneVerified) return true;
-    return s.emailVerified || s.phoneVerified;
+    if (this.phoneVerificationEnabled()) {
+      // Con SMS habilitado: WORKER requiere teléfono verificado; CLIENT: al menos una verificación
+      if (this.isWorker() && !s.phoneVerified) return false;
+      if (this.isClient() && !this.isWorker() && !(s.emailVerified || s.phoneVerified)) return false;
+      if (this.isWorker() && s.phoneVerified) return true;
+      return s.emailVerified || s.phoneVerified;
+    }
+    // Con SMS deshabilitado: solo requiere email verificado
+    return s.emailVerified;
   });
 
   constructor() {
@@ -607,34 +622,179 @@ export class Registration {
 
     clearApiError(this.accountForm);
     const value = this.accountForm.getRawValue();
-    this.reg.setRoles(value.selectedRoles);
-    this.reg.setStatus('PENDING');
-    this.reg.setStage('VERIFY');
-    this.persistDraft('VERIFY');
+
+    this.isBusy.set(true);
+    this.authApi
+      .register({
+        fullName: value.fullName.trim(),
+        email: value.email.trim(),
+        phoneNumber: value.phoneNumber.trim(),
+        password: value.password,
+        roles: value.selectedRoles,
+      })
+      .pipe(finalize(() => this.isBusy.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.reg.setRoles(value.selectedRoles);
+          this.reg.setStatus('PENDING');
+          this.reg.setEmailVerified(false);
+          this.reg.setStage('VERIFY');
+          this.phoneVerificationEnabled.set(res.phoneVerificationRequired ?? false);
+          this.emailOtpDigits.set(['', '', '', '', '', '']);
+          this.emailOtpError.set(null);
+          this.persistDraft('VERIFY');
+          this.cdr.markForCheck();
+        },
+        error: (err: unknown) => {
+          logRegistrationError('register', err);
+          const msg = mapRegistrationErrorToMessage(err, (k) => this.t(k));
+          this.accountForm.setErrors({ api: msg });
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   protected verifyEmail(): void {
-    const otp = this.verifyForm.controls.emailOtp.value.trim();
-    if (otp.length < 4) {
-      this.verifyForm.controls.emailOtp.setErrors({ otpInvalid: true });
-      this.verifyForm.controls.emailOtp.markAsTouched();
+    const otp = this.emailOtpDigits().join('');
+    this.emailOtpError.set(null);
+
+    if (otp.length < 6 || this.emailOtpDigits().some((d) => !d)) {
+      this.emailOtpError.set(this.t('error.otpInvalid'));
+      document.getElementById('otp-digit-0')?.focus();
       return;
     }
-    clearApiError(this.verifyForm.controls.emailOtp);
-    this.reg.setEmailVerified(true);
-    this.persistDraft(this.stage());
+
+    this.isBusy.set(true);
+    this.authApi
+      .verifyEmail({ otpCode: otp })
+      .pipe(finalize(() => this.isBusy.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.reg.setEmailVerified(true);
+          this.persistDraft(this.stage());
+          this.cdr.markForCheck();
+        },
+        error: (err: unknown) => {
+          logRegistrationError('verifyEmail', err);
+          const msg = mapRegistrationErrorToMessage(err, (k) => this.t(k));
+          this.emailOtpError.set(msg);
+          this.emailOtpDigits.set(['', '', '', '', '', '']);
+          document.getElementById('otp-digit-0')?.focus();
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  protected onDigitInput(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const raw = input.value.replace(/\D/g, '');
+    const digit = raw.slice(-1);
+    input.value = digit;
+
+    const digits = [...this.emailOtpDigits()];
+    digits[index] = digit;
+    this.emailOtpDigits.set(digits);
+    this.emailOtpError.set(null);
+
+    if (digit && index < 5) {
+      document.getElementById(`otp-digit-${index + 1}`)?.focus();
+    }
+  }
+
+  protected onDigitKeyDown(index: number, event: KeyboardEvent): void {
+    if (event.key === 'Backspace') {
+      const digits = [...this.emailOtpDigits()];
+      if (digits[index]) {
+        digits[index] = '';
+        this.emailOtpDigits.set(digits);
+      } else if (index > 0) {
+        document.getElementById(`otp-digit-${index - 1}`)?.focus();
+      }
+      this.emailOtpError.set(null);
+    } else if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      document.getElementById(`otp-digit-${index - 1}`)?.focus();
+    } else if (event.key === 'ArrowRight' && index < 5) {
+      event.preventDefault();
+      document.getElementById(`otp-digit-${index + 1}`)?.focus();
+    }
+  }
+
+  protected onDigitPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const text = event.clipboardData?.getData('text') ?? '';
+    const cleaned = text.replace(/\D/g, '').slice(0, 6).split('');
+    while (cleaned.length < 6) cleaned.push('');
+    this.emailOtpDigits.set(cleaned);
+    this.emailOtpError.set(null);
+    const focusIndex = Math.min(cleaned.filter(Boolean).length, 5);
+    document.getElementById(`otp-digit-${focusIndex}`)?.focus();
+    this.cdr.markForCheck();
+  }
+
+  protected onDigitFocus(index: number, event: FocusEvent): void {
+    (event.target as HTMLInputElement).select();
+  }
+
+  protected resendCode(): void {
+    const value = this.accountForm.getRawValue();
+    this.emailOtpDigits.set(['', '', '', '', '', '']);
+    this.emailOtpError.set(null);
+
+    this.isBusy.set(true);
+    this.authApi
+      .register({
+        fullName: value.fullName.trim(),
+        email: value.email.trim(),
+        phoneNumber: value.phoneNumber.trim(),
+        password: value.password,
+        roles: value.selectedRoles,
+      })
+      .pipe(finalize(() => this.isBusy.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.resendSent.set(true);
+          if (this.resendTimer) clearTimeout(this.resendTimer);
+          this.resendTimer = setTimeout(() => {
+            this.resendSent.set(false);
+            this.cdr.markForCheck();
+          }, 4000);
+          document.getElementById('otp-digit-0')?.focus();
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   protected verifyPhone(): void {
     const otp = this.verifyForm.controls.smsOtp.value.trim();
-    if (otp.length < 4) {
+    if (otp.length < 6) {
       this.verifyForm.controls.smsOtp.setErrors({ otpInvalid: true });
       this.verifyForm.controls.smsOtp.markAsTouched();
       return;
     }
     clearApiError(this.verifyForm.controls.smsOtp);
-    this.reg.setPhoneVerified(true);
-    this.persistDraft(this.stage());
+
+    this.isBusy.set(true);
+    this.authApi
+      .verifyPhone({ otpCode: otp })
+      .pipe(finalize(() => this.isBusy.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.reg.setPhoneVerified(true);
+          this.persistDraft(this.stage());
+          this.cdr.markForCheck();
+        },
+        error: (err: unknown) => {
+          logRegistrationError('verifyPhone', err);
+          const msg = mapRegistrationErrorToMessage(err, (k) => this.t(k));
+          this.verifyForm.controls.smsOtp.setErrors({ api: msg });
+          this.verifyForm.controls.smsOtp.markAsTouched();
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   protected onVerifyContinue(): void {
@@ -819,8 +979,11 @@ export class Registration {
 
   protected back(): void {
     const stage = this.stage();
-    if (stage === 'VERIFY') this.reg.setStage('ACCOUNT');
-    else if (stage === 'LOCATION') this.reg.setStage('VERIFY');
+    if (stage === 'VERIFY') {
+      this.emailOtpDigits.set(['', '', '', '', '', '']);
+      this.emailOtpError.set(null);
+      this.reg.setStage('ACCOUNT');
+    } else if (stage === 'LOCATION') this.reg.setStage('VERIFY');
     else if (stage === 'ROLE_PROFILE') this.reg.setStage('LOCATION');
     else if (stage === 'PERSONAL_INFO') this.reg.setStage('ROLE_PROFILE');
   }

@@ -2,15 +2,24 @@
   <header class="regHeader">
     <div>
       <h1 class="regTitle">{{ t('reg.title') }}</h1>
-      <p class="regSubtitle">{{ t('reg.subtitle') }}</p>
     </div>
     <a class="btn btn--link btn--sm" routerLink="/home">{{ t('btn.return') }}</a>
   </header>
 
   <nav class="regSteps" [attr.aria-label]="t('reg.progress')">
     <ol class="regStepsList">
-      @for (s of stages; track s) {
-        <li class="regStep" [class.regStep--active]="stage() === s">{{ t(stageLabelKey[s]) }}</li>
+      @for (s of stages; track s; let i = $index) {
+        <li
+          class="regStep"
+          [class.regStep--active]="stage() === s"
+          [class.regStep--done]="isStepDone(s)"
+          [attr.aria-current]="stage() === s ? 'step' : null"
+        >
+          <span class="regStepDot">
+            @if (isStepDone(s)) { ✓ } @else { {{ i + 1 }} }
+          </span>
+          <span class="regStepLabel">{{ t(stageLabelKey[s]) }}</span>
+        </li>
       }
     </ol>
   </nav>
@@ -55,17 +64,6 @@
             placeholder="+34123456789"
             autocomplete="tel"
           />
-          @if (accountForm.controls.phoneNumber.pending) {
-            <p class="regHint">{{ t('reg.checkingAvailability') }}</p>
-          }
-          @if (showAccountError(accountForm.controls.phoneNumber)) {
-            @if (accountForm.controls.phoneNumber.errors?.['e164Phone']) {
-              <p class="regError">{{ t('error.phoneE164') }}</p>
-            }
-            @if (accountForm.controls.phoneNumber.errors?.['phoneTaken']) {
-              <p class="regError">{{ t('error.phoneTaken') }}</p>
-            }
-          }
         </div>
 
         <div class="regField">
@@ -131,68 +129,101 @@
   }
 
   @if (stage() === 'VERIFY') {
-    <section class="regCard">
-      <header class="regCardHeader">
-        <h2 class="regH2">{{ t('verify.title') }}</h2>
-        <p class="regHint">
-          @if (isWorker()) {
-            {{ t('verify.hint.worker') }}
-          } @else {
-            {{ t('verify.hint.client') }}
-          }
-        </p>
-      </header>
+    <section class="regCard verifyCard" [class.verifyCard--verified]="vm().emailVerified">
 
-      <div class="regGrid" [formGroup]="verifyForm">
-        <div class="regField">
-          <label class="fieldLabel" for="emailOtp">{{ t('verify.otp.email') }}</label>
-          <input id="emailOtp" type="text" class="fieldControl" formControlName="emailOtp" inputmode="numeric" autocomplete="one-time-code" />
-          <div class="regInlineActions">
-            <button type="button" class="btn btn--secondary btn--sm" [disabled]="isBusy()" (click)="verifyEmail()">
-              {{ t('btn.verifyEmail') }}
-            </button>
-            <span class="regBadge" [class.regBadge--ok]="vm().emailVerified">
-              {{ vm().emailVerified ? t('verify.status.verified') : t('verify.status.pending') }}
-            </span>
+      <!-- Título -->
+      <h2 class="verifyTitle">
+        {{ vm().emailVerified ? 'Email verificado' : t('verify.title') }}
+      </h2>
+
+      <!-- Subtítulo con email -->
+      <p class="verifySubtitle">
+        @if (vm().emailVerified) {
+          Tu dirección
+          <span class="verifyEmailChip">{{ accountForm.controls.email.value }}</span>
+          ha sido verificada correctamente.
+        } @else {
+          Hemos enviado un código de seguridad a
+          <span class="verifyEmailChip">{{ accountForm.controls.email.value }}</span>
+        }
+      </p>
+
+      <!-- Formulario OTP (oculto tras verificar) -->
+      @if (!vm().emailVerified) {
+        <div class="verifyForm" [formGroup]="verifyForm">
+
+          <div
+            class="otpBoxes"
+            [class.otpBoxes--error]="!!emailOtpError()"
+            role="group"
+            aria-label="Código de seguridad de 6 dígitos"
+          >
+            @for (i of otpIndices; track i) {
+              <input
+                class="otpBox"
+                [class.otpBox--filled]="!!emailOtpDigits()[i]"
+                type="text"
+                inputmode="numeric"
+                maxlength="2"
+                [id]="'otp-digit-' + i"
+                [attr.aria-label]="'Dígito ' + (i + 1) + ' de 6'"
+                autocomplete="off"
+                [value]="emailOtpDigits()[i]"
+                (input)="onDigitInput(i, $event)"
+                (keydown)="onDigitKeyDown(i, $event)"
+                (paste)="onDigitPaste($event)"
+                (focus)="onDigitFocus(i, $event)"
+              />
+            }
           </div>
-          @if (verifyForm.controls.emailOtp.touched && verifyForm.controls.emailOtp.errors?.['otpInvalid']) {
-            <p class="regError">{{ t('error.otpInvalid') }}</p>
-          }
-          @if (verifyForm.controls.emailOtp.touched && verifyForm.controls.emailOtp.errors?.['api']) {
-            <p class="regError">{{ verifyForm.controls.emailOtp.errors?.['api'] }}</p>
-          }
-        </div>
 
-        <div class="regField">
-          <label class="fieldLabel" for="smsOtp">{{ t('verify.otp.sms') }}</label>
-          <input id="smsOtp" type="text" class="fieldControl" formControlName="smsOtp" inputmode="numeric" autocomplete="one-time-code" />
-          <div class="regInlineActions">
-            <button type="button" class="btn btn--secondary btn--sm" [disabled]="isBusy()" (click)="verifyPhone()">
-              {{ t('btn.verifyPhone') }}
-            </button>
-            <span class="regBadge" [class.regBadge--ok]="vm().phoneVerified">
-              {{ vm().phoneVerified ? t('verify.status.verified') : t('verify.status.pending') }}
-            </span>
-          </div>
-          @if (verifyForm.controls.smsOtp.touched && verifyForm.controls.smsOtp.errors?.['otpInvalid']) {
-            <p class="regError">{{ t('error.otpInvalid') }}</p>
+          @if (emailOtpError()) {
+            <p class="verifyError" role="alert">{{ emailOtpError() }}</p>
           }
-          @if (verifyForm.controls.smsOtp.touched && verifyForm.controls.smsOtp.errors?.['api']) {
-            <p class="regError">{{ verifyForm.controls.smsOtp.errors?.['api'] }}</p>
-          }
-        </div>
-      </div>
 
-      @if (verifyContinueHint(); as hint) {
-        <p class="regHint">{{ hint }}</p>
+          <button
+            type="button"
+            class="btn verifyBtn"
+            [disabled]="isBusy()"
+            (click)="verifyEmail()"
+          >
+            @if (isBusy()) {
+              <span class="verifySpinner" aria-hidden="true"></span>
+            }
+            {{ isBusy() ? 'Verificando…' : 'Verificar código' }}
+          </button>
+
+          <button
+            type="button"
+            class="verifyResend"
+            [disabled]="isBusy() || resendSent()"
+            (click)="resendCode()"
+          >
+            @if (resendSent()) {
+              ✓ Código enviado de nuevo
+            } @else {
+              ¿No recibiste el código? <span class="verifyResendAction">Reenviar</span>
+            }
+          </button>
+
+        </div>
       }
 
-      <footer class="regActions regActions--split">
-        <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
-        <button class="btn" type="button" [disabled]="!canContinueVerify() || isBusy()" (click)="onVerifyContinue()">
+      <!-- Footer: atrás / continuar -->
+      <footer class="verifyFooter">
+        <button class="btn btn--secondary" type="button" (click)="back()">
+          {{ t('btn.back') }}
+        </button>
+        <button
+          class="btn"
+          type="button"
+          [disabled]="!canContinueVerify() || isBusy()"
+          (click)="onVerifyContinue()"
+        >
           {{ t('btn.continue') }}
         </button>
       </footer>
+
     </section>
   }
 
@@ -393,12 +424,6 @@
     <form class="regCard" [formGroup]="personalForm" (ngSubmit)="onPersonalContinue()">
       <header class="regCardHeader">
         <h2 class="regH2">{{ t('personal.title') }}</h2>
-        <p class="regHint">
-          {{ t('personal.hint') }}
-          @if (isWorker()) {
-            <span class="regBadge regBadge--warn">{{ t('personal.docRequiredWorker') }}</span>
-          }
-        </p>
       </header>
 
       <div class="regGrid">
