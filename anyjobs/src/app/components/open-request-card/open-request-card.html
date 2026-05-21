@@ -30,32 +30,16 @@
     <a class="titleLink" [href]="detailHref()" (click)="openDetail($event)">{{ request().excerpt }}</a>
 
     <div
-      class="meta"
+      class="chips"
       *ngIf="request().locationLabel || request().publishedAtLabel || request().budgetLabel"
     >
-      <span class="meta__item" *ngIf="request().publishedAtLabel">{{
-        request().publishedAtLabel
-      }}</span>
-      <span class="meta__sep" *ngIf="request().publishedAtLabel && request().locationLabel">·</span>
-      <span class="meta__item" *ngIf="request().locationLabel">{{ request().locationLabel }}</span>
-      <span
-        class="meta__sep"
-        *ngIf="(request().publishedAtLabel || request().locationLabel) && request().budgetLabel"
-        >·</span
-      >
-      <span class="meta__item" *ngIf="request().budgetLabel">{{ request().budgetLabel }}</span>
+      <span class="chip" *ngIf="request().publishedAtLabel">{{ request().publishedAtLabel }}</span>
+      <span class="chip" *ngIf="request().locationLabel">{{ request().locationLabel }}</span>
+      <span class="chip chip--budget" *ngIf="request().budgetLabel">{{ request().budgetLabel }}</span>
     </div>
 
     <div class="actions">
       <button type="button" class="btn" (click)="openDetail($event)">Ver detalles</button>
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="$event.preventDefault(); $event.stopPropagation()"
-        aria-label="Comparar solicitud"
-      >
-        Comparar
-      </button>
     </div>
   </div>
 </article>
