@@ -112,12 +112,12 @@ describe('MyRequestsDashboard', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const tabs = compiled.querySelectorAll<HTMLButtonElement>('.tab');
+    const tabs = compiled.querySelectorAll<HTMLButtonElement>('.myRequestsTab');
     expect(tabs.length).toBe(2);
     expect(tabs[0]?.textContent).toContain('Publicadas por mí');
     expect(tabs[1]?.textContent).toContain('Postulé a estas');
-    expect(tabs[0]?.classList.contains('tab--active')).toBe(true);
-    expect(tabs[1]?.classList.contains('tab--active')).toBe(false);
+    expect(tabs[0]?.classList.contains('myRequestsTab--active')).toBe(true);
+    expect(tabs[1]?.classList.contains('myRequestsTab--active')).toBe(false);
   });
 
   it('muestra empty state propio en "Publicadas por mí" cuando no hay solicitudes propias', async () => {
@@ -168,7 +168,7 @@ describe('MyRequestsDashboard', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const appliedTab = compiled.querySelectorAll<HTMLButtonElement>('.tab')[1];
+    const appliedTab = compiled.querySelectorAll<HTMLButtonElement>('.myRequestsTab')[1];
     appliedTab?.click();
     fixture.detectChanges();
 
@@ -206,7 +206,7 @@ describe('MyRequestsDashboard', () => {
     expect(compiled.textContent).toContain('Mi solicitud publicada');
     expect(compiled.textContent).toContain('Publicada por ti');
 
-    const publishedTab = compiled.querySelectorAll<HTMLButtonElement>('.tab')[0];
+    const publishedTab = compiled.querySelectorAll<HTMLButtonElement>('.myRequestsTab')[0];
     expect(publishedTab?.textContent?.replace(/\s+/g, ' ')).toContain('Publicadas por mí 1');
   });
 });

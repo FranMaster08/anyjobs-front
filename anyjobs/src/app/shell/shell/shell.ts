@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, exhaustMap, filter, EMPTY, finalize, Subject } from 'rxjs';
 
@@ -53,6 +53,7 @@ export interface ShellMainNavItem {
     CommonModule,
     RouterOutlet,
     RouterLink,
+    RouterLinkActive,
     ReactiveFormsModule,
     ModalComponent,
     HeaderNotificationsBellComponent,

@@ -35,6 +35,9 @@ describe(HeaderNotificationsBellComponent.name, () => {
   });
 
   it('shows badge when unread count is greater than zero', () => {
+    fixture.nativeElement.querySelector('.notifBellBtn').click();
+    fixture.detectChanges();
+    http.expectOne((r) => r.url === baseUrl && r.method === 'GET').flush({ items: [], meta: {} });
     http.expectOne(`${baseUrl}/unread-count`).flush({ count: 2 });
     fixture.detectChanges();
     const badge = fixture.nativeElement.querySelector('.notifBellBadge');
