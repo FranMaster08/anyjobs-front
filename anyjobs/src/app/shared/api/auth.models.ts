@@ -69,3 +69,24 @@ export interface LoginResponse {
   user: AuthUser;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
+export interface ValidateResetTokenRequest {
+  token: string;
+}
+
+export interface ValidateResetTokenResponse {
+  valid: boolean;
+}
+

@@ -22,5 +22,39 @@
       />
     </div>
   }
+  @if (commentsPanelVisible()) {
+    <div
+      class="homeCommentsOverlay"
+      [class.is-visible]="commentsPanelShown()"
+      (click)="onCommentsOverlayClick($event)"
+      role="presentation"
+    >
+      <div
+        class="homeCommentsPanel"
+        [class.is-visible]="commentsPanelShown()"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-labelledby]="commentsPanelTitleId"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="homeCommentsPanel__header">
+          <h2 class="homeCommentsPanel__title" [id]="commentsPanelTitleId">Comentarios</h2>
+          <button
+            type="button"
+            class="homeCommentsPanel__close"
+            (click)="closeCommentsPanel()"
+            aria-label="Cerrar comentarios"
+          >
+            ✕
+          </button>
+        </header>
+        <div class="homeCommentsBody">
+          <p class="homeCommentsEmpty">
+            Aquí se mostrarán los comentarios de esta publicación.
+          </p>
+        </div>
+      </div>
+    </div>
+  }
   <app-home-mobile-bottom-nav />
 </section>

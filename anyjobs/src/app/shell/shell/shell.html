@@ -274,48 +274,58 @@
 
 <app-modal [open]="isLoginOpen()" [title]="t('auth.login')" size="sm" (closed)="closeLogin()">
   <form class="loginForm" [formGroup]="loginForm" (ngSubmit)="submitLogin()" novalidate>
-    <div class="field">
-      <label class="fieldLabel" for="loginEmail">{{ t('auth.email') }}</label>
-      <input
-        id="loginEmail"
-        type="email"
-        inputmode="email"
-        autocapitalize="none"
-        spellcheck="false"
-        class="fieldControl"
-        formControlName="email"
-        autocomplete="email"
-      />
-      @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
-        <p class="loginError">{{ t('auth.emailInvalid') }}</p>
-      }
-    </div>
+    <p class="loginIntro">{{ t('auth.loginIntro') }}</p>
 
-    <div class="field">
-      <label class="fieldLabel" for="loginPassword">{{ t('auth.password') }}</label>
-      <input
-        id="loginPassword"
-        type="password"
-        class="fieldControl"
-        formControlName="password"
-        autocomplete="current-password"
-      />
-      @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
-        <p class="loginError">{{ t('auth.passwordInvalid') }}</p>
-      }
+    <div class="loginFields">
+      <div class="loginField">
+        <label class="loginLabel" for="loginEmail">{{ t('auth.email') }}</label>
+        <input
+          id="loginEmail"
+          type="email"
+          inputmode="email"
+          autocapitalize="none"
+          spellcheck="false"
+          class="loginControl"
+          formControlName="email"
+          autocomplete="email"
+          [attr.aria-invalid]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
+        />
+        @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
+          <p class="loginFieldError">{{ t('auth.emailInvalid') }}</p>
+        }
+      </div>
+
+      <div class="loginField">
+        <div class="loginLabelRow">
+          <label class="loginLabel" for="loginPassword">{{ t('auth.password') }}</label>
+          <a
+            class="loginForgotLink"
+            routerLink="/recuperar-contrasena"
+            (click)="closeLogin()"
+          >{{ t('auth.forgotPassword') }}</a>
+        </div>
+        <input
+          id="loginPassword"
+          type="password"
+          class="loginControl"
+          formControlName="password"
+          autocomplete="current-password"
+          [attr.aria-invalid]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
+        />
+        @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+          <p class="loginFieldError">{{ t('auth.passwordInvalid') }}</p>
+        }
+      </div>
     </div>
 
     @if (loginError()) {
-      <p class="loginError" role="status" aria-live="polite">{{ loginError() }}</p>
+      <p class="loginAlert" role="alert" aria-live="polite">{{ loginError() }}</p>
     }
 
-    <footer class="loginActions">
-      <button type="button" class="btn btn--secondary" (click)="closeLogin()">
-        {{ t('auth.cancel') }}
-      </button>
+    <div class="loginPrimaryActions">
       <button
         type="submit"
-        class="btn"
+        class="btn loginSubmitBtn"
         [class.btn--loginBusy]="loginBusy()"
         [disabled]="loginForm.invalid || loginBusy()"
         [attr.aria-busy]="loginBusy() ? 'true' : null"
@@ -325,11 +335,13 @@
         }
         {{ loginBusy() ? t('auth.loginSubmitting') : t('auth.login') }}
       </button>
-    </footer>
+    </div>
 
-    <p class="loginHint">
-      ¿No tienes cuenta?
-      <a class="loginLink" href="/registro" (click)="goToRegistration($event)">Crear cuenta</a>
+    <p class="loginRegister">
+      <span class="loginRegisterText">{{ t('auth.noAccount') }}</span>
+      <a class="loginRegisterLink" href="/registro" (click)="goToRegistration($event)">
+        {{ t('auth.createAccount') }}
+      </a>
     </p>
   </form>
 </app-modal>

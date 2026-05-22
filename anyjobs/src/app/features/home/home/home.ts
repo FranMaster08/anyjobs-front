@@ -7,6 +7,7 @@ import {
   DestroyRef,
   effect,
   ElementRef,
+  HostListener,
   inject,
   Injector,
   runInInjectionContext,
@@ -40,6 +41,7 @@ type FeaturedReelSlide = SlideData & { readonly id?: string; readonly creatorUse
 const ANONYMOUS_ACTOR_KEY = 'anyjobs.reels.actor.anonymousId';
 const EARLY_SKIP_MS = 2000;
 const WATCH_PROGRESS_INTERVAL_MS = 5000;
+const COMMENTS_PANEL_CLOSE_MS = 280;
 
 function storageGet(key: string): string | null {
   try {
@@ -87,7 +89,15 @@ export class Home {
   readonly loadFailed = signal(false);
   readonly slides = signal<readonly FeaturedReelSlide[]>([]);
 
+  readonly commentsPanelOpen = signal(false);
+  readonly commentsPanelClosing = signal(false);
+  readonly commentsPanelSlideIndex = signal<number | null>(null);
+  readonly commentsPanelReelId = signal<string | null>(null);
+  protected readonly commentsPanelTitleId = 'home-comments-panel-title';
+
   private activeSlideIndex: number | null = null;
+  private previousBodyOverflow: string | null = null;
+  private commentsPanelCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private viewStartedAt: number | null = null;
   private readonly impressionsSent = new Set<number>();
   private visibilityObserver: MutationObserver | null = null;
@@ -119,7 +129,11 @@ export class Home {
         }
       });
 
-    this.destroyRef.onDestroy(() => this.teardownSliderSession());
+    this.destroyRef.onDestroy(() => {
+      this.clearCommentsPanelCloseTimer();
+      this.unlockBodyScroll();
+      this.teardownSliderSession();
+    });
 
     effect(() => {
       if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
@@ -259,6 +273,14 @@ export class Home {
       requestAnimationFrame(() => {
         const index = detectVisibleIndex();
         syncPlayback();
+
+        if (
+          this.commentsPanelOpen() &&
+          index !== null &&
+          index !== this.commentsPanelSlideIndex()
+        ) {
+          this.closeCommentsPanel();
+        }
 
         if (index === this.activeSlideIndex) return;
         if (this.activeSlideIndex !== null) {
@@ -426,6 +448,90 @@ export class Home {
       active: event.active,
       count: event.count,
     });
+
+    if (event.action === 'comment') {
+      this.openCommentsPanel(event.index);
+    }
+  }
+
+  protected commentsPanelVisible(): boolean {
+    return this.commentsPanelOpen() || this.commentsPanelClosing();
+  }
+
+  protected commentsPanelShown(): boolean {
+    return this.commentsPanelOpen() && !this.commentsPanelClosing();
+  }
+
+  private openCommentsPanel(slideIndex: number): void {
+    this.clearCommentsPanelCloseTimer();
+    this.commentsPanelClosing.set(false);
+    this.commentsPanelSlideIndex.set(slideIndex);
+    this.commentsPanelReelId.set(this.slideReelId(slideIndex));
+    this.commentsPanelOpen.set(true);
+    this.lockBodyScroll();
+  }
+
+  protected closeCommentsPanel(): void {
+    if (!this.commentsPanelOpen() && !this.commentsPanelClosing()) return;
+    if (this.commentsPanelClosing()) return;
+
+    this.commentsPanelClosing.set(true);
+    this.unlockBodyScroll();
+
+    this.clearCommentsPanelCloseTimer();
+    this.commentsPanelCloseTimer = setTimeout(() => {
+      this.commentsPanelOpen.set(false);
+      this.commentsPanelClosing.set(false);
+      this.commentsPanelSlideIndex.set(null);
+      this.commentsPanelReelId.set(null);
+      this.commentsPanelCloseTimer = null;
+    }, COMMENTS_PANEL_CLOSE_MS);
+  }
+
+  protected onCommentsOverlayClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeCommentsPanel();
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  protected onDocumentKeydown(event: KeyboardEvent): void {
+    if (!this.commentsPanelOpen() || this.commentsPanelClosing()) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeCommentsPanel();
+    }
+  }
+
+  private clearCommentsPanelCloseTimer(): void {
+    if (this.commentsPanelCloseTimer !== null) {
+      clearTimeout(this.commentsPanelCloseTimer);
+      this.commentsPanelCloseTimer = null;
+    }
+  }
+
+  private lockBodyScroll(): void {
+    try {
+      const body = this.document.body;
+      if (this.previousBodyOverflow === null) {
+        this.previousBodyOverflow = body.style.overflow || '';
+      }
+      body.style.overflow = 'hidden';
+    } catch {
+      // ignore
+    }
+  }
+
+  private unlockBodyScroll(): void {
+    try {
+      const body = this.document.body;
+      if (this.previousBodyOverflow !== null) {
+        body.style.overflow = this.previousBodyOverflow;
+        this.previousBodyOverflow = null;
+      }
+    } catch {
+      // ignore
+    }
   }
 
   onSlideFollow(event: SlideFollowEvent): void {

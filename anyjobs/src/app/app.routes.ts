@@ -21,6 +21,11 @@ export const routes: Routes = [
           import('./features/auth/registration/registration/registration').then((m) => m.Registration),
       },
       {
+        path: 'recuperar-contrasena',
+        loadComponent: () =>
+          import('./features/auth/password-recovery/password-recovery').then((m) => m.PasswordRecovery),
+      },
+      {
         path: 'perfil',
         loadComponent: () => import('./features/auth/profile/profile').then((m) => m.Profile),
       },

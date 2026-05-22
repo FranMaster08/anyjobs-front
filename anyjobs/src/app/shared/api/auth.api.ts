@@ -5,9 +5,14 @@ import { delay, map, Observable, of } from 'rxjs';
 
 import {
   CompleteOnboardingRegistrationRequest,
+  ForgotPasswordRequest,
   LoginRequest,
   LoginResponse,
+  MessageResponse,
   RegisterRequest,
+  ResetPasswordRequest,
+  ValidateResetTokenRequest,
+  ValidateResetTokenResponse,
   RegisterResponse,
   RegistrationStatusResponse,
   VerifyOtpRequest,
@@ -210,6 +215,37 @@ export class AuthApi {
     }
 
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { email, password });
+  }
+
+  forgotPassword(req: ForgotPasswordRequest): Observable<MessageResponse> {
+    const email = req.email.trim().toLowerCase();
+    if (this.apiUrl.includes('/mock/')) {
+      return of({
+        message:
+          'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.',
+      }).pipe(delay(300));
+    }
+    return this.http.post<MessageResponse>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  validateResetToken(req: ValidateResetTokenRequest): Observable<ValidateResetTokenResponse> {
+    if (this.apiUrl.includes('/mock/')) {
+      const ok = req.token.trim().length >= 8;
+      return of({ valid: ok }).pipe(delay(150));
+    }
+    return this.http.post<ValidateResetTokenResponse>(`${this.apiUrl}/validate-reset-token`, req);
+  }
+
+  resetPassword(req: ResetPasswordRequest): Observable<MessageResponse> {
+    if (this.apiUrl.includes('/mock/')) {
+      if (!req.token.trim() || req.password.length < 8) {
+        return new Observable<MessageResponse>((sub) =>
+          sub.error(new Error('Enlace inválido o expirado.')),
+        );
+      }
+      return of({ message: 'Contraseña actualizada correctamente.' }).pipe(delay(300));
+    }
+    return this.http.post<MessageResponse>(`${this.apiUrl}/reset-password`, req);
   }
 }
 
