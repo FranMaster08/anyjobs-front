@@ -346,6 +346,12 @@
   </form>
 </app-modal>
 
+@if (sessionExpiredBanner()) {
+  <p class="sessionExpiredBanner" role="status" aria-live="polite">
+    {{ sessionExpiredBanner() }}
+  </p>
+}
+
 <main class="app-main">
   <router-outlet />
 </main>

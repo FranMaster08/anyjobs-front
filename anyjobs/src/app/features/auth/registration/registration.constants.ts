@@ -34,6 +34,17 @@ export const WORKER_CATEGORY_LABEL_KEY: Record<WorkerCategory, string> = {
   reparaciones: 'category.reparaciones',
 };
 
+export type WorkerCategoryGroupId = 'homeCare' | 'maintenance';
+
+export const WORKER_CATEGORY_GROUPS: readonly {
+  readonly id: WorkerCategoryGroupId;
+  readonly labelKey: string;
+  readonly items: readonly WorkerCategory[];
+}[] = [
+  { id: 'homeCare', labelKey: 'categoryGroup.homeCare', items: ['limpieza', 'cuidado'] },
+  { id: 'maintenance', labelKey: 'categoryGroup.maintenance', items: ['reparaciones'] },
+] as const;
+
 export const PAYMENT_METHOD_OPTIONS = ['CARD', 'TRANSFER', 'CASH', 'WALLET'] as const;
 export type PaymentMethod = (typeof PAYMENT_METHOD_OPTIONS)[number];
 
@@ -64,6 +75,9 @@ export const SUPPORTED_COUNTRY_OPTIONS = [
   { code: 'CO', labelKey: 'country.colombia' },
   { code: 'AR', labelKey: 'country.argentina' },
 ] as const;
+
+/** Indicativos telefónicos en registro (Colombia y Argentina). */
+export const PHONE_DIAL_OPTIONS = ['+57', '+54'] as const;
 
 export type SupportedCountryCode = (typeof SUPPORTED_COUNTRY_OPTIONS)[number]['code'];
 

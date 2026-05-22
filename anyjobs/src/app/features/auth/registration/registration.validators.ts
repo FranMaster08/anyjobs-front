@@ -33,6 +33,25 @@ export function e164PhoneValidator(): ValidatorFn {
   };
 }
 
+export function phoneDialCodeValidator(): ValidatorFn {
+  return (control: AbstractControl<string>): ValidationErrors | null => {
+    const value = (control.value ?? '').trim();
+    if (!value) return null;
+    return /^\+[1-9]\d{0,3}$/.test(value) ? null : { phoneDialInvalid: true };
+  };
+}
+
+export function phoneLocalNumberValidator(minDigits = 6, maxDigits = 12): ValidatorFn {
+  return (control: AbstractControl<string>): ValidationErrors | null => {
+    const value = (control.value ?? '').trim();
+    if (!value) return null;
+    const digits = value.replace(/\D/g, '');
+    if (digits.length !== value.length) return { phoneLocalInvalid: true };
+    if (digits.length < minDigits || digits.length > maxDigits) return { phoneLocalInvalid: true };
+    return null;
+  };
+}
+
 export function rolesRequiredValidator(): ValidatorFn {
   return (control: AbstractControl<UserRole[]>): ValidationErrors | null => {
     const roles = control.value ?? [];

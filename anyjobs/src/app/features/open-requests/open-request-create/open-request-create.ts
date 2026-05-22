@@ -224,6 +224,11 @@ export class OpenRequestCreate {
   }
 
   protected submit(): void {
+    if (!this.authVm().isLoggedIn) {
+      this.openLogin();
+      return;
+    }
+
     if (this.imageSelectionError()) {
       this.state.set('error');
       this.errorMessage.set(this.imageSelectionError());
@@ -347,7 +352,6 @@ export class OpenRequestCreate {
       err instanceof HttpErrorResponse ? readApiMessage(err.error) : undefined;
 
     if (status === 401) {
-      this.auth.clear();
       this.errorMessage.set('Tu sesión expiró, vuelve a iniciar sesión');
       return;
     }

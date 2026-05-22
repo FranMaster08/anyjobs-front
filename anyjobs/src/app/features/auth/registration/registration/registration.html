@@ -1,9 +1,6 @@
 <section class="page regPage">
   <header class="regHeader">
-    <div>
-      <h1 class="regTitle">{{ t('reg.title') }}</h1>
-    </div>
-    <a class="btn btn--link btn--sm" routerLink="/home">{{ t('btn.return') }}</a>
+    <h1 class="regTitle">{{ t('reg.title') }}</h1>
   </header>
 
   <nav class="regSteps" [attr.aria-label]="t('reg.progress')">
@@ -54,16 +51,53 @@
           }
         </div>
 
-        <div class="regField">
-          <label class="fieldLabel" for="phoneNumber">{{ t('field.phone') }}</label>
-          <input
-            id="phoneNumber"
-            type="tel"
-            class="fieldControl"
-            formControlName="phoneNumber"
-            placeholder="+34123456789"
-            autocomplete="tel"
-          />
+        <div class="regField regField--phone">
+          <span class="fieldLabel">{{ t('field.phone') }}</span>
+          <div class="regPhoneRow">
+            <label class="sr-only" for="phoneDialCode">{{ t('field.phoneDial') }}</label>
+            <select
+              id="phoneDialCode"
+              class="regPhoneDial"
+              formControlName="phoneDialCode"
+              autocomplete="tel-country-code"
+              [attr.aria-label]="t('field.phoneDial')"
+            >
+              @for (dial of phoneDialOptions; track dial) {
+                <option [value]="dial">{{ dial }}</option>
+              }
+            </select>
+            <label class="sr-only" for="phoneLocalNumber">{{ t('field.phoneLocal') }}</label>
+            <input
+              id="phoneLocalNumber"
+              type="tel"
+              class="fieldControl regPhoneLocal"
+              formControlName="phoneLocalNumber"
+              [placeholder]="t('field.phoneLocalPlaceholder')"
+              autocomplete="tel-national"
+              inputmode="numeric"
+              (input)="onPhoneLocalInput($event)"
+            />
+          </div>
+          @if (accountForm.controls.phoneNumber.pending) {
+            <p class="regHint">{{ t('reg.checkingAvailability') }}</p>
+          }
+          @if (showAccountError(accountForm.controls.phoneDialCode)) {
+            <p class="regError">{{ t('error.phoneDialInvalid') }}</p>
+          }
+          @if (showAccountError(accountForm.controls.phoneLocalNumber)) {
+            @if (accountForm.controls.phoneLocalNumber.errors?.['required']) {
+              <p class="regError">{{ t('error.phoneLocalRequired') }}</p>
+            } @else {
+              <p class="regError">{{ t('error.phoneLocalInvalid') }}</p>
+            }
+          }
+          @if (showAccountError(accountForm.controls.phoneNumber)) {
+            @if (accountForm.controls.phoneNumber.errors?.['phoneTaken']) {
+              <p class="regError">{{ t('error.phoneTaken') }}</p>
+            } @else if (accountForm.controls.phoneNumber.errors?.['e164Phone']) {
+              <p class="regError">{{ t('error.phoneE164') }}</p>
+            }
+          }
         </div>
 
         <div class="regField">
@@ -362,28 +396,44 @@
     <section class="regCard">
       <header class="regCardHeader">
         <h2 class="regH2">{{ t('profile.title') }}</h2>
-        <p class="regHint">{{ t('profile.hint') }}</p>
       </header>
 
       @if (isWorker()) {
         <div class="regSection" [formGroup]="workerProfileForm">
-          <p class="fieldLabel">{{ t('profile.categories') }}</p>
-          <div class="regRolesRow">
-            @for (c of categoryOptions; track c) {
-              <button
-                type="button"
-                class="regChip"
-                [class.regChip--active]="workerProfileForm.controls.categories.value.includes(c)"
-                (click)="toggleCategory(c)"
-              >
-                {{ t(categoryLabelKey[c]) }}
-              </button>
+          <label class="fieldLabel" for="workerCategories">{{ t('profile.categories') }}</label>
+          <select
+            id="workerCategories"
+            class="fieldControl"
+            (change)="onWorkerCategoryPick($event)"
+          >
+            <option value="">{{ t('profile.categoryPlaceholder') }}</option>
+            @for (group of categoryGroups; track group.id) {
+              <optgroup [label]="t(group.labelKey)">
+                @for (c of group.items; track c) {
+                  <option [value]="c" [disabled]="isCategorySelected(c)">
+                    {{ t(categoryLabelKey[c]) }}
+                  </option>
+                }
+              </optgroup>
             }
-          </div>
-          <p class="regHint">
-            {{ t('profile.categoriesSelected') }}:
-            {{ workerProfileForm.controls.categories.value.join(', ') || '—' }}
-          </p>
+          </select>
+          @if (workerProfileForm.controls.categories.value.length > 0) {
+            <div class="regCategoryChips" [attr.aria-label]="t('profile.categoriesSelected')">
+              @for (c of workerProfileForm.controls.categories.value; track c) {
+                <span class="regChip regChip--active">
+                  {{ categoryLabel($any(c)) }}
+                  <button
+                    type="button"
+                    class="regChipRemove"
+                    (click)="removeCategory($any(c))"
+                    [attr.aria-label]="t('profile.removeCategoryAria')"
+                  >
+                    ×
+                  </button>
+                </span>
+              }
+            </div>
+          }
           @if (showProfileCategoriesError()) {
             <p class="regError">{{ t('error.categoriesRequired') }}</p>
           }
@@ -415,7 +465,7 @@
 
       <footer class="regActions regActions--split">
         <button class="btn btn--link" type="button" (click)="back()">{{ t('btn.back') }}</button>
-        <button class="btn" type="button" [disabled]="isBusy()" (click)="finish()">{{ t('btn.finish') }}</button>
+        <button class="btn" type="button" [disabled]="isBusy()" (click)="finish()">{{ t('btn.continue') }}</button>
       </footer>
     </section>
   }
@@ -529,42 +579,103 @@
   }
 
   @if (stage() === 'DONE') {
-    <section class="regCard regDone">
-      <header class="regDoneHeader">
+    <section class="regCard regDone" aria-labelledby="regDoneTitle">
+      <div class="regDoneHero">
         <div class="regDoneIcon" aria-hidden="true">✓</div>
-        <div class="regDoneText">
-          <h2 class="regH2">{{ t('done.title') }}</h2>
-          <p class="regHint">{{ t('done.subtitle') }}</p>
-        </div>
-      </header>
+        <h2 id="regDoneTitle" class="regDoneTitle">{{ t('done.title') }}</h2>
+        <p class="regDoneLead">{{ t('done.subtitle') }}</p>
+        <p class="regDoneAccount">
+          <span class="regDoneAccountLabel">{{ t('done.registeredAs') }}</span>
+          <strong class="regDoneAccountName">{{ doneSummary().fullName }}</strong>
+          <span class="regDoneAccountEmail">{{ doneSummary().email }}</span>
+        </p>
+      </div>
 
-      <ul class="regDoneBadges" aria-label="Resumen de estado">
-        <li>
-          <span class="regBadge regBadge--ok">{{ t('done.status') }}: {{ vm().status }}</span>
-        </li>
-        <li>
-          <span class="regBadge" [class.regBadge--ok]="vm().emailVerified">
-            {{ t('done.emailVerified') }}: {{ vm().emailVerified ? t('common.yes') : t('common.no') }}
-          </span>
-        </li>
-        <li>
-          <span class="regBadge" [class.regBadge--ok]="vm().phoneVerified">
-            {{ t('done.phoneVerified') }}: {{ vm().phoneVerified ? t('common.yes') : t('common.no') }}
-          </span>
-        </li>
-        @if (isWorker()) {
-          <li>
-            <span class="regBadge" [class.regBadge--ok]="vm().listable">
-              {{ t('done.listable') }}: {{ vm().listable ? t('common.yes') : t('common.no') }}
-            </span>
+      <section class="regDonePanel" [attr.aria-label]="t('done.summaryTitle')">
+        <h3 class="regDonePanelTitle">{{ t('done.summaryTitle') }}</h3>
+        <dl class="regDoneGrid">
+          <div class="regDoneRow">
+            <dt>{{ t('done.field.phone') }}</dt>
+            <dd>{{ doneSummary().phone }}</dd>
+          </div>
+          <div class="regDoneRow">
+            <dt>{{ t('done.field.roles') }}</dt>
+            <dd>{{ doneSummary().rolesLabel }}</dd>
+          </div>
+          <div class="regDoneRow regDoneRow--full">
+            <dt>{{ t('done.field.location') }}</dt>
+            <dd>{{ doneSummary().locationLabel }}</dd>
+          </div>
+          @if (isWorker() && doneSummary().categories.length > 0) {
+            <div class="regDoneRow regDoneRow--full">
+              <dt>{{ t('done.field.categories') }}</dt>
+              <dd>
+                <div class="regCategoryChips regCategoryChips--readonly">
+                  @for (label of doneSummary().categories; track label) {
+                    <span class="regChip regChip--active">{{ label }}</span>
+                  }
+                </div>
+              </dd>
+            </div>
+          }
+          @if (isClient() && doneSummary().paymentMethodLabel) {
+            <div class="regDoneRow">
+              <dt>{{ t('done.field.payment') }}</dt>
+              <dd>{{ doneSummary().paymentMethodLabel }}</dd>
+            </div>
+          }
+          @if (doneSummary().documentLabel) {
+            <div class="regDoneRow">
+              <dt>{{ t('done.field.document') }}</dt>
+              <dd>{{ doneSummary().documentLabel }}</dd>
+            </div>
+          }
+          @if (doneSummary().nationalityLabel) {
+            <div class="regDoneRow">
+              <dt>{{ t('done.field.nationality') }}</dt>
+              <dd>{{ doneSummary().nationalityLabel }}</dd>
+            </div>
+          }
+          @if (doneSummary().birthDateLabel) {
+            <div class="regDoneRow">
+              <dt>{{ t('done.field.birthDate') }}</dt>
+              <dd>{{ doneSummary().birthDateLabel }}</dd>
+            </div>
+          }
+          @if (doneSummary().genderLabel) {
+            <div class="regDoneRow">
+              <dt>{{ t('done.field.gender') }}</dt>
+              <dd>{{ doneSummary().genderLabel }}</dd>
+            </div>
+          }
+          <div class="regDoneRow">
+            <dt>{{ t('done.field.createdAt') }}</dt>
+            <dd>{{ doneSummary().createdAtLabel }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="regDonePanel" [attr.aria-label]="t('done.statusTitle')">
+        <h3 class="regDonePanelTitle">{{ t('done.statusTitle') }}</h3>
+        <ul class="regDoneChecks">
+          <li class="regDoneCheck" [class.regDoneCheck--ok]="vm().status === 'ACTIVE'">
+            <span class="regDoneCheckIcon" aria-hidden="true">{{ vm().status === 'ACTIVE' ? '✓' : '○' }}</span>
+            <span>{{ t('done.statusActive') }}</span>
           </li>
-        }
-      </ul>
+          <li class="regDoneCheck" [class.regDoneCheck--ok]="vm().emailVerified">
+            <span class="regDoneCheckIcon" aria-hidden="true">{{ vm().emailVerified ? '✓' : '○' }}</span>
+            <span>{{ t('done.emailVerified') }}</span>
+          </li>
+        </ul>
+      </section>
 
-      <footer class="regActions regActions--split">
-        <a class="btn btn--secondary" routerLink="/solicitudes">{{ t('btn.goRequests') }}</a>
-        <a class="btn" routerLink="/home">{{ t('btn.goHome') }}</a>
-      </footer>
+      <section class="regDoneNext">
+        <h3 class="regDoneNextTitle">{{ t('done.nextTitle') }}</h3>
+        <p class="regDoneNextHint">{{ t('done.nextHint') }}</p>
+        <footer class="regDoneActions">
+          <a class="btn" routerLink="/home" [queryParams]="{ login: '1' }">{{ t('auth.login') }}</a>
+        </footer>
+      </section>
     </section>
   }
 </section>

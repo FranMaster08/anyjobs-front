@@ -1,15 +1,29 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
 import { authBearerInterceptor } from './shared/api/auth-bearer.interceptor';
 import { authCredentialsInterceptor } from './shared/api/auth-credentials.interceptor';
+import { authUnauthorizedInterceptor } from './shared/api/auth-unauthorized.interceptor';
+import { AuthSessionService } from './shared/auth/auth-session.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptors([authCredentialsInterceptor, authBearerInterceptor])),
+    provideAppInitializer(() => inject(AuthSessionService).validatePersistedSession()),
+    provideHttpClient(
+      withInterceptors([
+        authCredentialsInterceptor,
+        authBearerInterceptor,
+        authUnauthorizedInterceptor,
+      ]),
+    ),
     provideRouter(
       routes,
       withRouterConfig({

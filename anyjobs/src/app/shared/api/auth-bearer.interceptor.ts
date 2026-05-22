@@ -63,7 +63,10 @@ export const authBearerInterceptor: HttpInterceptorFn = (req, next) => {
   if (!isApiPath) return next(req);
   if (req.headers.has('Authorization')) return next(req);
 
-  const token = inject(AuthSessionService).vm().session?.token ?? '';
+  const auth = inject(AuthSessionService);
+  if (auth.isAuthBlocked()) return next(req);
+
+  const token = auth.vm().session?.token ?? '';
   if (token.trim().length === 0) return next(req);
 
   return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));

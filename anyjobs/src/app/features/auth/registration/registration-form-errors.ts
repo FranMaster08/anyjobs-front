@@ -18,8 +18,16 @@ export const ACCOUNT_CONTROL_ERRORS: Record<string, readonly ControlErrorRule[]>
     { error: 'email', messageKey: 'error.emailInvalid' },
     { error: 'emailTaken', messageKey: 'error.emailTaken' },
   ],
+  phoneDialCode: [
+    { error: 'required', messageKey: 'error.phoneDialInvalid' },
+    { error: 'phoneDialInvalid', messageKey: 'error.phoneDialInvalid' },
+  ],
+  phoneLocalNumber: [
+    { error: 'required', messageKey: 'error.phoneLocalInvalid' },
+    { error: 'phoneLocalInvalid', messageKey: 'error.phoneLocalInvalid' },
+  ],
   phoneNumber: [
-    { error: 'required', messageKey: 'error.phoneE164' },
+    { error: 'required', messageKey: 'error.phoneLocalInvalid' },
     { error: 'e164Phone', messageKey: 'error.phoneE164' },
     { error: 'phoneTaken', messageKey: 'error.phoneTaken' },
   ],

@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  effect,
   HostListener,
   inject,
   signal,
@@ -85,6 +86,7 @@ export class Shell {
   protected readonly isLoginOpen = signal(false);
   protected readonly loginBusy = signal(false);
   protected readonly loginError = signal<string | null>(null);
+  protected readonly sessionExpiredBanner = signal<string | null>(null);
   protected readonly isAccountMenuOpen = signal(false);
   protected readonly isMobileNavOpen = signal(false);
   protected readonly showLanguageSelector = SHELL_SHOW_LANGUAGE_SELECTOR;
@@ -111,9 +113,19 @@ export class Shell {
     this.destroyRef.onDestroy(() => this.clearFragmentScrollSchedule());
     this.updateOpenRequestsFiltersHeaderVisibility();
     this.site.load();
-    if (this.authVm().isLoggedIn) {
-      this.notifications.refreshUnreadCount();
-    }
+
+    effect(() => {
+      if (!this.auth.consumeSessionExpiredNotice()) return;
+      this.sessionExpiredBanner.set(this.i18n.t('auth.sessionExpired'));
+      this.cdr.markForCheck();
+    });
+
+    effect(() => {
+      if (this.authVm().isLoggedIn) {
+        this.notifications.refreshUnreadCount();
+        this.sessionExpiredBanner.set(null);
+      }
+    });
 
     this.loginRequests
       .pipe(
@@ -134,6 +146,7 @@ export class Shell {
       .subscribe({
         next: (res) => {
           this.auth.setSession({ token: res.token, user: res.user });
+          this.sessionExpiredBanner.set(null);
           this.notifications.refreshUnreadCount();
           this.isLoginOpen.set(false);
           this.isAccountMenuOpen.set(false);
@@ -330,8 +343,8 @@ export class Shell {
   protected logout(): void {
     this.isAccountMenuOpen.set(false);
     this.isMobileNavOpen.set(false);
+    this.sessionExpiredBanner.set(null);
     this.auth.clear();
-    this.notifications.reset();
     this.router.navigateByUrl('/home');
   }
 

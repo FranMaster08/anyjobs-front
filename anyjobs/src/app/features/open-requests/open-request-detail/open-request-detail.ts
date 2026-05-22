@@ -317,9 +317,6 @@ export class OpenRequestDetail {
 
   private handlePostulantesLoadError(err: unknown): void {
     if (err instanceof HttpErrorResponse) {
-      if (err.status === 401) {
-        this.authSession.clear();
-      }
       if (err.status === 401 || err.status === 403) {
         this.resetPostulantes();
         return;

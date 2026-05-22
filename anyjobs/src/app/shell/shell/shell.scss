@@ -7,7 +7,7 @@
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 200;
   border-bottom: 1px solid var(--aj-color-border);
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(16px);
@@ -585,6 +585,18 @@
   font-weight: 700;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.sessionExpiredBanner {
+  margin: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid color-mix(in srgb, #b45309 25%, transparent);
+  background: color-mix(in srgb, #f59e0b 12%, var(--aj-color-surface));
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .loginAlert {

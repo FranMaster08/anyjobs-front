@@ -23,11 +23,17 @@ interface RegistrationTestHarness {
   finish(): void;
   verifyEmail(): void;
   verifyPhone(): void;
-  toggleCategory(id: string): void;
+  setWorkerCategories(ids: string[]): void;
 }
 
 function registrationHarness(c: Registration): RegistrationTestHarness {
-  return c as unknown as RegistrationTestHarness;
+  const inner = c as unknown as Registration & { workerProfileForm: FormGroup };
+  return Object.assign(inner, {
+    setWorkerCategories(ids: string[]): void {
+      inner.workerProfileForm.controls['categories'].setValue(ids);
+      inner.workerProfileForm.controls['categories'].markAsTouched();
+    },
+  }) as unknown as RegistrationTestHarness;
 }
 
 describe('Registration', () => {
@@ -101,6 +107,8 @@ describe('Registration', () => {
     c.accountForm.setValue({
       fullName: 'Test User',
       email: 'user@anyjobs.test',
+      phoneDialCode: '+34',
+      phoneLocalNumber: '123456789',
       phoneNumber: '+34123456789',
       password: 'Aa1!aaaa',
       acceptTerms: true,
@@ -166,6 +174,8 @@ describe('Registration', () => {
     c.accountForm.setValue({
       fullName: 'Worker User',
       email: 'worker@anyjobs.test',
+      phoneDialCode: '+34',
+      phoneLocalNumber: '987654321',
       phoneNumber: '+34987654321',
       password: 'Aa1!aaaa',
       acceptTerms: true,
@@ -213,7 +223,7 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('ROLE_PROFILE');
 
-    c.toggleCategory('limpieza');
+    c.setWorkerCategories(['limpieza']);
     fixture.detectChanges();
     await fixture.whenStable();
 

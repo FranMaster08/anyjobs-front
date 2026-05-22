@@ -4,6 +4,8 @@ import { UserRole } from './registration.models';
 import {
   e164PhoneValidator,
   minimumAgeValidator,
+  phoneDialCodeValidator,
+  phoneLocalNumberValidator,
   rolesRequiredValidator,
   strongPasswordValidator,
   isoCountryCodeValidator,
@@ -19,6 +21,30 @@ describe('registration.validators', () => {
     it('rejects a weak password', () => {
       const c = new FormControl('password', { nonNullable: true });
       expect(strongPasswordValidator()(c)).toEqual({ strongPassword: true });
+    });
+  });
+
+  describe('phoneDialCodeValidator', () => {
+    it('accepts valid dial codes', () => {
+      const c = new FormControl('+57', { nonNullable: true });
+      expect(phoneDialCodeValidator()(c)).toBeNull();
+    });
+
+    it('rejects invalid dial codes', () => {
+      const c = new FormControl('57', { nonNullable: true });
+      expect(phoneDialCodeValidator()(c)).toEqual({ phoneDialInvalid: true });
+    });
+  });
+
+  describe('phoneLocalNumberValidator', () => {
+    it('accepts digit-only local numbers in range', () => {
+      const c = new FormControl('612345678', { nonNullable: true });
+      expect(phoneLocalNumberValidator()(c)).toBeNull();
+    });
+
+    it('rejects letters in local number', () => {
+      const c = new FormControl('61abc', { nonNullable: true });
+      expect(phoneLocalNumberValidator()(c)).toEqual({ phoneLocalInvalid: true });
     });
   });
 

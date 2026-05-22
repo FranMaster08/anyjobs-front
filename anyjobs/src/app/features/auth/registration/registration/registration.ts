@@ -20,6 +20,8 @@ import {
 } from '../registration-draft.service';
 import {
   ClientProfileFormVM,
+  type DocumentType,
+  type Gender,
   LocationFormVM,
   PersonalInfoFormVM,
   RegisterFormVM,
@@ -34,21 +36,26 @@ import {
   GENDER_OPTIONS,
   PAYMENT_METHOD_LABEL_KEY,
   PAYMENT_METHOD_OPTIONS,
+  PHONE_DIAL_OPTIONS,
   type PaymentMethod,
   REGISTRATION_STAGES,
   ROLE_LABEL_KEY,
   ROLE_OPTIONS,
   SUPPORTED_COUNTRY_OPTIONS,
   STAGE_LABEL_KEY,
+  WORKER_CATEGORY_GROUPS,
   WORKER_CATEGORY_LABEL_KEY,
   WORKER_CATEGORY_OPTIONS,
   type WorkerCategory,
 } from '../registration.constants';
 import {
   cityInCountryValidator,
+  e164PhoneValidator,
   isoCountryCodeValidator,
   minimumAgeValidator,
   municipalityInDivisionValidator,
+  phoneDialCodeValidator,
+  phoneLocalNumberValidator,
   rolesRequiredValidator,
   strongPasswordValidator,
 } from '../registration.validators';
@@ -57,7 +64,8 @@ import {
   WORLD_COUNTRY_OPTIONS,
 } from '../../../../shared/location/world-countries.data';
 import { LocationGeographyService } from '../../../../shared/location/location-geography.service';
-import { emailTakenAsyncValidator } from '../registration.async-validators';
+import { emailTakenAsyncValidator, phoneTakenAsyncValidator } from '../registration.async-validators';
+import { buildE164Phone, parseE164Phone, sanitizePhoneLocalInput } from '../phone.utils';
 import { AuthApi } from '../../../../shared/api/auth.api';
 import { clearApiError } from '../../../../shared/api/api-error.utils';
 import {
@@ -108,6 +116,7 @@ export class Registration {
   protected readonly roleOptions = ROLE_OPTIONS;
   protected readonly roleLabelKey = ROLE_LABEL_KEY;
   protected readonly categoryOptions: readonly WorkerCategory[] = WORKER_CATEGORY_OPTIONS;
+  protected readonly categoryGroups = WORKER_CATEGORY_GROUPS;
   protected readonly categoryLabelKey: Record<WorkerCategory, string> = WORKER_CATEGORY_LABEL_KEY;
   protected readonly paymentOptions: readonly PaymentMethod[] = PAYMENT_METHOD_OPTIONS;
   protected readonly paymentLabelKey: Record<PaymentMethod, string> = PAYMENT_METHOD_LABEL_KEY;
@@ -116,6 +125,7 @@ export class Registration {
   protected readonly genderOptions = GENDER_OPTIONS;
   protected readonly genderLabelKey = GENDER_LABEL_KEY;
   protected readonly countryOptions = SUPPORTED_COUNTRY_OPTIONS;
+  protected readonly phoneDialOptions = PHONE_DIAL_OPTIONS;
 
   protected readonly nationalityOptions = computed(() => {
     const locale = this.i18n.lang() === 'en' ? 'en' : 'es';
@@ -210,7 +220,19 @@ export class Registration {
       [Validators.required, Validators.email],
       [emailTakenAsyncValidator(this.authApi)],
     ),
-    phoneNumber: this.fb.nonNullable.control<RegisterFormVM['phoneNumber']>(''),
+    phoneDialCode: this.fb.nonNullable.control('+57', [
+      Validators.required,
+      phoneDialCodeValidator(),
+    ]),
+    phoneLocalNumber: this.fb.nonNullable.control('', [
+      Validators.required,
+      phoneLocalNumberValidator(),
+    ]),
+    phoneNumber: this.fb.nonNullable.control<RegisterFormVM['phoneNumber']>(
+      '',
+      [Validators.required, e164PhoneValidator()],
+      [phoneTakenAsyncValidator(this.authApi)],
+    ),
     password: this.fb.nonNullable.control<RegisterFormVM['password']>('', [
       Validators.required,
       strongPasswordValidator(),
@@ -282,9 +304,89 @@ export class Registration {
   protected readonly isWorker = computed(() => this.roles().includes('WORKER'));
   protected readonly isClient = computed(() => this.roles().includes('CLIENT'));
 
+  protected readonly doneSummary = computed(() => {
+    const account = this.accountForm.getRawValue();
+    const location = this.locationForm.getRawValue();
+    const worker = this.workerProfileForm.getRawValue();
+    const client = this.clientProfileForm.getRawValue();
+    const personal = this.personalForm.getRawValue();
+    const locale = this.i18n.lang() === 'en' ? 'en-US' : 'es-ES';
+
+    const rolesLabel = this.roles()
+      .map((role) => this.t(this.roleLabelKey[role]))
+      .join(' · ');
+
+    const locationParts = [location.area, location.municipality, location.city].filter(
+      (part) => part.trim().length > 0,
+    );
+    const locationLabel = [
+      locationParts.join(', '),
+      this.locationCountryLabel(location.countryCode),
+    ]
+      .filter((part) => part.length > 0)
+      .join(' · ');
+
+    const categories = worker.categories.map((id) =>
+      this.t(this.categoryLabelKey[id as WorkerCategory] ?? id),
+    );
+
+    let paymentMethodLabel: string | null = null;
+    if (client.preferredPaymentMethod) {
+      paymentMethodLabel = this.t(
+        this.paymentLabelKey[client.preferredPaymentMethod as PaymentMethod],
+      );
+    }
+
+    let documentLabel: string | null = null;
+    let nationalityLabel: string | null = null;
+    let birthDateLabel: string | null = null;
+    let genderLabel: string | null = null;
+
+    if (this.isWorker() && personal.documentType) {
+      const docType = this.t(this.documentTypeLabelKey[personal.documentType as DocumentType]);
+      const docNumber = (personal.documentNumber ?? '').trim();
+      documentLabel = docNumber
+        ? `${docType} · ${this.maskDocumentNumber(docNumber)}`
+        : docType;
+      if (personal.nationality) {
+        nationalityLabel =
+          this.nationalityOptions().find((c) => c.code === personal.nationality)?.label ??
+          personal.nationality;
+      }
+      if (personal.birthDate) {
+        birthDateLabel = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(
+          new Date(`${personal.birthDate}T12:00:00`),
+        );
+      }
+      if (personal.gender) {
+        genderLabel = this.t(this.genderLabelKey[personal.gender as Gender]);
+      }
+    }
+
+    return {
+      fullName: account.fullName.trim(),
+      email: account.email.trim(),
+      phone: this.getAccountE164Phone(),
+      rolesLabel,
+      locationLabel,
+      categories,
+      paymentMethodLabel,
+      documentLabel,
+      nationalityLabel,
+      birthDateLabel,
+      genderLabel,
+      createdAtLabel: new Intl.DateTimeFormat(locale, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date()),
+    };
+  });
+
   protected readonly accountFormPending = computed(() => {
     this.formStatusTick();
-    return this.accountForm.controls.email.pending;
+    return (
+      this.accountForm.controls.email.pending || this.accountForm.controls.phoneNumber.pending
+    );
   });
 
   protected readonly accountContinueBlocked = computed(
@@ -323,6 +425,8 @@ export class Registration {
     merge(
       this.accountForm.statusChanges,
       this.accountForm.controls.email.statusChanges,
+      this.accountForm.controls.phoneDialCode.statusChanges,
+      this.accountForm.controls.phoneLocalNumber.statusChanges,
       this.accountForm.controls.phoneNumber.statusChanges,
       this.locationForm.statusChanges,
     )
@@ -331,6 +435,13 @@ export class Registration {
         this.formStatusTick.update((n) => n + 1);
         this.cdr.markForCheck();
       });
+
+    merge(
+      this.accountForm.controls.phoneDialCode.valueChanges,
+      this.accountForm.controls.phoneLocalNumber.valueChanges,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncPhoneNumberFromParts());
 
     this.accountForm.controls.selectedRoles.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -443,10 +554,10 @@ export class Registration {
       this.accountForm.patchValue({
         fullName: draft.account.fullName,
         email: draft.account.email,
-        phoneNumber: draft.account.phoneNumber,
         password: draft.account.password,
         selectedRoles: draft.account.roles,
       });
+      this.applyPhonePartsFromE164(draft.account.phoneNumber);
       this.updatePersonalValidators(draft.account.roles);
     }
 
@@ -511,7 +622,7 @@ export class Registration {
       account: {
         fullName: accountValue.fullName.trim(),
         email: accountValue.email.trim(),
-        phoneNumber: accountValue.phoneNumber.trim(),
+        phoneNumber: this.getAccountE164Phone(),
         password: accountValue.password,
         roles: accountValue.selectedRoles,
       },
@@ -612,6 +723,7 @@ export class Registration {
   }
 
   protected onAccountContinue(): void {
+    this.syncPhoneNumberFromParts();
     this.accountValidationAttempted.set(true);
     if (this.accountForm.invalid || this.accountFormPending()) {
       this.accountForm.markAllAsTouched();
@@ -626,7 +738,7 @@ export class Registration {
       .register({
         fullName: value.fullName.trim(),
         email: value.email.trim(),
-        phoneNumber: value.phoneNumber.trim(),
+        phoneNumber: this.getAccountE164Phone(),
         password: value.password,
         roles: value.selectedRoles,
       })
@@ -744,7 +856,7 @@ export class Registration {
       .register({
         fullName: value.fullName.trim(),
         email: value.email.trim(),
-        phoneNumber: value.phoneNumber.trim(),
+        phoneNumber: this.getAccountE164Phone(),
         password: value.password,
         roles: value.selectedRoles,
       })
@@ -821,12 +933,84 @@ export class Registration {
     this.persistDraft('ROLE_PROFILE');
   }
 
-  protected toggleCategory(category: string): void {
-    const current = new Set(this.workerProfileForm.controls.categories.value);
-    if (current.has(category)) current.delete(category);
-    else current.add(category);
-    this.workerProfileForm.controls.categories.setValue([...current]);
-    this.workerProfileForm.controls.categories.markAsTouched();
+  protected categoryLabel(category: WorkerCategory): string {
+    return this.t(this.categoryLabelKey[category]);
+  }
+
+  protected onPhoneLocalInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = sanitizePhoneLocalInput(input.value);
+    if (digits !== this.accountForm.controls.phoneLocalNumber.value) {
+      this.accountForm.controls.phoneLocalNumber.setValue(digits);
+    }
+  }
+
+  protected getAccountE164Phone(): string {
+    return buildE164Phone(
+      this.accountForm.controls.phoneDialCode.value,
+      this.accountForm.controls.phoneLocalNumber.value,
+    );
+  }
+
+  private syncPhoneNumberFromParts(): void {
+    const e164 = this.getAccountE164Phone();
+    const control = this.accountForm.controls.phoneNumber;
+    if (control.value === e164) return;
+    control.setValue(e164, { emitEvent: true });
+    control.updateValueAndValidity({ emitEvent: true });
+  }
+
+  private applyPhonePartsFromE164(e164: string): void {
+    const parsed = parseE164Phone(e164);
+    if (parsed) {
+      this.accountForm.patchValue({
+        phoneDialCode: parsed.dialCode,
+        phoneLocalNumber: parsed.localNumber,
+      });
+    } else if (e164.trim()) {
+      this.accountForm.controls.phoneNumber.setValue(e164.trim());
+    }
+    this.syncPhoneNumberFromParts();
+  }
+
+  private locationCountryLabel(code: string): string {
+    const normalized = code.trim().toUpperCase();
+    const match = SUPPORTED_COUNTRY_OPTIONS.find((item) => item.code === normalized);
+    return match ? this.t(match.labelKey) : normalized;
+  }
+
+  private maskDocumentNumber(value: string): string {
+    const trimmed = value.trim();
+    if (trimmed.length <= 4) return '••••';
+    return `•••• ${trimmed.slice(-4)}`;
+  }
+
+  protected isCategorySelected(category: WorkerCategory): boolean {
+    return this.workerProfileForm.controls.categories.value.includes(category);
+  }
+
+  protected onWorkerCategoryPick(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value as WorkerCategory;
+    if (!value) return;
+
+    const control = this.workerProfileForm.controls.categories;
+    const current = new Set(control.value);
+    if (!current.has(value)) {
+      current.add(value);
+      control.setValue([...current]);
+      control.markAsTouched();
+    }
+
+    select.value = '';
+    this.cdr.markForCheck();
+  }
+
+  protected removeCategory(category: WorkerCategory): void {
+    const control = this.workerProfileForm.controls.categories;
+    control.setValue(control.value.filter((item) => item !== category));
+    control.markAsTouched();
+    this.cdr.markForCheck();
   }
 
   protected finish(): void {
@@ -872,7 +1056,7 @@ export class Registration {
       account: {
         fullName: account.fullName.trim(),
         email: account.email.trim(),
-        phoneNumber: account.phoneNumber.trim(),
+        phoneNumber: this.getAccountE164Phone(),
         password: account.password,
         roles: account.selectedRoles,
       },

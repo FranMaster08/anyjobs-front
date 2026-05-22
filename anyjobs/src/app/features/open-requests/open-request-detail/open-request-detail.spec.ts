@@ -114,7 +114,7 @@ describe('OpenRequestDetail', () => {
     expect(fixture.nativeElement.textContent).toContain('María García');
   });
 
-  it('oculta Postulantes si el dueño recibe 401 al listar', () => {
+  it('oculta Postulantes si el dueño recibe 401 al listar sin limpiar sesión en el componente', () => {
     const auth = buildAuthMock(ownerId, true);
     const clearSpy = vi.fn();
 
@@ -165,6 +165,6 @@ describe('OpenRequestDetail', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).not.toContain('Postulantes');
-    expect(clearSpy).toHaveBeenCalled();
+    expect(clearSpy).not.toHaveBeenCalled();
   });
 });

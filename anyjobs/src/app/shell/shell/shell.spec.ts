@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -11,6 +11,7 @@ import { AuthApi } from '../../shared/api/auth.api';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
 import { AuthSession } from '../../shared/auth/auth.models';
 import { LoginResponse } from '../../shared/api/auth.models';
+import { NotificationsService } from '../../shared/notifications/notifications.service';
 
 interface ShellLoginTestView {
   openLogin(): void;
@@ -57,8 +58,18 @@ describe('Shell', () => {
           provide: AuthSessionService,
           useValue: {
             vm: authState,
+            isAuthBlocked: computed(() => false),
             setSession: setSessionSpy,
             clear: vi.fn(() => authState.set({ session: null, isLoggedIn: false, user: null })),
+            consumeSessionExpiredNotice: vi.fn(() => false),
+            invalidateSession: vi.fn(),
+          },
+        },
+        {
+          provide: NotificationsService,
+          useValue: {
+            refreshUnreadCount: vi.fn(),
+            reset: vi.fn(),
           },
         },
         {

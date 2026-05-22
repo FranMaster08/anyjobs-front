@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  /* Debajo del header (z-index 50) y del drawer móvil (70) para no tapar el menú de cuenta / logout. */
+  /* Debajo del header (z-index 200) y del drawer móvil (70) para no tapar el menú de cuenta / logout. */
   z-index: 40;
   box-sizing: border-box;
   padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));

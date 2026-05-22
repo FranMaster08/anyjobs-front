@@ -282,7 +282,6 @@ export class Profile {
         map((data: UserPrivateProfileDto): FetchPrivateResult => ({ kind: 'ok', data })),
         catchError((err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 401) {
-            this.auth.clear();
             return of<FetchPrivateResult>({ kind: 'unauthorized' });
           }
           const msg =

@@ -315,7 +315,7 @@ describe('OpenRequestCreate', () => {
     expect(routerNavigateSpy).toHaveBeenCalledWith(['/solicitudes', 'req-abc']);
   });
 
-  it('respuesta 401 limpia sesión y muestra mensaje de sesión expirada', () => {
+  it('respuesta 401 muestra mensaje de sesión expirada sin limpiar en el componente', () => {
     const session: AuthSession = {
       token: 't',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -329,7 +329,7 @@ describe('OpenRequestCreate', () => {
     fillForm(component);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).submit();
-    expect(authClearSpy).toHaveBeenCalledTimes(1);
+    expect(authClearSpy).not.toHaveBeenCalled();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((component as any).errorMessage()).toBe('Tu sesión expiró, vuelve a iniciar sesión');
   });

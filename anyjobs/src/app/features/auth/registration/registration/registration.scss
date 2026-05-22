@@ -34,10 +34,6 @@
 }
 
 .regHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
   margin-bottom: 14px;
 }
 
@@ -198,6 +194,90 @@
   gap: 6px;
 }
 
+.regField--phone {
+  grid-column: 1 / -1;
+}
+
+.regPhoneRow {
+  display: flex;
+  align-items: stretch;
+  min-height: 42px;
+  border: 1px solid var(--aj-color-skeleton-2);
+  border-radius: var(--aj-radius-sm);
+  background: var(--aj-color-surface);
+  overflow: hidden;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.regPhoneRow:focus-within {
+  border-color: rgba(14, 165, 164, 0.55);
+  box-shadow: 0 0 0 3px rgba(14, 165, 164, 0.14);
+}
+
+.regPhoneDial {
+  flex: 0 0 5.5rem;
+  width: 5.5rem;
+  margin: 0;
+  padding: 10px 1.75rem 10px 12px;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--aj-color-muted-2);
+  background-color: var(--aj-color-chip);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.regPhoneDial:hover {
+  background-color: color-mix(in srgb, var(--aj-color-chip) 88%, var(--aj-color-primary) 12%);
+}
+
+.regPhoneRow .regPhoneLocal.fieldControl {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.regPhoneRow .regPhoneLocal.fieldControl::placeholder {
+  color: var(--aj-color-subtle);
+  font-weight: inherit;
+  opacity: 1;
+}
+
+.regPhoneRow .regPhoneLocal.fieldControl:-webkit-autofill,
+.regPhoneRow .regPhoneLocal.fieldControl:-webkit-autofill:hover,
+.regPhoneRow .regPhoneLocal.fieldControl:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--aj-color-ink);
+  box-shadow: 0 0 0 1000px var(--aj-color-surface) inset;
+  transition: background-color 99999s ease-out 0s;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .regError {
   margin: 0;
   color: #b91c1c;
@@ -229,6 +309,60 @@
 .regChip--active {
   background: rgba(17, 24, 39, 0.06);
   border-color: var(--aj-color-border-strong);
+}
+
+.regCategoryChips {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.regCategoryChips .regChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: default;
+  background: var(--aj-color-chip);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.regCategoryChips .regChip--active {
+  background: rgba(14, 165, 164, 0.12);
+  border-color: rgba(14, 165, 164, 0.22);
+  color: var(--aj-color-ink);
+}
+
+.regCategoryChips .regChipRemove {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--aj-color-muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.regCategoryChips .regChipRemove:hover {
+  background: rgba(17, 24, 39, 0.08);
+  color: var(--aj-color-ink);
+}
+
+.regCategoryChips .regChipRemove:focus-visible {
+  outline: 2px solid var(--aj-color-focus);
+  outline-offset: 1px;
 }
 
 .regTerms {
@@ -292,49 +426,223 @@
 }
 
 .regDone {
+  display: grid;
+  gap: 18px;
   background:
-    radial-gradient(circle at 18% 20%, rgba(14, 165, 164, 0.14), transparent 46%),
-    radial-gradient(circle at 90% 0%, rgba(17, 24, 39, 0.06), transparent 54%),
+    radial-gradient(circle at 50% 0%, rgba(14, 165, 164, 0.12), transparent 58%),
     var(--aj-color-surface);
 }
 
-.regDoneHeader {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+.regDoneHero {
+  text-align: center;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding-top: 4px;
 }
 
 .regDoneIcon {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--aj-radius-pill);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 22px;
   font-weight: 1000;
   color: var(--aj-color-ink);
   background: rgba(14, 165, 164, 0.16);
-  border: 1px solid rgba(14, 165, 164, 0.25);
-  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
-  flex: 0 0 auto;
+  border: 1px solid rgba(14, 165, 164, 0.28);
+  box-shadow: 0 14px 32px rgba(14, 165, 164, 0.18);
 }
 
-.regDoneText {
+.regDoneTitle {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.regDoneLead {
+  margin: 0;
+  max-width: 420px;
+  color: var(--aj-color-muted);
+  font-weight: 600;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.regDoneAccount {
+  margin: 4px 0 0;
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+}
+
+.regDoneAccountLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aj-color-subtle);
+}
+
+.regDoneAccountName {
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.regDoneAccountEmail {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--aj-color-muted-2);
+  word-break: break-all;
+}
+
+.regDonePanel {
+  border: 1px solid var(--aj-color-border);
+  border-radius: var(--aj-radius-md);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 14px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.regDonePanelTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--aj-color-muted-2);
+}
+
+.regDoneGrid {
+  margin: 0;
+  display: grid;
+  gap: 10px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.regDoneRow {
+  margin: 0;
   min-width: 0;
 }
 
-.regDoneBadges {
-  margin: 12px 0 0;
+.regDoneRow--full {
+  grid-column: 1 / -1;
+}
+
+.regDoneRow dt {
+  margin: 0 0 3px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--aj-color-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.regDoneRow dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--aj-color-ink);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.regCategoryChips--readonly .regChip {
+  cursor: default;
+}
+
+.regDoneChecks {
+  margin: 0;
   padding: 0;
   list-style: none;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 8px;
+}
+
+.regDoneCheck {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--aj-radius-sm);
+  background: rgba(17, 24, 39, 0.03);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--aj-color-muted-2);
+}
+
+.regDoneCheck--ok {
+  background: rgba(14, 165, 164, 0.1);
+  color: var(--aj-color-ink);
+}
+
+.regDoneCheckIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 12px;
+  background: rgba(17, 24, 39, 0.08);
+  flex-shrink: 0;
+}
+
+.regDoneCheck--ok .regDoneCheckIcon {
+  background: rgba(14, 165, 164, 0.22);
+  color: var(--aj-color-primary);
+}
+
+.regDoneNote {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--aj-color-muted);
+  font-weight: 600;
+}
+
+.regDoneNext {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.regDoneNextTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.regDoneNextHint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--aj-color-muted);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.regDoneActions {
+  display: grid;
+  gap: 10px;
+}
+
+.regDoneActions .btn {
+  width: 100%;
 }
 
 .regDone .btn:focus-visible {
   outline: 3px solid var(--aj-color-focus);
   outline-offset: 2px;
+}
+
+@media (min-width: 560px) {
+  .regDoneActions {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 /* ── Verify card ─────────────────────────────────────────────── */

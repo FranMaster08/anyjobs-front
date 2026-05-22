@@ -36,6 +36,7 @@
         aria-modal="true"
         [attr.aria-labelledby]="commentsPanelTitleId"
         (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
       >
         <header class="homeCommentsPanel__header">
           <h2 class="homeCommentsPanel__title" [id]="commentsPanelTitleId">Comentarios</h2>

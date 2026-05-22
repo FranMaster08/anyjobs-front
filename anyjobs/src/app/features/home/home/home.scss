@@ -202,7 +202,7 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Panel de comentarios: sobre bottom nav (40), bajo drawer shell (70). */
+/* Panel de comentarios: sobre bottom nav (40), bajo cabecera sticky (200) y drawer shell (70). */
 .homeCommentsOverlay {
   position: fixed;
   inset: 0;
