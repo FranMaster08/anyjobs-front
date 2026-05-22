@@ -19,43 +19,61 @@
           </div>
           <ng-container *ngIf="!hasFilterEmptyResults()">
           <section id="inicio" class="heroLayout">
-            <div class="heroRight">
-              <div class="mediaHero">
-                <span class="badge">Galería destacada</span>
-                <ng-container *ngIf="featured()!.imageUrl; else heroPlaceholder">
-                  <img
-                    class="mediaHeroImg"
-                    [src]="featured()!.imageUrl"
-                    [alt]="featured()!.imageAlt ?? ''"
-                    loading="lazy"
-                  />
-                </ng-container>
-                <ng-template #heroPlaceholder>
-                  <div class="mediaHeroPlaceholder" aria-hidden="true"></div>
-                </ng-template>
-              </div>
-
-              <div class="heroSpotlight" *ngIf="featured()">
-                <p class="heroSpotlightLabel">Solicitud destacada</p>
-                <p class="heroSpotlightTitle">{{ featured()!.excerpt }}</p>
-
-                <div class="heroSpotlightMeta">
-                  <span *ngIf="featured()!.locationLabel">{{ featured()!.locationLabel }}</span>
-                  <span *ngIf="featured()!.budgetLabel">{{ featured()!.budgetLabel }}</span>
-                  <span *ngIf="featured()!.publishedAtLabel">{{
-                    featured()!.publishedAtLabel
-                  }}</span>
+            @if (featured(); as feat) {
+              <article class="heroFeatured" [attr.data-open-request-id]="feat.id">
+                <div class="heroFeaturedMedia">
+                  <a
+                    class="heroFeaturedMediaLink"
+                    [href]="featuredDetailHref()"
+                    (click)="openFeaturedDetail($event)"
+                    [attr.aria-label]="'Ver solicitud destacada: ' + feat.excerpt"
+                  >
+                    <span class="badge">Galería destacada</span>
+                    @if (feat.imageUrl) {
+                      <img
+                        class="heroFeaturedImg"
+                        [src]="feat.imageUrl"
+                        [alt]="feat.imageAlt ?? ''"
+                        loading="eager"
+                      />
+                    } @else {
+                      <div class="heroFeaturedPlaceholder" aria-hidden="true"></div>
+                    }
+                  </a>
                 </div>
 
-                <a
-                  class="btn btn--secondary heroSpotlightBtn"
-                  [href]="featuredDetailHref()"
-                  (click)="openFeaturedDetail($event)"
-                >
-                  Explorar destacada
-                </a>
-              </div>
-            </div>
+                <div class="heroSpotlight">
+                  <p class="heroSpotlightLabel">Solicitud destacada</p>
+                  <a
+                    class="heroSpotlightTitleLink"
+                    [href]="featuredDetailHref()"
+                    (click)="openFeaturedDetail($event)"
+                  >
+                    {{ feat.excerpt }}
+                  </a>
+
+                  <div class="heroSpotlightMeta">
+                    @if (feat.locationLabel) {
+                      <span>{{ feat.locationLabel }}</span>
+                    }
+                    @if (feat.budgetLabel) {
+                      <span>{{ feat.budgetLabel }}</span>
+                    }
+                    @if (feat.publishedAtLabel) {
+                      <span>{{ feat.publishedAtLabel }}</span>
+                    }
+                  </div>
+
+                  <a
+                    class="btn btn--secondary heroSpotlightBtn"
+                    [href]="featuredDetailHref()"
+                    (click)="openFeaturedDetail($event)"
+                  >
+                    Explorar destacada
+                  </a>
+                </div>
+              </article>
+            }
           </section>
 
           <section id="solicitudes" class="section">

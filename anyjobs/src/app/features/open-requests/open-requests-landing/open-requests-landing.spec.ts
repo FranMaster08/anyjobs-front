@@ -118,5 +118,39 @@ describe('OpenRequestsLanding', () => {
     expect(calls).toBe(2);
     expect(compiled.querySelectorAll('app-open-request-card').length).toBe(1);
   });
+
+  it('should render clickable featured hero links when items load', async () => {
+    TestBed.resetTestingModule();
+    configure({
+      listOpenRequests: () =>
+        of({
+          items: [
+            {
+              id: 'feat-1',
+              excerpt: 'Instalar estanterías',
+              locationLabel: 'Sevilla',
+              budgetLabel: '€55',
+              publishedAtLabel: 'Hace 3 horas',
+            },
+          ],
+          nextPage: null,
+          hasMore: false,
+        }),
+      listNearbyOpenRequests: () => of({ items: [] }),
+    });
+    await TestBed.compileComponents();
+
+    fixture = TestBed.createComponent(OpenRequestsLanding);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const hero = compiled.querySelector('.heroFeatured');
+    expect(hero).toBeTruthy();
+
+    const links = hero!.querySelectorAll('a[href="/solicitudes/feat-1"]');
+    expect(links.length).toBeGreaterThanOrEqual(3);
+  });
 });
 

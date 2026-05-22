@@ -41,6 +41,14 @@ export function hardStopAllVideos(): void {
   });
 }
 
+/** Detiene vídeos solo dentro de un contenedor (p. ej. visor fullscreen), sin tocar la grilla. */
+export function hardStopVideosIn(root: ParentNode | null | undefined): void {
+  if (!root) return;
+  root.querySelectorAll('video').forEach((node) => {
+    if (node instanceof HTMLVideoElement) hardStopVideo(node);
+  });
+}
+
 export function pauseAllSliderVideos(container: HTMLElement, resetTime = false): void {
   forEachSliderVideo(container, (video) => {
     video.pause();
@@ -113,11 +121,17 @@ export function bootstrapSliderPlayback(
   });
 }
 
+type WithSoundOption = boolean | (() => boolean);
+
+function resolveWithSound(option: WithSoundOption): boolean {
+  return typeof option === 'function' ? option() : option;
+}
+
 /** Sincroniza play/pause mientras el usuario hace scroll (la librería puede dejar varios slides visibles). */
 export function setupSliderViewportScrollSync(
   container: HTMLElement,
   slider: MediaSliderComponent | undefined,
-  withSound: boolean,
+  withSound: WithSoundOption,
   registerCleanup: (fn: () => void) => void,
 ): void {
   const viewport = container.querySelector('.media-slider__viewport');
@@ -126,7 +140,9 @@ export function setupSliderViewportScrollSync(
   let rafId = 0;
   const onScroll = (): void => {
     cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => syncVisibleSlidePlayback(container, slider, withSound));
+    rafId = requestAnimationFrame(() =>
+      syncVisibleSlidePlayback(container, slider, resolveWithSound(withSound)),
+    );
   };
 
   viewport.addEventListener('scroll', onScroll, { passive: true });
@@ -150,7 +166,7 @@ export function destroySliderPlayback(
   slider: MediaSliderComponent | undefined,
 ): void {
   pauseSliderPlayback(container, slider, true);
-  hardStopAllVideos();
+  hardStopVideosIn(container);
 }
 
 /** @deprecated Usar `destroySliderPlayback` al desmontar o `pauseSliderPlayback` al cambiar slide. */

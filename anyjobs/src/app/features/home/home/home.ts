@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import {
   afterNextRender,
@@ -15,7 +15,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, finalize, of } from 'rxjs';
+import { finalize } from 'rxjs';
 
 import {
   MediaSliderComponent,
@@ -33,10 +33,14 @@ import {
   setupSliderViewportScrollSync,
 } from '../../../shared/media/media-slider-playback';
 import { setupSliderAvatarProfileNavigation } from '../../../shared/media/media-slider-profile-nav';
+import { HomeFeaturedReelsDataService } from '../../../shared/media/home-featured-reels-data.service';
+import type { ReelSlide } from '../../../shared/media/feed-reels-slide';
+import { VIEWPORT_DESKTOP_MIN_MQ } from '../../../shared/media/viewport-breakpoint';
+import { ReelsDesktopGalleryComponent } from '../../reels-feed/reels-desktop-gallery/reels-desktop-gallery';
 
 import { HomeMobileBottomNavComponent } from '../home-mobile-bottom-nav/home-mobile-bottom-nav';
 
-type FeaturedReelSlide = SlideData & { readonly id?: string; readonly creatorUserId?: string };
+type FeaturedReelSlide = ReelSlide;
 
 const ANONYMOUS_ACTOR_KEY = 'anyjobs.reels.actor.anonymousId';
 const EARLY_SKIP_MS = 2000;
@@ -62,7 +66,7 @@ function storageSet(key: string, value: string): void {
 
 @Component({
   selector: 'app-home',
-  imports: [MediaSliderComponent, HomeMobileBottomNavComponent],
+  imports: [MediaSliderComponent, HomeMobileBottomNavComponent, ReelsDesktopGalleryComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -70,6 +74,7 @@ export class Home {
   private static readonly SLIDER_ID = 'home-featured-reels';
 
   private readonly http = inject(HttpClient);
+  private readonly featuredData = inject(HomeFeaturedReelsDataService);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly auth = inject(AuthSessionService);
@@ -79,6 +84,11 @@ export class Home {
 
   private readonly sliderWrap = viewChild<ElementRef<HTMLElement>>('homeSliderWrap');
   private readonly mediaSlider = viewChild(MediaSliderComponent);
+
+  /** Escritorio: >900px (alineado a `SHELL_HEADER_COMPACT_MAX_PX`). */
+  readonly isDesktopViewport = signal(
+    typeof matchMedia !== 'undefined' ? matchMedia(VIEWPORT_DESKTOP_MIN_MQ).matches : false,
+  );
 
   private readonly interactionsUrl = new URL(
     '/feed/reels/interactions',
@@ -95,6 +105,9 @@ export class Home {
   readonly commentsPanelReelId = signal<string | null>(null);
   protected readonly commentsPanelTitleId = 'home-comments-panel-title';
 
+  /** `true` = audio activo; alineado al botón mute de la librería (`withSound = !muted`). */
+  private readonly sliderWithSound = signal(true);
+
   private activeSlideIndex: number | null = null;
   private previousBodyOverflow: string | null = null;
   private commentsPanelCloseTimer: ReturnType<typeof setTimeout> | null = null;
@@ -106,28 +119,28 @@ export class Home {
   private teardownAvatarNavigation: (() => void) | null = null;
 
   constructor() {
-    const featuredUrl = new URL('/home/featured-reels', this.document.baseURI);
-    featuredUrl.search = new HttpParams()
-      .set('anonymousId', this.anonymousActorId())
-      .set('limit', '15')
-      .toString();
-
-    this.http
-      .get<FeaturedReelSlide[]>(featuredUrl.toString())
-      .pipe(
-        catchError(() => {
-          this.loadFailed.set(true);
-          return of([] as FeaturedReelSlide[]);
-        }),
-        finalize(() => this.loaded.set(true)),
-      )
-      .subscribe((data) => {
-        const list = Array.isArray(data) ? data.map((slide) => this.normalizeSlide(slide)) : [];
-        this.slides.set(list);
-        if (!Array.isArray(data)) {
-          this.loadFailed.set(true);
-        }
+    this.featuredData
+      .loadFeatured(15)
+      .pipe(finalize(() => this.loaded.set(true)))
+      .subscribe(({ slides, failed }) => {
+        this.slides.set(slides);
+        this.loadFailed.set(failed);
       });
+
+    if (typeof matchMedia !== 'undefined') {
+      const mq = matchMedia(VIEWPORT_DESKTOP_MIN_MQ);
+      const onMqChange = (): void => {
+        const wasDesktop = this.isDesktopViewport();
+        const nowDesktop = mq.matches;
+        this.isDesktopViewport.set(nowDesktop);
+        if (nowDesktop && !wasDesktop) {
+          this.closeCommentsPanel();
+          this.teardownSliderSession();
+        }
+      };
+      mq.addEventListener('change', onMqChange);
+      this.destroyRef.onDestroy(() => mq.removeEventListener('change', onMqChange));
+    }
 
     this.destroyRef.onDestroy(() => {
       this.clearCommentsPanelCloseTimer();
@@ -136,6 +149,7 @@ export class Home {
     });
 
     effect(() => {
+      if (this.isDesktopViewport()) return;
       if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
       runInInjectionContext(this.injector, () => {
         afterNextRender(() => {
@@ -145,22 +159,6 @@ export class Home {
         });
       });
     });
-  }
-
-  /** ngx-vertical-slider exige avatar, music y counts; el API solo envía campos de reel. */
-  private normalizeSlide(raw: FeaturedReelSlide): FeaturedReelSlide {
-    const user = raw.user?.trim() || 'Usuario';
-    return {
-      ...raw,
-      type: raw.type === 'image' ? 'image' : 'video',
-      media: this.resolveMediaUrl(raw.media),
-      user,
-      avatar: raw.avatar?.trim() || this.avatarPlaceholder(user),
-      caption: raw.caption ?? '',
-      music: raw.music ?? 'sonido original',
-      counts: { ...raw.counts },
-      creatorUserId: raw.creatorUserId,
-    };
   }
 
   private setupAvatarProfileNavigation(): void {
@@ -175,22 +173,17 @@ export class Home {
     );
   }
 
-  private resolveMediaUrl(media: string): string {
-    const trimmed = media?.trim() ?? '';
-    if (trimmed.length === 0) return trimmed;
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    return new URL(trimmed, this.document.baseURI).href;
-  }
-
-  private avatarPlaceholder(user: string): string {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&size=96&background=fe2c55&color=fff`;
+  private syncSliderPlayback(): void {
+    const wrap = this.sliderWrap()?.nativeElement;
+    if (!wrap) return;
+    this.mediaPlayback.syncSlider(wrap, this.sliderWithSound(), this.mediaSlider());
   }
 
   /** Tras cargar slides async, el IntersectionObserver a veces no dispara play en el primer reel. */
   private ensureFirstVideoPlays(): void {
     const wrap = this.sliderWrap()?.nativeElement;
     if (!wrap) return;
-    bootstrapSliderPlayback(wrap, this.mediaSlider(), true);
+    bootstrapSliderPlayback(wrap, this.mediaSlider(), this.sliderWithSound());
   }
 
   private slideMediaAt(index: number): string | null {
@@ -266,7 +259,7 @@ export class Home {
     };
 
     const syncPlayback = (): void => {
-      this.mediaPlayback.syncSlider(wrap, true, this.mediaSlider());
+      this.syncSliderPlayback();
     };
 
     const onVisibleChange = (): void => {
@@ -298,7 +291,7 @@ export class Home {
     };
 
     this.teardownScrollSync?.();
-    setupSliderViewportScrollSync(wrap, this.mediaSlider(), true, (fn) => {
+    setupSliderViewportScrollSync(wrap, this.mediaSlider(), () => this.sliderWithSound(), (fn) => {
       this.teardownScrollSync = fn;
     });
 
@@ -432,6 +425,8 @@ export class Home {
   }
 
   onMutedChange(muted: boolean): void {
+    this.sliderWithSound.set(!muted);
+    this.syncSliderPlayback();
     this.trackInteraction({
       sliderId: Home.SLIDER_ID,
       kind: 'mutedChange',
@@ -449,6 +444,13 @@ export class Home {
       count: event.count,
     });
 
+    if (event.action === 'comment') {
+      this.openCommentsPanel(event.index);
+    }
+  }
+
+  /** Galería desktop: telemetría la registra el componente hijo; aquí solo UI de comentarios. */
+  onDesktopGallerySlideAction(event: SlideActionEvent): void {
     if (event.action === 'comment') {
       this.openCommentsPanel(event.index);
     }

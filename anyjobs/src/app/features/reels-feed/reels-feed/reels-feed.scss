@@ -9,6 +9,15 @@
   min-height: calc(100dvh - var(--reels-slider-header-offset) - var(--reels-bottom-nav-height));
 }
 
+/* Escritorio (>900px): galería con scroll de página; sin layout fullscreen del slider. */
+@media (min-width: 901px) {
+  :host {
+    --reels-bottom-nav-height: 0px;
+    min-height: calc(100dvh - var(--reels-slider-header-offset));
+    overflow: visible;
+  }
+}
+
 @media (max-width: 900px) {
   :host {
     --reels-bottom-nav-height: calc(59px + env(safe-area-inset-bottom, 0px));

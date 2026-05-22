@@ -1,0 +1,109 @@
+<section
+  class="reelsDesktopGallery"
+  [attr.aria-label]="sectionTitle() || 'Multimedia'"
+  [attr.aria-labelledby]="sectionTitle() ? sectionHeadingId : null"
+>
+  @if (sectionTitle()) {
+    <header class="reelsDesktopGallery__intro">
+      @if (sectionEyebrow()) {
+        <p class="reelsDesktopGallery__eyebrow">{{ sectionEyebrow() }}</p>
+      }
+      <h2 class="reelsDesktopGallery__title" [id]="sectionHeadingId">{{ sectionTitle() }}</h2>
+      @if (sectionSubtitle()) {
+        <p class="reelsDesktopGallery__subtitle">{{ sectionSubtitle() }}</p>
+      }
+    </header>
+  }
+  @if (!loaded()) {
+    <p class="reelsDesktopGallery__status" aria-live="polite">{{ loadingLabel() }}</p>
+  } @else if (loadFailed()) {
+    <p class="reelsDesktopGallery__status" role="status">{{ errorLabel() }}</p>
+  } @else if (visibleSlides().length === 0) {
+    <p class="reelsDesktopGallery__status" role="status">{{ emptyLabel() }}</p>
+  } @else {
+    <ul class="reelsDesktopGallery__grid" role="list">
+      @for (slide of visibleSlides(); track trackSlide(slide)) {
+        <li class="reelsDesktopGallery__item">
+          <article class="reelsDesktopGallery__card">
+            <button
+              type="button"
+              class="reelsDesktopGallery__preview"
+              (click)="openFullscreen(slide)"
+            >
+              @if (isVideo(slide)) {
+                <video
+                  #previewVideo
+                  class="reelsDesktopGallery__media"
+                  [src]="slide.media"
+                  muted
+                  playsinline
+                  preload="metadata"
+                  (mouseenter)="onPreviewHoverStart(previewVideo)"
+                  (mouseleave)="onPreviewHoverEnd(previewVideo)"
+                  (error)="onPreviewMediaError(slide)"
+                ></video>
+              } @else {
+                <img
+                  class="reelsDesktopGallery__media"
+                  [src]="slide.media"
+                  alt=""
+                  loading="lazy"
+                  (error)="onPreviewMediaError(slide)"
+                />
+              }
+              <span class="reelsDesktopGallery__overlay">
+                @if (slide.caption) {
+                  <span class="reelsDesktopGallery__caption">{{ slide.caption }}</span>
+                }
+              </span>
+            </button>
+            <div class="reelsDesktopGallery__meta">
+              <button
+                type="button"
+                class="reelsDesktopGallery__author"
+                (click)="goToProfile(slide, $event)"
+              >
+                <img
+                  class="reelsDesktopGallery__avatar"
+                  [src]="slide.avatar"
+                  alt=""
+                  width="28"
+                  height="28"
+                  loading="lazy"
+                />
+                <span class="reelsDesktopGallery__user">{{ slide.user }}</span>
+              </button>
+            </div>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+@if (fullscreenOpen()) {
+  <div
+    class="reelsDesktopGallery__fullscreen"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Reel en pantalla completa"
+  >
+    <button
+      type="button"
+      class="reelsDesktopGallery__fullscreenClose"
+      (click)="closeFullscreen()"
+      aria-label="Cerrar reel"
+    >
+      ✕
+    </button>
+    <div #fullscreenWrap class="reelsDesktopGallery__sliderWrap">
+      <media-slider
+        [slides]="visibleSlides()"
+        (doubleTap)="onDoubleTap()"
+        (mutedChange)="onMutedChange($event)"
+        (slideAction)="onSlideAction($event)"
+        (slideFollow)="onSlideFollow($event)"
+      />
+    </div>
+  </div>
+}

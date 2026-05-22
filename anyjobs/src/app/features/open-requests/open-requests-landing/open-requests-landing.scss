@@ -33,7 +33,7 @@
 }
 
 .heroLeft,
-.heroRight,
+.heroFeatured,
 .heroSpotlight,
 .filtersCard {
   min-width: 0;
@@ -304,87 +304,118 @@
   min-height: 44px;
 }
 
-.heroRight {
-  display: grid;
-  gap: 14px;
-  align-content: start;
-}
-
-.mediaHero {
+.heroFeatured {
   position: relative;
-  overflow: hidden;
-  min-height: clamp(280px, 42vw, 560px);
   border-radius: 20px;
+  overflow: hidden;
   background: var(--aj-color-surface);
   box-shadow: var(--aj-shadow-sm);
+  isolation: isolate;
+}
+
+.heroFeaturedMedia {
+  position: relative;
+}
+
+.heroFeaturedMediaLink {
+  display: block;
+  position: relative;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.heroFeaturedMediaLink:focus-visible,
+.heroSpotlightTitleLink:focus-visible,
+.heroSpotlightBtn:focus-visible {
+  outline: 3px solid var(--aj-color-focus);
+  outline-offset: 2px;
 }
 
 .badge {
   position: absolute;
   top: 14px;
   left: 14px;
-  z-index: 1;
+  z-index: 2;
   padding: 6px 10px;
   border-radius: var(--aj-radius-pill);
   background: rgba(17, 24, 39, 0.92);
   color: var(--aj-color-surface);
   font-size: 12px;
   font-weight: 800;
+  pointer-events: none;
 }
 
-.mediaHeroImg,
-.mediaHeroPlaceholder {
+.heroFeaturedImg,
+.heroFeaturedPlaceholder {
   width: 100%;
-  height: 100%;
+  height: clamp(240px, 52vw, 480px);
   display: block;
 }
 
-.mediaHeroImg {
+.heroFeaturedImg {
   object-fit: cover;
 }
 
-.mediaHeroPlaceholder {
+.heroFeaturedPlaceholder {
   background: var(--aj-skeleton-gradient);
   background-size: 200% 100%;
   animation: shimmer 1.2s ease-in-out infinite;
 }
 
 .heroSpotlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   padding: 18px;
-  border-radius: 18px;
-  background: var(--aj-color-surface);
-  box-shadow: var(--aj-shadow-sm);
-  border: 1px solid rgba(17, 24, 39, 0.06);
+  pointer-events: auto;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(17, 24, 39, 0.5) 30%,
+    rgba(17, 24, 39, 0.94) 100%
+  );
 }
 
 .heroSpotlightLabel,
-.heroSpotlightTitle,
 .heroSpotlightMeta {
   margin: 0;
 }
 
 .heroSpotlightLabel {
-  color: var(--aj-color-subtle);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.heroSpotlightTitle {
-  color: var(--aj-color-ink);
+.heroSpotlightTitleLink {
+  margin: 0;
+  color: #fff;
   font-size: clamp(1.05rem, 2vw, 1.35rem);
   font-weight: 900;
   line-height: 1.25;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.heroSpotlightTitleLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .heroSpotlightMeta {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  color: var(--aj-color-muted);
+  color: rgba(255, 255, 255, 0.88);
   font-size: 13px;
   font-weight: 700;
 }
@@ -394,11 +425,15 @@
   align-items: center;
   padding: 4px 10px;
   border-radius: var(--aj-radius-pill);
-  background: rgba(17, 24, 39, 0.04);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .heroSpotlightBtn {
+  position: relative;
+  z-index: 4;
   width: fit-content;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .section {
@@ -802,8 +837,9 @@
     border-top: 1px solid var(--aj-color-border);
   }
 
-  .mediaHero {
-    min-height: 340px;
+  .heroFeaturedImg,
+  .heroFeaturedPlaceholder {
+    height: 340px;
   }
 }
 
@@ -841,13 +877,13 @@
 }
 
 @media (max-width: 520px) {
-  .heroLeft,
   .heroSpotlight {
-    padding-inline: 14px;
+    padding: 14px;
   }
 
-  .mediaHero {
-    min-height: 260px;
+  .heroFeaturedImg,
+  .heroFeaturedPlaceholder {
+    height: 260px;
   }
 
   .badge {

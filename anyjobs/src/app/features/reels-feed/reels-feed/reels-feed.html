@@ -1,20 +1,30 @@
-<section class="reelsSliderPage" aria-label="Reels">
-  @if (!loaded()) {
-    <p class="reelsSliderLoading" aria-live="polite">Cargando reels…</p>
-  } @else if (loadFailed()) {
-    <p class="reelsSliderEmpty" role="status">No se pudo cargar el feed de reels.</p>
-  } @else if (slides().length === 0) {
-    <p class="reelsSliderEmpty" role="status">Aún no hay reels en el feed. Publica desde tu perfil.</p>
-  } @else {
-    <div #reelsSliderWrap class="reelsSliderWrap">
-      <media-slider
-        [slides]="slides()"
-        (doubleTap)="onDoubleTap()"
-        (mutedChange)="onMutedChange($event)"
-        (slideAction)="onSlideAction($event)"
-        (slideFollow)="onSlideFollow($event)"
-      />
-    </div>
-  }
-  <app-home-mobile-bottom-nav />
-</section>
+@if (isDesktopViewport()) {
+  <app-reels-desktop-gallery
+    [loaded]="loaded()"
+    [loadFailed]="loadFailed()"
+    [slides]="slides()"
+    sectionTitle="Videos de la comunidad"
+    sectionSubtitle="Reels publicados en AnyJobs."
+  />
+} @else {
+  <section class="reelsSliderPage" aria-label="Reels">
+    @if (!loaded()) {
+      <p class="reelsSliderLoading" aria-live="polite">Cargando reels…</p>
+    } @else if (loadFailed()) {
+      <p class="reelsSliderEmpty" role="status">No se pudo cargar el feed de reels.</p>
+    } @else if (slides().length === 0) {
+      <p class="reelsSliderEmpty" role="status">Aún no hay reels en el feed. Publica desde tu perfil.</p>
+    } @else {
+      <div #reelsSliderWrap class="reelsSliderWrap">
+        <media-slider
+          [slides]="slides()"
+          (doubleTap)="onDoubleTap()"
+          (mutedChange)="onMutedChange($event)"
+          (slideAction)="onSlideAction($event)"
+          (slideFollow)="onSlideFollow($event)"
+        />
+      </div>
+    }
+    <app-home-mobile-bottom-nav />
+  </section>
+}

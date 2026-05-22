@@ -44,6 +44,7 @@
 
 .brand:focus-visible,
 .mainNavLink:focus-visible,
+.mobileNavItem:focus-visible,
 .cta:focus-visible,
 .langSelect:focus-visible,
 .footerLink:focus-visible,
@@ -66,11 +67,7 @@
 .nav.nav--desktop {
   gap: 2px;
   max-width: fit-content;
-  padding: 4px 6px;
-  border-radius: 14px;
-  border: 1px solid var(--aj-color-border-strong);
-  background: rgba(17, 24, 39, 0.03);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 0;
 }
 
 @media (min-width: 901px) {
@@ -112,9 +109,27 @@
 }
 
 .nav.nav--desktop .mainNavLink {
+  position: relative;
   font-size: 14px;
-  padding: 7px 11px;
-  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding: 10px 14px;
+  border-radius: 0;
+  color: var(--aj-color-muted);
+}
+
+.nav.nav--desktop .mainNavLink::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--aj-color-primary);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.2s ease;
 }
 
 .mainNavLink:hover {
@@ -122,31 +137,117 @@
   color: var(--aj-color-ink);
 }
 
+.nav.nav--desktop .mainNavLink:hover {
+  background: transparent;
+  color: var(--aj-color-ink);
+}
+
 .nav.nav--desktop .mainNavLink--active {
   color: var(--aj-color-ink);
-  text-decoration: underline;
-  text-decoration-color: var(--aj-color-primary);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
+  font-weight: 600;
+}
+
+.nav.nav--desktop .mainNavLink--active::after {
+  transform: scaleX(1);
 }
 
 .nav.nav--desktop .mainNavLink--active:hover {
-  background: rgba(17, 24, 39, 0.06);
+  background: transparent;
   color: var(--aj-color-ink);
 }
 
 .mobileNavLinks {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: block;
 }
 
-.mobileNavLinks .mainNavLink {
-  width: 100%;
-  min-height: 44px;
+.mobileNavList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+}
+
+.mobileNavListItem {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--aj-color-border);
+}
+
+.mobileNavListItem:last-child {
+  border-bottom: none;
+}
+
+.mobileNavItem {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 4px;
   box-sizing: border-box;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--aj-color-muted-2);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.mobileNavItem:hover {
+  background: rgba(17, 24, 39, 0.03);
+  color: var(--aj-color-ink);
+}
+
+.mobileNavItem--active {
+  color: var(--aj-color-ink);
+  background: transparent;
+}
+
+.mobileNavItem--active:hover {
+  background: rgba(17, 24, 39, 0.03);
+  color: var(--aj-color-ink);
+}
+
+.mobileNavItemIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--aj-color-muted);
+  transition: color 0.15s ease;
+}
+
+.mobileNavItemIcon svg {
+  display: block;
+}
+
+.mobileNavItem--active .mobileNavItemIcon {
+  color: var(--aj-color-primary);
+}
+
+.mobileNavItemLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mobileNavItemChevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--aj-color-subtle);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .headerActions {
@@ -397,10 +498,10 @@
 
 .mobileNavDrawerTitle {
   margin: 0;
-  font-size: 15px;
-  font-weight: 900;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--aj-color-ink);
-  letter-spacing: 0.2px;
+  letter-spacing: -0.02em;
 }
 
 .mobileNavDrawerClose {
@@ -422,10 +523,11 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 12px 16px 16px;
+  padding: 14px 14px 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobileNavSection {
