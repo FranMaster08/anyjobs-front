@@ -11,7 +11,7 @@ describe('OpenRequestsLanding', () => {
   let component: OpenRequestsLanding;
   let fixture: ComponentFixture<OpenRequestsLanding>;
 
-  function configure(service: Pick<OpenRequestsService, 'listOpenRequests'>): void {
+  function configure(service: Pick<OpenRequestsService, 'listOpenRequests' | 'listNearbyOpenRequests'>): void {
     TestBed.configureTestingModule({
       imports: [OpenRequestsLanding],
       providers: [
@@ -33,6 +33,7 @@ describe('OpenRequestsLanding', () => {
   beforeEach(async () => {
     configure({
       listOpenRequests: () => NEVER,
+      listNearbyOpenRequests: () => NEVER,
     });
     await TestBed.compileComponents();
 
@@ -55,6 +56,7 @@ describe('OpenRequestsLanding', () => {
     TestBed.resetTestingModule();
     configure({
       listOpenRequests: () => of({ items: [], nextPage: null, hasMore: false }),
+      listNearbyOpenRequests: () => NEVER,
     });
     await TestBed.compileComponents();
     fixture = TestBed.createComponent(OpenRequestsLanding);
@@ -70,6 +72,7 @@ describe('OpenRequestsLanding', () => {
     TestBed.resetTestingModule();
     configure({
       listOpenRequests: () => throwError(() => new Error('fail')),
+      listNearbyOpenRequests: () => NEVER,
     });
     await TestBed.compileComponents();
     fixture = TestBed.createComponent(OpenRequestsLanding);
@@ -94,6 +97,7 @@ describe('OpenRequestsLanding', () => {
           hasMore: false,
         });
       },
+      listNearbyOpenRequests: () => NEVER,
     });
     await TestBed.compileComponents();
 

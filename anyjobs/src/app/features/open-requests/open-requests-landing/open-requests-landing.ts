@@ -127,7 +127,11 @@ export class OpenRequestsLanding implements AfterViewInit {
   protected readonly featured = computed(() => this.visibleItems()[0] ?? null);
   protected readonly listItems = computed(() => {
     const items = this.visibleItems();
-    return items.length > 1 ? items.slice(1) : items;
+    if (items.length <= 1) return items;
+    // Exclude the featured item only when there are more than 4, so the grid
+    // always shows at least 4 cards when the data allows it.
+    const startIdx = items.length > 4 ? 1 : 0;
+    return items.slice(startIdx);
   });
 
   protected readonly hasFilterEmptyResults = computed(

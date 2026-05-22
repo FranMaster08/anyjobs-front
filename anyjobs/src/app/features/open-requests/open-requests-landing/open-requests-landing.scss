@@ -11,7 +11,13 @@
 .grid {
   display: grid;
   gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1080px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
 }
 
 .heroLayout {
@@ -478,17 +484,22 @@
   user-select: none;
 }
 
+.locationSection {
+  margin-top: 28px;
+}
+
 .locationCard {
-  border-radius: 18px;
+  border-radius: 20px;
   background: var(--aj-color-surface);
   box-shadow: var(--aj-shadow-sm);
+  border: 1px solid var(--aj-color-border);
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  min-height: 380px;
 }
 
 .locationMedia {
-  min-height: 280px;
   background: linear-gradient(135deg, rgba(14, 165, 164, 0.12), rgba(17, 24, 39, 0.06));
   position: relative;
   overflow: hidden;
@@ -497,11 +508,13 @@
 .locationMedia .mapCanvas--preview {
   display: block;
   width: 100%;
-  min-height: 280px;
+  height: 100%;
+  min-height: 380px;
 }
 
 .locationMedia .mapCanvas--preview .mapHost {
-  height: 280px;
+  height: 100%;
+  min-height: 380px;
   border-radius: 0;
 }
 
@@ -511,21 +524,21 @@
   z-index: 500;
   display: grid;
   align-content: end;
-  padding: 14px;
+  padding: 20px;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(17, 24, 39, 0.55), transparent 55%);
+  background: linear-gradient(to top, rgba(17, 24, 39, 0.6), transparent 55%);
   max-width: none;
 }
 
 .locationMedia .mapPreviewStatus {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
+  bottom: 14px;
+  left: 14px;
   z-index: 550;
   margin: 0;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.93);
   font-size: 12px;
   font-weight: 600;
   pointer-events: none;
@@ -534,46 +547,123 @@
 
 .locationMedia .mapPreviewBanner {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  top: 12px;
+  left: 12px;
+  right: 12px;
   z-index: 600;
   margin: 0;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
   font-size: 12px;
   line-height: 1.35;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.1);
 }
 
 .locationMedia .mapPreviewEmpty {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
   z-index: 600;
   margin: 0;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
   font-size: 13px;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.1);
 }
 
 .locationBody {
-  padding: clamp(16px, 2.5vw, 22px);
+  padding: clamp(20px, 3vw, 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  border-left: 1px solid var(--aj-color-border);
+}
+
+.locationBodyTop {
   display: grid;
-  gap: 14px;
-  align-content: start;
+  gap: 10px;
+}
+
+.locationEyebrow {
+  margin: 0;
+  color: var(--aj-color-subtle);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.locationHeading {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.4vw, 1.85rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--aj-color-ink);
 }
 
 .locationText {
   margin: 0;
   color: var(--aj-color-muted);
-  line-height: 1.45;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.locationActions {
+  padding-top: 16px;
+  border-top: 1px solid var(--aj-color-border);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.locationActions .btn {
+  flex: 1;
+  min-width: 120px;
+  justify-content: center;
+}
+
+/* ─── Sección Contacto ─────────────────────────────── */
+
+.sectionCard {
+  padding: clamp(20px, 3vw, 28px);
+  background: var(--aj-color-surface);
+  border-radius: var(--aj-radius-lg);
+  box-shadow: var(--aj-shadow-sm);
+  border: 1px solid var(--aj-color-border);
+}
+
+.sectionCardHeader {
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--aj-color-border);
+}
+
+.sectionCard .sectionLabel::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--aj-color-primary);
+  margin-right: 7px;
+  vertical-align: middle;
+  margin-bottom: 2px;
+}
+
+.contactIntro {
+  margin: 8px 0 0;
+  color: var(--aj-color-muted);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .contactGrid {
@@ -583,34 +673,29 @@
   align-items: stretch;
 }
 
-.sectionCard {
-  padding: clamp(16px, 2.4vw, 22px);
-}
-
-.sectionCardHeader {
-  margin-bottom: 18px;
-}
-
 .contactCard {
   border-radius: 16px;
-  background: rgba(17, 24, 39, 0.02);
+  background: rgba(17, 24, 39, 0.025);
   border: 1px solid var(--aj-color-border);
   padding: 18px;
   display: grid;
-  gap: 12px;
+  grid-template-rows: 1fr auto;
+  gap: 16px;
   transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
   text-decoration: none;
   color: inherit;
   min-width: 0;
 }
 
 .contactCard:hover {
-  background: rgba(14, 165, 164, 0.06);
-  border-color: rgba(14, 165, 164, 0.25);
-  transform: translateY(-1px);
+  background: rgba(14, 165, 164, 0.07);
+  border-color: rgba(14, 165, 164, 0.3);
+  box-shadow: 0 6px 24px rgba(14, 165, 164, 0.1);
+  transform: translateY(-2px);
 }
 
 .contactCard:focus-visible {
@@ -618,31 +703,103 @@
   outline-offset: 2px;
 }
 
-.contactCard:hover .contactChevron {
-  color: var(--aj-color-ink);
+.contactTop {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.contactIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: rgba(14, 165, 164, 0.1);
+  color: var(--aj-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: background 180ms ease;
+}
+
+.contactCard:hover .contactIcon {
+  background: rgba(14, 165, 164, 0.18);
+}
+
+.contactInfo {
+  min-width: 0;
+  flex: 1;
 }
 
 .contactTitle {
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--aj-color-muted);
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .contactValue {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   font-weight: 900;
   color: var(--aj-color-ink);
   font-size: 16px;
   overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.contactMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--aj-color-border);
+}
+
+.contactHint {
+  font-size: 12px;
+  color: var(--aj-color-muted);
+  font-weight: 700;
+}
+
+.contactChevron {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--aj-color-subtle);
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.contactCard:hover .contactChevron {
+  color: var(--aj-color-primary);
+  transform: translateX(4px);
 }
 
 @media (max-width: 980px) {
-  .heroLayout,
+  .heroLayout {
+    grid-template-columns: 1fr;
+  }
+
   .locationCard {
     grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .locationMedia {
+    min-height: 280px;
+  }
+
+  .locationMedia .mapCanvas--preview,
+  .locationMedia .mapCanvas--preview .mapHost {
+    min-height: 280px;
+  }
+
+  .locationBody {
+    border-left: none;
+    border-top: 1px solid var(--aj-color-border);
   }
 
   .mediaHero {
@@ -674,15 +831,18 @@
   }
 
   .locationMedia {
-    min-height: 220px;
+    min-height: 200px;
+  }
+
+  .locationMedia .mapCanvas--preview,
+  .locationMedia .mapCanvas--preview .mapHost {
+    min-height: 200px;
   }
 }
 
 @media (max-width: 520px) {
   .heroLeft,
-  .heroSpotlight,
-  .locationBody,
-  .contactCard {
+  .heroSpotlight {
     padding-inline: 14px;
   }
 

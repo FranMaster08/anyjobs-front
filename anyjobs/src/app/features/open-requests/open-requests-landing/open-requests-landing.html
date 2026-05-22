@@ -77,6 +77,7 @@
               </a>
             </div>
 
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div class="grid" #listGrid (click)="onListGridClick($event)">
               <app-open-request-card
                 *ngFor="let item of listItems(); trackBy: trackById"
@@ -100,22 +101,9 @@
             </div>
           </section>
 
-          <section class="section" #locationSection>
-            <div class="sectionHeader">
-              <div class="sectionHeading">
-                <p class="sectionLabel">
-                  {{ site.config()?.sections?.location?.label ?? 'UBICACIÓN' }}
-                </p>
-                <h2 class="sectionTitle">
-                  {{ site.config()?.sections?.location?.title ?? 'Trabajos en tu zona' }}
-                </h2>
-              </div>
-              <button type="button" class="btn btn--secondary btn--sm" (click)="openMap()">
-                {{ site.config()?.sections?.location?.viewMap ?? 'Ver mapa' }}
-              </button>
-            </div>
-
+          <section class="section locationSection" #locationSection>
             <div class="locationCard">
+
               <div class="locationMedia" aria-label="Mapa de solicitudes cercanas">
                 <app-requests-map
                   *ngIf="mapCenter()"
@@ -173,18 +161,22 @@
                   No hay solicitudes abiertas con ubicación en esta zona.
                 </p>
               </div>
-              <div class="locationBody" id="ubicacion">
-                <p class="locationText">
-                  {{
-                    site.config()?.sections?.location?.body ??
-                      'Activa tu ubicación y revisa solicitudes abiertas cerca de ti. También puedes explorar el mapa para ver más.'
-                  }}
-                </p>
 
-                <p class="locationStatus" *ngIf="nearbyState() === 'error'" role="status">
-                  {{ nearbyError() }}
-                  <button type="button" class="btn btn--link" (click)="retryNearby()">Reintentar</button>
-                </p>
+              <div class="locationBody" id="ubicacion">
+                <div class="locationBodyTop">
+                  <p class="locationEyebrow">
+                    {{ site.config()?.sections?.location?.label ?? 'UBICACIÓN' }}
+                  </p>
+                  <h2 class="locationHeading">
+                    {{ site.config()?.sections?.location?.title ?? 'Busca por zona' }}
+                  </h2>
+                  <p class="locationText">
+                    {{
+                      site.config()?.sections?.location?.body ??
+                        'Activa tu ubicación y revisa solicitudes abiertas cerca de ti. También puedes explorar el mapa para ver más.'
+                    }}
+                  </p>
+                </div>
 
                 <div
                   class="nearbyList"
@@ -198,17 +190,25 @@
                     <span class="nearbyDot" aria-hidden="true"></span>
                     <span class="nearbyText">
                       {{ nearbyZoneLabel(it.item.locationLabel) }}
-                      <span *ngIf="it.distanceKm != null">
+                      <span *ngIf="it.distanceKm !== null">
                         · ~{{ it.distanceKm | number: '1.0-1' }} km</span
                       >
                     </span>
                   </div>
                 </div>
 
-                <button type="button" class="btn" (click)="openMap()">
-                  {{ site.config()?.sections?.location?.openMap ?? 'Abrir mapa' }}
-                </button>
+                <p class="locationStatus" *ngIf="nearbyState() === 'error'" role="status">
+                  {{ nearbyError() }}
+                  <button type="button" class="btn btn--link" (click)="retryNearby()">Reintentar</button>
+                </p>
+
+                <div class="locationActions">
+                  <button type="button" class="btn" (click)="openMap()">
+                    {{ site.config()?.sections?.location?.openMap ?? 'Ver mapa' }}
+                  </button>
+                </div>
               </div>
+
             </div>
           </section>
 
@@ -237,23 +237,19 @@
                 >
                   <div class="contactTop">
                     <div class="contactIcon" aria-hidden="true">☎</div>
-                    <div>
+                    <div class="contactInfo">
                       <p class="contactTitle">
                         {{ site.config()?.sections?.contact?.phone?.label ?? 'TELÉFONO' }}
                       </p>
                       <p class="contactValue">
                         {{ site.config()?.sections?.contact?.phone?.value ?? '+34 000 000 000' }}
                       </p>
-                      <p class="contactHint">
-                        {{
-                          site.config()?.sections?.contact?.phone?.hint ??
-                            'Ideal para dudas rápidas.'
-                        }}
-                      </p>
                     </div>
                   </div>
                   <div class="contactMeta">
-                    <span class="contactMetaText" aria-hidden="true"></span>
+                    <span class="contactHint">{{
+                      site.config()?.sections?.contact?.phone?.hint ?? 'L-V 9:00–18:00'
+                    }}</span>
                     <span class="contactChevron" aria-hidden="true">›</span>
                   </div>
                 </a>
@@ -267,23 +263,19 @@
                 >
                   <div class="contactTop">
                     <div class="contactIcon" aria-hidden="true">✉</div>
-                    <div>
+                    <div class="contactInfo">
                       <p class="contactTitle">
                         {{ site.config()?.sections?.contact?.email?.label ?? 'EMAIL' }}
                       </p>
                       <p class="contactValue">
                         {{ site.config()?.sections?.contact?.email?.value ?? 'hola@anyjobs.local' }}
                       </p>
-                      <p class="contactHint">
-                        {{
-                          site.config()?.sections?.contact?.email?.hint ??
-                            'Te respondemos con detalles.'
-                        }}
-                      </p>
                     </div>
                   </div>
                   <div class="contactMeta">
-                    <span class="contactMetaText" aria-hidden="true"></span>
+                    <span class="contactHint">{{
+                      site.config()?.sections?.contact?.email?.hint ?? 'Respuesta en 24h'
+                    }}</span>
                     <span class="contactChevron" aria-hidden="true">›</span>
                   </div>
                 </a>

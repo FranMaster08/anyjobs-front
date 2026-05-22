@@ -1,7 +1,7 @@
 <header class="app-header">
   <div class="headerInner">
-    <a class="brand" routerLink="/home">
-      {{ site.config()?.brandName ?? t('brand.name') }}
+    <a class="brand" routerLink="/home" aria-label="anyjobs - Inicio">
+      <span class="brandAny">any</span><span class="brandJobs">jobs</span>
     </a>
 
     <nav class="nav nav--desktop" aria-label="Navegación principal">
@@ -15,13 +15,22 @@
             {{ t(item.i18nKey) }}
           </a>
         } @else {
-          <a class="mainNavLink" [routerLink]="item.routerLink">
+          <a
+            class="mainNavLink"
+            [routerLink]="item.routerLink"
+            routerLinkActive="mainNavLink--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
             {{ t(item.i18nKey) }}
           </a>
         }
       }
       @if (authVm().isLoggedIn) {
-        <a class="mainNavLink" [routerLink]="profileRouterLink()">{{ t('auth.myProfile') }}</a>
+        <a
+          class="mainNavLink"
+          [routerLink]="profileRouterLink()"
+          routerLinkActive="mainNavLink--active"
+        >{{ t('auth.myProfile') }}</a>
       }
     </nav>
 
@@ -331,7 +340,9 @@
 
 <footer class="app-footer" aria-label="Footer">
   <div class="footerInner">
-    <div class="footerBrand">{{ site.config()?.brandName ?? t('brand.name') }}</div>
+    <div class="footerBrand">
+      <span class="brandAny">any</span><span class="brandJobs">jobs</span>
+    </div>
     <div class="footerLinks">
       <a class="footerLink" routerLink="/home">{{ t('nav.inicio') }}</a>
       <a class="footerLink" href="/solicitudes" (click)="scrollToOpenRequestsSection($event, 'solicitudes')">{{

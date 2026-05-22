@@ -13,11 +13,11 @@ export interface GeoDivision {
   municipalities: readonly GeoMunicipality[];
 }
 
-export type LocationCatalogCountry = {
+export interface LocationCatalogCountry {
   divisions: string[];
   municipalitiesByDivision: Record<string, string[]>;
   neighborhoodsByMunicipalityKey: Record<string, string[]>;
-};
+}
 
 export type LocationCatalog = Record<SupportedCountryCode, LocationCatalogCountry>;
 

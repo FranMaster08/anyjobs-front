@@ -9,7 +9,9 @@
   top: 0;
   z-index: 50;
   border-bottom: 1px solid var(--aj-color-border);
-  background: var(--aj-color-surface);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   overflow: visible;
 }
 
@@ -25,11 +27,19 @@
 }
 
 .brand {
-  font-weight: 800;
-  letter-spacing: 0.2px;
+  font-weight: 900;
+  font-size: 21px;
+  letter-spacing: -0.3px;
   text-decoration: none;
-  color: var(--aj-color-ink);
   white-space: nowrap;
+}
+
+.brandAny {
+  color: var(--aj-color-ink);
+}
+
+.brandJobs {
+  color: var(--aj-color-primary);
 }
 
 .brand:focus-visible,
@@ -54,13 +64,13 @@
 }
 
 .nav.nav--desktop {
-  gap: 4px;
+  gap: 2px;
   max-width: fit-content;
-  padding: 5px 8px;
+  padding: 4px 6px;
   border-radius: 14px;
-  border: 1px solid var(--aj-color-border);
-  background: var(--aj-color-surface);
-  box-shadow: var(--aj-shadow-lg);
+  border: 1px solid var(--aj-color-border-strong);
+  background: rgba(17, 24, 39, 0.03);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 @media (min-width: 901px) {
@@ -103,10 +113,24 @@
 
 .nav.nav--desktop .mainNavLink {
   font-size: 14px;
-  padding: 8px 12px;
+  padding: 7px 11px;
+  border-radius: 10px;
 }
 
 .mainNavLink:hover {
+  background: rgba(17, 24, 39, 0.06);
+  color: var(--aj-color-ink);
+}
+
+.nav.nav--desktop .mainNavLink--active {
+  color: var(--aj-color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--aj-color-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.nav.nav--desktop .mainNavLink--active:hover {
   background: rgba(17, 24, 39, 0.06);
   color: var(--aj-color-ink);
 }
@@ -267,18 +291,23 @@
 }
 
 .headerBtn {
-  border: 1px solid var(--aj-color-border-strong);
-  background: var(--aj-color-surface);
+  border: 0;
+  background: var(--aj-color-ink);
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 9px 16px;
   font-weight: 900;
-  font-size: 12px;
-  color: var(--aj-color-ink);
+  font-size: 13px;
+  color: var(--aj-color-surface);
   cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    transform 0.12s ease;
 }
 
 .headerBtn:hover {
-  background: rgba(17, 24, 39, 0.06);
+  background: color-mix(in srgb, var(--aj-color-ink) 80%, transparent);
+  transform: translateY(-1px);
 }
 
 .headerBtn:focus-visible {

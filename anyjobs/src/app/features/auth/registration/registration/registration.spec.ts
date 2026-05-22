@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormGroup } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
+import { type WritableSignal } from '@angular/core';
 
 import { Registration } from './registration';
 import { RegistrationStateService } from '../registration-state.service';
@@ -14,6 +15,7 @@ interface RegistrationTestHarness {
   readonly verifyForm: FormGroup;
   readonly locationForm: FormGroup;
   readonly personalForm: FormGroup;
+  readonly emailOtpDigits: WritableSignal<string[]>;
   onAccountContinue(): void;
   onVerifyContinue(): void;
   onLocationContinue(): void;
@@ -37,6 +39,9 @@ describe('Registration', () => {
     const catalog = buildLocationCatalogResponse();
     const authMock: Pick<
       AuthApi,
+      | 'register'
+      | 'verifyEmail'
+      | 'verifyPhone'
       | 'completeOnboardingRegistration'
       | 'getLocationCatalog'
       | 'getDivisionsByCountry'
@@ -44,6 +49,15 @@ describe('Registration', () => {
       | 'isEmailAvailable'
       | 'isPhoneAvailable'
     > = {
+      register: () =>
+        of({
+          status: 'PENDING' as const,
+          emailVerificationRequired: true,
+          phoneVerificationRequired: true,
+          nextStage: 'VERIFY' as const,
+        }),
+      verifyEmail: () => of(void 0),
+      verifyPhone: () => of(void 0),
       completeOnboardingRegistration: () => of(void 0),
       getLocationCatalog: () => of(catalog),
       getDivisionsByCountry: (countryCode: string) =>
@@ -102,7 +116,7 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('VERIFY');
 
-    c.verifyForm.controls['emailOtp'].setValue('1234');
+    c.emailOtpDigits.set(['1', '2', '3', '4', '5', '6']);
     c.verifyEmail();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -167,7 +181,7 @@ describe('Registration', () => {
 
     expect(reg.vm().stage).toBe('VERIFY');
 
-    c.verifyForm.controls['smsOtp'].setValue('1234');
+    c.verifyForm.controls['smsOtp'].setValue('123456');
     c.verifyPhone();
     fixture.detectChanges();
     await fixture.whenStable();
