@@ -30,7 +30,13 @@
               class="reelsDesktopGallery__preview"
               (click)="openFullscreen(slide)"
             >
-              @if (isVideo(slide)) {
+              @if (isPreviewBroken(slide)) {
+                <div
+                  class="reelsDesktopGallery__media reelsDesktopGallery__media--unavailable"
+                  role="img"
+                  aria-label="Vista previa no disponible"
+                ></div>
+              } @else if (isVideo(slide)) {
                 <video
                   #previewVideo
                   class="reelsDesktopGallery__media"

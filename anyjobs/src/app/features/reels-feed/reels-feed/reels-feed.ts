@@ -31,6 +31,7 @@ import {
   bootstrapSliderPlayback,
   destroySliderPlayback,
   pauseSliderPlayback,
+  setupDocumentVisibilityPlaybackResume,
   setupSliderViewportScrollSync,
 } from '../../../shared/media/media-slider-playback';
 import { setupSliderAvatarProfileNavigation } from '../../../shared/media/media-slider-profile-nav';
@@ -103,6 +104,8 @@ export class ReelsFeed {
 
     this.destroyRef.onDestroy(() => this.teardownSliderSession());
 
+    setupDocumentVisibilityPlaybackResume(this.destroyRef, () => this.resumeMobileSliderPlayback());
+
     effect(() => {
       if (this.isDesktopViewport()) return;
       if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
@@ -111,7 +114,7 @@ export class ReelsFeed {
           this.setupRetentionTracking();
           this.setupAvatarProfileNavigation();
           const wrap = this.sliderWrap()?.nativeElement;
-          if (wrap) bootstrapSliderPlayback(wrap, this.mediaSlider(), this.sliderWithSound());
+          if (wrap) bootstrapSliderPlayback(wrap, this.mediaSlider(), this.sliderWithSound(), this.slides());
         });
       });
     });
@@ -121,6 +124,14 @@ export class ReelsFeed {
     const wrap = this.sliderWrap()?.nativeElement;
     if (!wrap) return;
     this.mediaPlayback.syncSlider(wrap, this.sliderWithSound(), this.mediaSlider());
+  }
+
+  private resumeMobileSliderPlayback(): void {
+    if (this.isDesktopViewport()) return;
+    if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
+    const wrap = this.sliderWrap()?.nativeElement;
+    if (!wrap) return;
+    bootstrapSliderPlayback(wrap, this.mediaSlider(), this.sliderWithSound(), this.slides());
   }
 
   private setupAvatarProfileNavigation(): void {
@@ -196,7 +207,6 @@ export class ReelsFeed {
     }
     this.teardownRetentionTracking();
     this.stopSliderMedia();
-    this.mediaPlayback.stopAll();
     this.teardownAvatarNavigation?.();
     this.teardownAvatarNavigation = null;
   }

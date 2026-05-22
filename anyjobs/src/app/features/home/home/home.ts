@@ -30,6 +30,7 @@ import {
   bootstrapSliderPlayback,
   destroySliderPlayback,
   pauseSliderPlayback,
+  setupDocumentVisibilityPlaybackResume,
   setupSliderViewportScrollSync,
 } from '../../../shared/media/media-slider-playback';
 import { setupSliderAvatarProfileNavigation } from '../../../shared/media/media-slider-profile-nav';
@@ -148,6 +149,8 @@ export class Home {
       this.teardownSliderSession();
     });
 
+    setupDocumentVisibilityPlaybackResume(this.destroyRef, () => this.resumeMobileSliderPlayback());
+
     effect(() => {
       if (this.isDesktopViewport()) return;
       if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
@@ -183,7 +186,13 @@ export class Home {
   private ensureFirstVideoPlays(): void {
     const wrap = this.sliderWrap()?.nativeElement;
     if (!wrap) return;
-    bootstrapSliderPlayback(wrap, this.mediaSlider(), this.sliderWithSound());
+    bootstrapSliderPlayback(wrap, this.mediaSlider(), this.sliderWithSound(), this.slides());
+  }
+
+  private resumeMobileSliderPlayback(): void {
+    if (this.isDesktopViewport()) return;
+    if (!this.loaded() || this.loadFailed() || this.slides().length === 0) return;
+    this.ensureFirstVideoPlays();
   }
 
   private slideMediaAt(index: number): string | null {
@@ -315,7 +324,6 @@ export class Home {
     }
     this.teardownRetentionTracking();
     this.stopSliderMedia();
-    this.mediaPlayback.stopAll();
     this.teardownAvatarNavigation?.();
     this.teardownAvatarNavigation = null;
   }

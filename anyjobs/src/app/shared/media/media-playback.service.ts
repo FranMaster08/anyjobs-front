@@ -4,7 +4,7 @@ import { NavigationStart, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
 import {
-  hardStopAllVideos,
+  pauseAllDocumentVideos,
   pauseAllVideosExceptVisible,
   setMediaSliderMuted,
 } from './media-slider-playback';
@@ -30,7 +30,7 @@ export class MediaPlaybackService {
 
     if (typeof document !== 'undefined') {
       const onVisibility = (): void => {
-        if (document.hidden) hardStopAllVideos();
+        if (document.hidden) pauseAllDocumentVideos();
       };
       document.addEventListener('visibilitychange', onVisibility);
       this.destroyRef.onDestroy(() =>
@@ -49,6 +49,6 @@ export class MediaPlaybackService {
   }
 
   stopAll(): void {
-    hardStopAllVideos();
+    pauseAllDocumentVideos();
   }
 }

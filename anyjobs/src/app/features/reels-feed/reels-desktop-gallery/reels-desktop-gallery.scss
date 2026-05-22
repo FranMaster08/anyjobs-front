@@ -107,6 +107,23 @@
   object-fit: cover;
 }
 
+.reelsDesktopGallery__media--unavailable {
+  min-height: 180px;
+  background: var(--aj-skeleton-gradient);
+  background-size: 200% 100%;
+  animation: reelsGalleryShimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes reelsGalleryShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
 .reelsDesktopGallery__overlay {
   position: absolute;
   inset: auto 0 0 0;

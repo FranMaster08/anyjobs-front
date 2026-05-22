@@ -98,19 +98,14 @@ export class ReelsDesktopGalleryComponent {
   private watchProgressTimer: ReturnType<typeof setInterval> | null = null;
   private teardownAvatarNavigation: (() => void) | null = null;
   private previousBodyOverflow: string | null = null;
-  private readonly failedSlideKeys = signal<ReadonlySet<string>>(new Set());
+  private readonly brokenPreviewKeys = signal<ReadonlySet<string>>(new Set());
 
-  protected readonly visibleSlides = computed(() => {
-    const failed = this.failedSlideKeys();
-    return filterDisplayableReelSlides(this.slides()).filter(
-      (slide) => !failed.has(reelSlideKey(slide)),
-    );
-  });
+  protected readonly visibleSlides = computed(() => filterDisplayableReelSlides(this.slides()));
 
   constructor() {
     effect(() => {
       this.slides();
-      this.failedSlideKeys.set(new Set());
+      this.brokenPreviewKeys.set(new Set());
     });
 
     this.destroyRef.onDestroy(() => {
@@ -151,11 +146,16 @@ export class ReelsDesktopGalleryComponent {
   protected onPreviewMediaError(slide: ReelSlide): void {
     const key = reelSlideKey(slide);
     if (!key) return;
-    this.failedSlideKeys.update((prev) => {
+    this.brokenPreviewKeys.update((prev) => {
       const next = new Set(prev);
       next.add(key);
       return next;
     });
+  }
+
+  protected isPreviewBroken(slide: ReelSlide): boolean {
+    const key = reelSlideKey(slide);
+    return key.length > 0 && this.brokenPreviewKeys().has(key);
   }
 
   protected closeFullscreen(): void {
@@ -219,10 +219,10 @@ export class ReelsDesktopGalleryComponent {
     );
     if (!grid) return;
 
-    const slides = this.slides();
+    const slides = this.visibleSlides();
     grid.querySelectorAll('.reelsDesktopGallery__item').forEach((item, index) => {
       const slide = slides[index];
-      if (!slide || slide.type !== 'video') return;
+      if (!slide || slide.type !== 'video' || this.isPreviewBroken(slide)) return;
 
       const video = item.querySelector('video.reelsDesktopGallery__media');
       if (!(video instanceof HTMLVideoElement)) return;
@@ -250,7 +250,12 @@ export class ReelsDesktopGalleryComponent {
 
     this.setupRetentionTracking();
     this.setupAvatarProfileNavigation();
-    bootstrapSliderPlayback(wrap, this.fullscreenSlider(), this.fullscreenWithSound());
+    bootstrapSliderPlayback(
+      wrap,
+      this.fullscreenSlider(),
+      this.fullscreenWithSound(),
+      this.visibleSlides(),
+    );
   }
 
   private syncFullscreenPlayback(): void {

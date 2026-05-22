@@ -33,7 +33,17 @@ export function hardStopVideo(video: HTMLVideoElement): void {
   video.load();
 }
 
-/** Pausa todos los vídeos del documento (tras navegar o desmontar el slider). */
+/** Pausa todos los vídeos del documento sin vaciar `src` (evita pantallas negras al volver). */
+export function pauseAllDocumentVideos(): void {
+  if (typeof document === 'undefined') return;
+  document.querySelectorAll('video').forEach((node) => {
+    if (!(node instanceof HTMLVideoElement)) return;
+    node.pause();
+    node.muted = true;
+  });
+}
+
+/** Pausa y vacía `src`; solo al desmontar un slider concreto. */
 export function hardStopAllVideos(): void {
   if (typeof document === 'undefined') return;
   document.querySelectorAll('video').forEach((node) => {
@@ -107,11 +117,34 @@ export function syncVisibleSlidePlayback(
   pauseAllVideosExceptVisible(container, withSound);
 }
 
+/** Repone `src` en vídeos del slider vaciados por un stop duro previo. */
+export function restoreSliderVideoSources(
+  container: HTMLElement,
+  slides: readonly { readonly media?: string; readonly type?: string }[],
+): void {
+  const slideEls = container.querySelectorAll('media-slide');
+  slideEls.forEach((slideEl, index) => {
+    const slide = slides[index];
+    const url = slide?.media?.trim() ?? '';
+    if (!url || slide?.type !== 'video') return;
+
+    const video = slideEl.querySelector('video.slide__media');
+    if (!(video instanceof HTMLVideoElement)) return;
+    if (video.getAttribute('src')?.trim()) return;
+
+    video.src = url;
+    video.load();
+  });
+}
+
 export function bootstrapSliderPlayback(
   container: HTMLElement,
   slider: MediaSliderComponent | undefined,
   withSound = true,
+  slides: readonly { readonly media?: string; readonly type?: string }[] = [],
 ): void {
+  restoreSliderVideoSources(container, slides);
+
   const viewport = container.querySelector('.media-slider__viewport');
   if (viewport instanceof HTMLElement) {
     viewport.scrollTop = 0;
@@ -167,6 +200,21 @@ export function destroySliderPlayback(
 ): void {
   pauseSliderPlayback(container, slider, true);
   hardStopVideosIn(container);
+}
+
+/** Reanuda el slide visible al volver a la pestaña (p. ej. tras `pauseAllDocumentVideos`). */
+export function setupDocumentVisibilityPlaybackResume(
+  destroyRef: { onDestroy(callback: () => void): void },
+  resume: () => void,
+): void {
+  if (typeof document === 'undefined') return;
+
+  const onVisibility = (): void => {
+    if (!document.hidden) resume();
+  };
+
+  document.addEventListener('visibilitychange', onVisibility);
+  destroyRef.onDestroy(() => document.removeEventListener('visibilitychange', onVisibility));
 }
 
 /** @deprecated Usar `destroySliderPlayback` al desmontar o `pauseSliderPlayback` al cambiar slide. */
