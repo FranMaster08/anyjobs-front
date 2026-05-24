@@ -42,6 +42,7 @@ import {
   setupSliderViewportScrollSync,
 } from '../../../shared/media/media-slider-playback';
 import { setupSliderAvatarProfileNavigation } from '../../../shared/media/media-slider-profile-nav';
+import { resolveSlideAvatarUrl } from '../../../shared/media/user-avatar-placeholder';
 
 const PREVIEW_LOOP_SECONDS = 5;
 const EARLY_SKIP_MS = 2000;
@@ -128,6 +129,10 @@ export class ReelsDesktopGalleryComponent {
 
   private telemetryContext(): { sliderId: string; route: string } {
     return { sliderId: this.telemetrySliderId(), route: this.telemetryRoute() };
+  }
+
+  protected avatarSrc(slide: ReelSlide): string {
+    return resolveSlideAvatarUrl(slide.avatar, slide.user ?? 'Usuario', 56);
   }
 
   protected openFullscreen(slide: ReelSlide): void {

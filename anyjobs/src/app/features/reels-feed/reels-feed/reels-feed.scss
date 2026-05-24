@@ -1,3 +1,5 @@
+@use '../../../shared/media/media-slider-action-icons' as sliderActionIcons;
+
 :host {
   --reels-slider-header-offset: 56px;
   --reels-bottom-nav-height: 0px;
@@ -99,6 +101,10 @@
 
 .reelsSliderWrap ::ng-deep media-action-button {
   display: block;
+}
+
+.reelsSliderWrap ::ng-deep {
+  @include sliderActionIcons.overrides();
 }
 
 .reelsSliderWrap ::ng-deep media-slide .slide__actions {

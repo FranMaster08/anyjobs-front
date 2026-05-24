@@ -103,6 +103,11 @@ export function pauseAllVideosExceptVisible(container: HTMLElement, withSound: b
 
   if (!visibleVideo) return;
 
+  const mediaSrc = visibleVideo.getAttribute('src')?.trim() ?? '';
+  if (visibleVideo.error && mediaSrc) {
+    visibleVideo.load();
+  }
+
   visibleVideo.muted = !withSound;
   visibleVideo.preload = 'auto';
   void visibleVideo.play().catch(() => undefined);

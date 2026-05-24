@@ -34,6 +34,7 @@ export class HomeMobileBottomNavComponent {
     { initialValue: this.router.url },
   );
 
+  protected readonly jobsActive = computed(() => this.isJobsActive(this.url()));
   protected readonly solicitudesActive = computed(() => this.isSolicitudesSectionActive(this.url()));
   protected readonly mapaActive = computed(() => this.isMapaActive(this.url()));
   protected readonly profileActive = computed(() => this.isProfileActive(this.url()));
@@ -43,6 +44,13 @@ export class HomeMobileBottomNavComponent {
       queryParams: { login: '1' },
       queryParamsHandling: 'merge',
     });
+  }
+
+  private isJobsActive(url: string): boolean {
+    const tree = this.router.parseUrl(url);
+    const segs = tree.root.children['primary']?.segments ?? [];
+    const root = segs[0]?.path;
+    return root === 'home' || root === 'reels';
   }
 
   private isMapaActive(url: string): boolean {

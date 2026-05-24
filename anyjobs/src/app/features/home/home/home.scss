@@ -1,3 +1,5 @@
+@use '../../../shared/media/media-slider-action-icons' as sliderActionIcons;
+
 /* Alto útil = viewport menos header sticky (~56px). El pie sigue debajo al hacer scroll. */
 :host {
   --home-slider-header-offset: 56px;
@@ -153,12 +155,16 @@
 }
 
 /*
- * Clics en ♥ / 💬 / 🔖: ActionButtonComponent usa :host { display: contents }, que en
+ * Clics en acciones del slider: ActionButtonComponent usa :host { display: contents }, que en
  * algunos navegadores deja la zona clic rota. Forzamos un host con caja y elevamos
  * la columna de acciones por encima del gradiente del overlay.
  */
 .homeSliderWrap ::ng-deep media-action-button {
   display: block;
+}
+
+.homeSliderWrap ::ng-deep {
+  @include sliderActionIcons.overrides();
 }
 
 .homeSliderWrap ::ng-deep media-slide .slide__actions {

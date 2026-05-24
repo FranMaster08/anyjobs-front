@@ -1,0 +1,116 @@
+/**
+ * Sustituye emojis Unicode de ngx-vertical-slider por SVG en /public/media-slider-icons/.
+ * Importar dentro del contenedor ::ng-deep de cada vista que monte media-slider.
+ */
+$icon-like: url('/media-slider-icons/slider-like.svg');
+$icon-like-active: url('/media-slider-icons/slider-like-active.svg');
+$icon-comment: url('/media-slider-icons/slider-comment.svg');
+$icon-bookmark: url('/media-slider-icons/slider-bookmark.svg');
+$icon-share: url('/media-slider-icons/slider-share.svg');
+
+@mixin overrides() {
+  /* Sin botón «Seguir» (+) de la librería */
+  media-follow-button,
+  media-follow-button .slide__follow {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+
+  media-action-button button.action .action__icon {
+    position: relative;
+    display: inline-block !important;
+    overflow: hidden;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    color: transparent !important;
+    text-indent: -9999px;
+    text-shadow: none !important;
+    filter: none !important;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      display: block;
+      background-color: #fff;
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      -webkit-mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+    }
+  }
+
+  media-action-button button.action .action__icon {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  /* Like: rayo (energía / me gusta) */
+  media-action-button button.action[data-action='like'] .action__icon::before {
+    mask-image: $icon-like;
+    -webkit-mask-image: $icon-like;
+  }
+
+  media-action-button button.action[data-action='comment'] .action__icon::before {
+    mask-image: $icon-comment;
+    -webkit-mask-image: $icon-comment;
+  }
+
+  media-action-button button.action[data-action='bookmark'] .action__icon::before {
+    mask-image: $icon-bookmark;
+    -webkit-mask-image: $icon-bookmark;
+  }
+
+  media-action-button button.action[data-action='share'] .action__icon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px;
+    min-height: 30px;
+  }
+
+  media-action-button button.action[data-action='share'] .action__icon::before {
+    mask-image: $icon-share;
+    -webkit-mask-image: $icon-share;
+  }
+
+  media-action-button button.action.is-active[data-action='like'] .action__icon::before {
+    mask-image: $icon-like-active;
+    -webkit-mask-image: $icon-like-active;
+    background-color: #0ea5a4;
+  }
+
+  media-action-button button.action.is-active[data-action='bookmark'] .action__icon::before {
+    background-color: #facc15;
+  }
+
+  /* Texto inferior del slide: menos espacio entre nombre, caption y música */
+  media-slide .slide__info {
+    gap: 2px !important;
+  }
+
+  media-slide .slide__info h3,
+  media-slide .slide__info p {
+    margin: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  media-slide .slide__info p:empty {
+    display: none !important;
+  }
+
+  media-slide .slide__music {
+    margin-top: 0 !important;
+    gap: 4px !important;
+    line-height: 1.1 !important;
+  }
+}

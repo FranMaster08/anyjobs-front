@@ -10,7 +10,6 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
@@ -36,7 +35,6 @@ import {
 } from '../../../shared/media/media-slider-playback';
 import { setupSliderAvatarProfileNavigation } from '../../../shared/media/media-slider-profile-nav';
 import { VIEWPORT_DESKTOP_MIN_MQ } from '../../../shared/media/viewport-breakpoint';
-import { HomeMobileBottomNavComponent } from '../../home/home-mobile-bottom-nav/home-mobile-bottom-nav';
 import { ReelsDesktopGalleryComponent } from '../reels-desktop-gallery/reels-desktop-gallery';
 
 const EARLY_SKIP_MS = 2000;
@@ -44,7 +42,7 @@ const WATCH_PROGRESS_INTERVAL_MS = 5000;
 
 @Component({
   selector: 'app-reels-feed',
-  imports: [MediaSliderComponent, HomeMobileBottomNavComponent, ReelsDesktopGalleryComponent],
+  imports: [MediaSliderComponent, ReelsDesktopGalleryComponent],
   templateUrl: './reels-feed.html',
   styleUrl: './reels-feed.scss',
 })

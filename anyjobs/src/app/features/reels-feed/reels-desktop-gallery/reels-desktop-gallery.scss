@@ -1,3 +1,5 @@
+@use '../../../shared/media/media-slider-action-icons' as sliderActionIcons;
+
 :host {
   display: block;
   width: 100%;
@@ -234,6 +236,14 @@
 
 .reelsDesktopGallery__sliderWrap ::ng-deep media-slide .slide__media {
   z-index: 0;
+}
+
+.reelsDesktopGallery__sliderWrap ::ng-deep media-action-button {
+  display: block;
+}
+
+.reelsDesktopGallery__sliderWrap ::ng-deep {
+  @include sliderActionIcons.overrides();
 }
 
 @media (min-width: 700px) {

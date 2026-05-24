@@ -1,13 +1,13 @@
 /** Textos de presupuesto según el país seleccionado en el formulario de publicación. */
-export type BudgetCurrencyHint = {
+export interface BudgetCurrencyHint {
   readonly placeholder: string;
   readonly hint: string;
-};
+}
 
-type BudgetDisplayConfig = BudgetCurrencyHint & {
+interface BudgetDisplayConfig extends BudgetCurrencyHint {
   readonly locale: string;
   readonly symbol: string;
-};
+}
 
 const BUDGET_BY_COUNTRY: Record<string, BudgetDisplayConfig> = {
   CO: {
@@ -35,8 +35,9 @@ const HAS_CURRENCY_OR_TEXT = /[€$£]|convenir/i;
 
 export function budgetCurrencyForCountry(countryCode: string | null | undefined): BudgetCurrencyHint | null {
   const code = (countryCode ?? '').trim().toUpperCase();
-  if (!code) return null;
-  return BUDGET_BY_COUNTRY[code] ?? null;
+  const config = BUDGET_BY_COUNTRY[code];
+  if (!config) return null;
+  return { placeholder: config.placeholder, hint: config.hint };
 }
 
 /** Infiere el código de país desde el `locationLabel` (p. ej. «… · Colombia»). */

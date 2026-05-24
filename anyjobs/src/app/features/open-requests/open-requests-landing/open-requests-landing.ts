@@ -14,7 +14,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { ModalComponent } from '../../../components/modal/modal';
@@ -88,7 +88,6 @@ function locationLabelZoneOnly(raw: string | undefined | null): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    RouterLink,
     OpenRequestCardComponent,
     ModalComponent,
     RequestsMapComponent,

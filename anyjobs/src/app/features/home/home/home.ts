@@ -38,8 +38,6 @@ import type { ReelSlide } from '../../../shared/media/feed-reels-slide';
 import { VIEWPORT_DESKTOP_MIN_MQ } from '../../../shared/media/viewport-breakpoint';
 import { ReelsDesktopGalleryComponent } from '../../reels-feed/reels-desktop-gallery/reels-desktop-gallery';
 
-import { HomeMobileBottomNavComponent } from '../home-mobile-bottom-nav/home-mobile-bottom-nav';
-
 type FeaturedReelSlide = ReelSlide;
 
 const ANONYMOUS_ACTOR_KEY = 'anyjobs.reels.actor.anonymousId';
@@ -66,7 +64,7 @@ function storageSet(key: string, value: string): void {
 
 @Component({
   selector: 'app-home',
-  imports: [MediaSliderComponent, HomeMobileBottomNavComponent, ReelsDesktopGalleryComponent],
+  imports: [MediaSliderComponent, ReelsDesktopGalleryComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -136,6 +134,10 @@ export class Home {
         if (nowDesktop && !wasDesktop) {
           this.closeCommentsPanel();
           this.teardownSliderSession();
+        } else if (!nowDesktop && wasDesktop) {
+          runInInjectionContext(this.injector, () => {
+            afterNextRender(() => this.ensureFirstVideoPlays());
+          });
         }
       };
       mq.addEventListener('change', onMqChange);
@@ -256,7 +258,8 @@ export class Home {
 
   private setupRetentionTracking(): void {
     const wrap = this.sliderWrap()?.nativeElement;
-    if (!wrap || this.visibilityObserver) return;
+    if (!wrap) return;
+    if (this.visibilityObserver) return;
 
     const detectVisibleIndex = (): number | null => {
       const slideEls = wrap.querySelectorAll('media-slide');

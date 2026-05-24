@@ -23,6 +23,7 @@ import { mapLoginErrorToMessage } from '../../shared/api/auth-login-error.utils'
 import { LoginRequest } from '../../shared/api/auth.models';
 import { AuthSessionService } from '../../shared/auth/auth-session.service';
 import { buildProfileRouterLink } from '../../shared/navigation/profile-router-link';
+import { HomeMobileBottomNavComponent } from '../../features/home/home-mobile-bottom-nav/home-mobile-bottom-nav';
 import { HeaderNotificationsBellComponent } from '../header-notifications-bell/header-notifications-bell';
 import { HeaderOpenRequestsFiltersToggleComponent } from '../header-open-requests-filters-toggle/header-open-requests-filters-toggle';
 import { OpenRequestsFiltersUiService } from '../../features/open-requests/open-requests-filters-ui.service';
@@ -62,6 +63,7 @@ export interface ShellMainNavItem {
     PasswordFieldComponent,
     HeaderNotificationsBellComponent,
     HeaderOpenRequestsFiltersToggleComponent,
+    HomeMobileBottomNavComponent,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -265,6 +267,23 @@ export class Shell {
     };
 
     this.fragmentScrollHandle = setTimeout(tick, 0);
+  }
+
+  protected footerHelpMailto(): string {
+    return this.site.config()?.sections?.contact?.email?.href ?? 'mailto:hola@anyjobs.local';
+  }
+
+  protected footerHelpPhoneHref(): string {
+    return this.site.config()?.sections?.contact?.phone?.href ?? 'tel:+34000000000';
+  }
+
+  protected onFooterHelpAccount(event: Event): void {
+    event.preventDefault();
+    if (this.authVm().isLoggedIn) {
+      void this.router.navigate(this.profileRouterLink());
+      return;
+    }
+    this.openLogin();
   }
 
   protected onLangChange(event: Event): void {
