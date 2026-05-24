@@ -102,7 +102,13 @@
 
         <div class="regField">
           <label class="fieldLabel" for="password">{{ t('field.password') }}</label>
-          <input id="password" type="password" class="fieldControl" formControlName="password" />
+          <app-password-field
+            inputId="password"
+            controlName="password"
+            inputClass="fieldControl"
+            autocomplete="new-password"
+            [ariaInvalid]="showAccountError(accountForm.controls.password)"
+          />
           @if (showAccountError(accountForm.controls.password)) {
             <p class="regError">{{ t('error.passwordWeak') }}</p>
           }

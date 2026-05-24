@@ -11,6 +11,7 @@ import { UserApi } from '../../../shared/api/user.api';
 import type { UserPrivateProfileDto, UserPublicProfileDto } from '../../../shared/api/user-profile.models';
 import { I18nService } from '../../../shared/i18n/i18n.service';
 import { ProfileMultimediaComponent } from './profile-multimedia';
+import { ProfileEditComponent } from './profile-edit/profile-edit';
 import { ROLE_LABEL_KEY } from '../registration/registration.constants';
 import type { UserRole } from '../registration/registration.models';
 import {
@@ -34,7 +35,7 @@ type FetchPrivateResult =
 @Component({
   selector: 'app-profile',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, ProfileMultimediaComponent],
+  imports: [CommonModule, RouterLink, ProfileMultimediaComponent, ProfileEditComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -55,6 +56,7 @@ export class Profile {
   protected readonly routeUserId = signal<string | null>(null);
   protected readonly privateProfile = signal<UserPrivateProfileDto | null>(null);
   protected readonly publicProfile = signal<UserPublicProfileDto | null>(null);
+  protected readonly isEditOpen = signal(false);
 
   protected readonly profileErrorHeading = computed(() => {
     const msg = this.loadError() ?? '';
@@ -68,7 +70,14 @@ export class Profile {
   protected readonly displayName = computed(() => {
     const priv = this.privateProfile();
     const pub = this.publicProfile();
-    return priv?.fullName ?? pub?.fullName ?? this.vm().user?.fullName ?? '';
+    const visible =
+      priv?.displayName?.trim() ||
+      pub?.displayName?.trim() ||
+      priv?.fullName ||
+      pub?.fullName ||
+      this.vm().user?.fullName ||
+      '';
+    return visible;
   });
 
   protected readonly initials = computed(() => {
@@ -137,6 +146,10 @@ export class Profile {
     if (status === 'PENDING') return 'Pendiente';
     return capitalizeLabel(status);
   });
+
+  protected verificationStatusLabel(verified: boolean | undefined): string {
+    return verified === true ? 'Verificado' : 'Sin verificar';
+  }
 
   protected readonly bioText = computed(() => {
     const priv = this.privateProfile();
@@ -213,6 +226,20 @@ export class Profile {
 
   protected setTab(tab: ProfileTab): void {
     this.activeTab.set(tab);
+  }
+
+  protected openEditProfile(): void {
+    this.isEditOpen.set(true);
+  }
+
+  protected closeEditProfile(): void {
+    this.isEditOpen.set(false);
+  }
+
+  protected onProfileSaved(): void {
+    this.isEditOpen.set(false);
+    this.profileBanner.set('Perfil actualizado correctamente.');
+    this.reload();
   }
 
   protected reload(): void {

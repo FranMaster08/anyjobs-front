@@ -7,6 +7,7 @@ import {
   UpdateClientProfileRequest,
   UpdateLocationRequest,
   UpdatePersonalInfoRequest,
+  UpdateProfileRequest,
   UpdateWorkerProfileRequest,
 } from './user.models';
 import type { UserPrivateProfileDto, UserPublicProfileDto } from './user-profile.models';
@@ -43,6 +44,11 @@ export class UserApi {
   updatePersonalInfo(req: UpdatePersonalInfoRequest): Observable<void> {
     if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
     return this.http.patch<void>(`${this.apiUrl}/me/personal-info`, req);
+  }
+
+  updateProfile(req: UpdateProfileRequest): Observable<void> {
+    if (this.apiUrl.includes('/mock/')) return of(void 0).pipe(delay(250));
+    return this.http.patch<void>(`${this.apiUrl}/me/profile`, req);
   }
 
   getMyProfile(): Observable<UserPrivateProfileDto> {

@@ -117,6 +117,73 @@ body {
   font: inherit;
 }
 
+/* Controles de formulario usados también dentro de app-password-field (sin encapsulación del padre). */
+.loginControl {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--aj-color-border-strong);
+  border-radius: var(--aj-radius-sm);
+  padding: 11px 12px;
+  background: var(--aj-color-bg);
+  font: inherit;
+  color: var(--aj-color-ink);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.loginControl::placeholder {
+  color: var(--aj-color-subtle);
+}
+
+.loginControl:hover {
+  border-color: color-mix(in srgb, var(--aj-color-primary) 35%, var(--aj-color-border-strong));
+}
+
+.loginControl:focus {
+  outline: none;
+  border-color: var(--aj-color-primary);
+  background: var(--aj-color-surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--aj-color-primary) 22%, transparent);
+}
+
+.loginControl[aria-invalid='true'] {
+  border-color: color-mix(in srgb, #b91c1c 55%, var(--aj-color-border-strong));
+}
+
+.recoveryControl {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--aj-color-border-strong);
+  border-radius: var(--aj-radius-sm);
+  padding: 11px 12px;
+  background: var(--aj-color-bg);
+  font: inherit;
+  color: var(--aj-color-ink);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.recoveryControl:hover {
+  border-color: color-mix(in srgb, var(--aj-color-primary) 35%, var(--aj-color-border-strong));
+}
+
+.recoveryControl:focus {
+  outline: none;
+  border-color: var(--aj-color-primary);
+  background: var(--aj-color-surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--aj-color-primary) 22%, transparent);
+}
+
+.recoveryControl[aria-invalid='true'] {
+  border-color: color-mix(in srgb, #b91c1c 55%, var(--aj-color-border-strong));
+}
+
 /* Map demo primitives (pins + legend) */
 
 .mapCanvas {

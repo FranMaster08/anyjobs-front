@@ -17,6 +17,7 @@ import { catchError, exhaustMap, filter, EMPTY, finalize, Subject } from 'rxjs';
 import { I18nService } from '../../shared/i18n/i18n.service';
 import { SiteConfigService } from '../../shared/site-config/site-config.service';
 import { ModalComponent } from '../../components/modal/modal';
+import { PasswordFieldComponent } from '../../shared/components/password-field/password-field';
 import { AuthApi } from '../../shared/api/auth.api';
 import { mapLoginErrorToMessage } from '../../shared/api/auth-login-error.utils';
 import { LoginRequest } from '../../shared/api/auth.models';
@@ -58,6 +59,7 @@ export interface ShellMainNavItem {
     RouterLinkActive,
     ReactiveFormsModule,
     ModalComponent,
+    PasswordFieldComponent,
     HeaderNotificationsBellComponent,
     HeaderOpenRequestsFiltersToggleComponent,
   ],

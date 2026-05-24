@@ -8,7 +8,12 @@
       [attr.aria-label]="!title ? ariaLabel : null"
     >
       <header class="header">
-        <h2 class="title" *ngIf="title" [id]="titleId">{{ title }}</h2>
+        <div class="headerStart">
+          <h2 class="title" *ngIf="title" [id]="titleId">{{ title }}</h2>
+          <div class="headerActions">
+            <ng-content select="[modalHeaderActions]" />
+          </div>
+        </div>
         <button type="button" class="closeBtn" (click)="requestClose()" aria-label="Cerrar">
           ✕
         </button>

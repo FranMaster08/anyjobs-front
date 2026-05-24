@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
+import { PasswordFieldComponent } from '../../../shared/components/password-field/password-field';
 import { AuthApi } from '../../../shared/api/auth.api';
 import { I18nService } from '../../../shared/i18n/i18n.service';
 import {
@@ -24,7 +25,7 @@ type ViewMode = 'request' | 'checking' | 'reset' | 'expired' | 'success';
 @Component({
   selector: 'app-password-recovery',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, PasswordFieldComponent],
   templateUrl: './password-recovery.html',
   styleUrl: './password-recovery.scss',
 })

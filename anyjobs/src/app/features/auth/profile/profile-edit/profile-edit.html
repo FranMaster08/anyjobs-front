@@ -1,0 +1,168 @@
+<app-modal
+  [open]="open()"
+  title="Editar perfil"
+  ariaLabel="Editar perfil"
+  size="lg"
+  (closed)="onCancel()"
+>
+  <button
+    type="button"
+    modalHeaderActions
+    class="profileEditHelpBtn"
+    (click)="startHelpTour($event)"
+    aria-label="Iniciar tour de edición de perfil"
+    title="Tour guiado"
+  >
+    <span aria-hidden="true">?</span>
+  </button>
+
+  <form class="profileEditForm" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <p class="profileEditHint" data-tour="profile-edit-intro">
+      Solo puedes modificar información pública. Los datos de identidad y contacto permanecen protegidos.
+    </p>
+
+    <div class="profileEditGrid">
+      <div class="profileEditField" data-tour="profile-edit-display-name">
+        <label class="fieldLabel" for="profileDisplayName">Nombre visible</label>
+        <input
+          id="profileDisplayName"
+          class="fieldControl"
+          type="text"
+          formControlName="displayName"
+          autocomplete="nickname"
+          placeholder="Cómo quieres que te vean otros usuarios"
+        />
+        @if (showError('displayName')) {
+          <p class="profileEditError">El nombre visible debe tener entre 2 y 200 caracteres.</p>
+        }
+      </div>
+
+      <div class="profileEditField" data-tour="profile-edit-country">
+        <span class="fieldLabel" id="profileCountryLabel">País</span>
+        <p class="profileEditLockedValue fieldControl" id="profileCountry" aria-labelledby="profileCountryLabel">
+          {{ lockedCountryLabel() }}
+        </p>
+      </div>
+
+      <p class="profileEditFieldNote profileEditFieldNote--full">
+        El país de tu cuenta no se puede modificar.
+      </p>
+
+      <div class="profileEditField" data-tour="profile-edit-city">
+        <label class="fieldLabel" for="profileCity">Departamento / Provincia</label>
+        <select
+          id="profileCity"
+          class="fieldControl"
+          formControlName="city"
+          [disabled]="!lockedCountryCode()"
+        >
+          <option value="">Selecciona departamento o provincia</option>
+          @for (city of locationCityOptions(); track city) {
+            <option [value]="city">{{ city }}</option>
+          }
+        </select>
+        @if (showError('city')) {
+          <p class="profileEditError">Selecciona departamento o provincia.</p>
+        }
+      </div>
+
+      <div class="profileEditField" data-tour="profile-edit-municipality">
+        <label class="fieldLabel" for="profileMunicipality">Municipio / Ciudad</label>
+        <select
+          id="profileMunicipality"
+          class="fieldControl"
+          formControlName="municipality"
+          [disabled]="!form.controls.city.value"
+        >
+          <option value="">Selecciona municipio</option>
+          @for (m of locationMunicipalityOptions(); track m) {
+            <option [value]="m">{{ m }}</option>
+          }
+        </select>
+        @if (showError('municipality')) {
+          <p class="profileEditError">Selecciona un municipio válido.</p>
+        }
+      </div>
+
+      <div class="profileEditField profileEditField--full" data-tour="profile-edit-area">
+        <label class="fieldLabel" for="profileArea">Barrio</label>
+        <input
+          id="profileArea"
+          class="fieldControl"
+          type="text"
+          formControlName="area"
+          [disabled]="!form.controls.municipality.value"
+          placeholder="Ej. El Poblado"
+        />
+        @if (showError('area')) {
+          <p class="profileEditError">El barrio debe tener entre 2 y 120 caracteres.</p>
+        }
+      </div>
+
+      @if (isWorker()) {
+        <div class="profileEditField profileEditField--full" data-tour="profile-edit-categories">
+          <span class="fieldLabel">Categorías de servicio</span>
+          <div class="profileEditChips">
+            @for (cat of categoryOptions; track cat) {
+              <button
+                type="button"
+                class="profileEditChip"
+                [class.profileEditChip--active]="isCategorySelected(cat)"
+                (click)="toggleCategory(cat)"
+              >
+                {{ t(categoryLabelKey[cat]) }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="profileEditField profileEditField--full" data-tour="profile-edit-headline">
+          <label class="fieldLabel" for="profileHeadline">Titular / encabezado</label>
+          <input id="profileHeadline" class="fieldControl" type="text" formControlName="headline" />
+        </div>
+
+        <div class="profileEditField profileEditField--full" data-tour="profile-edit-bio">
+          <label class="fieldLabel" for="profileBio">Descripción / biografía</label>
+          <textarea id="profileBio" class="fieldControl profileEditTextarea" rows="4" formControlName="bio"></textarea>
+          @if (showError('bio')) {
+            <p class="profileEditError">La biografía no puede superar 2000 caracteres.</p>
+          }
+        </div>
+
+        <div class="profileEditField" data-tour="profile-edit-coverage">
+          <label class="fieldLabel" for="profileCoverage">Radio de cobertura (km, opcional)</label>
+          <input id="profileCoverage" class="fieldControl" type="number" min="0" formControlName="coverageRadiusKm" />
+        </div>
+      }
+
+      @if (isClient()) {
+        <div class="profileEditField profileEditField--full" data-tour="profile-edit-payment">
+          <label class="fieldLabel" for="profilePayment">Método de pago preferido</label>
+          <select id="profilePayment" class="fieldControl" formControlName="preferredPaymentMethod">
+            <option value="">Sin preferencia</option>
+            @for (pm of paymentOptions; track pm) {
+              <option [value]="pm">{{ t(paymentLabelKey[pm]) }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    @if (saveError()) {
+      <p class="profileEditError profileEditError--banner" role="alert">{{ saveError() }}</p>
+    }
+
+    <footer class="profileEditActions" data-tour="profile-edit-save">
+      <button type="button" class="btn btn--profile" [disabled]="isSaving()" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn--profile btn--profile-accent" [disabled]="isSaving()">
+        @if (isSaving()) {
+          Guardando…
+        } @else {
+          Guardar cambios
+        }
+      </button>
+    </footer>
+  </form>
+</app-modal>

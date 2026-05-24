@@ -66,6 +66,7 @@ import {
 import { LocationGeographyService } from '../../../../shared/location/location-geography.service';
 import { emailTakenAsyncValidator, phoneTakenAsyncValidator } from '../registration.async-validators';
 import { buildE164Phone, parseE164Phone, sanitizePhoneLocalInput } from '../phone.utils';
+import { PasswordFieldComponent } from '../../../../shared/components/password-field/password-field';
 import { AuthApi } from '../../../../shared/api/auth.api';
 import { clearApiError } from '../../../../shared/api/api-error.utils';
 import {
@@ -87,7 +88,7 @@ import { I18nService } from '../../../../shared/i18n/i18n.service';
 @Component({
   selector: 'app-registration',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, PasswordFieldComponent],
   templateUrl: './registration.html',
   styleUrl: './registration.scss',
 })

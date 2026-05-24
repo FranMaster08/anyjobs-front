@@ -351,13 +351,12 @@
             (click)="closeLogin()"
           >{{ t('auth.forgotPassword') }}</a>
         </div>
-        <input
-          id="loginPassword"
-          type="password"
-          class="loginControl"
-          formControlName="password"
+        <app-password-field
+          inputId="loginPassword"
+          controlName="password"
+          inputClass="loginControl"
           autocomplete="current-password"
-          [attr.aria-invalid]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
+          [ariaInvalid]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
         />
         @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
           <p class="loginFieldError">{{ t('auth.passwordInvalid') }}</p>

@@ -7,6 +7,7 @@ export interface UserProfileMetrics {
 export interface UserPublicProfileDto {
   userId: string;
   fullName: string;
+  displayName?: string;
   roles: string[];
   countryCode?: string;
   city?: string;
@@ -22,6 +23,7 @@ export interface UserPublicProfileDto {
 export interface UserPrivateProfileDto {
   userId: string;
   fullName: string;
+  displayName?: string;
   email: string;
   roles: string[];
   status?: string;

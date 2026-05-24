@@ -64,6 +64,7 @@
 
       <footer class="profileActions">
         @if (visibilityMode() === 'private') {
+          <button type="button" class="btn btn--profile" (click)="openEditProfile()">Editar perfil</button>
           <a class="btn btn--profile" routerLink="/mis-solicitudes">Mis solicitudes</a>
         } @else {
           <a class="btn btn--profile" routerLink="/solicitudes">Ver solicitudes</a>
@@ -89,21 +90,21 @@
         type="button"
         role="tab"
         class="profileTab"
-        [class.profileTab--active]="activeTab() === 'activity'"
-        [attr.aria-selected]="activeTab() === 'activity'"
-        (click)="setTab('activity')"
-      >
-        Actividad
-      </button>
-      <button
-        type="button"
-        role="tab"
-        class="profileTab"
         [class.profileTab--active]="activeTab() === 'multimedia'"
         [attr.aria-selected]="activeTab() === 'multimedia'"
         (click)="setTab('multimedia')"
       >
         Multimedia
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="profileTab"
+        [class.profileTab--active]="activeTab() === 'activity'"
+        [attr.aria-selected]="activeTab() === 'activity'"
+        (click)="setTab('activity')"
+      >
+        Actividad
       </button>
       <button
         type="button"
@@ -182,14 +183,19 @@
         @if (visibilityMode() === 'private' && privateProfile()) {
           <section class="profileCard">
             <h2 class="profileSectionTitle">Estado</h2>
-            <div class="profileBadges" aria-label="Estado de cuenta">
-              <span class="profileBadge profileBadge--ok">Estado: {{ statusLabel() ?? '—' }}</span>
-              <span class="profileBadge" [class.profileBadge--ok]="privateProfile()!.emailVerified">
-                Email: {{ privateProfile()!.emailVerified ? 'sí' : 'no' }}
-              </span>
-              <span class="profileBadge" [class.profileBadge--ok]="privateProfile()!.phoneVerified">
-                Tel: {{ privateProfile()!.phoneVerified ? 'sí' : 'no' }}
-              </span>
+            <div class="profileList">
+              <p class="profileRow">
+                <span class="profileLabel">Cuenta</span>
+                <span class="profileValue">{{ statusLabel() ?? '—' }}</span>
+              </p>
+              <p class="profileRow">
+                <span class="profileLabel">Email</span>
+                <span class="profileValue">{{ verificationStatusLabel(privateProfile()!.emailVerified) }}</span>
+              </p>
+              <p class="profileRow">
+                <span class="profileLabel">Teléfono</span>
+                <span class="profileValue">{{ verificationStatusLabel(privateProfile()!.phoneVerified) }}</span>
+              </p>
             </div>
           </section>
           <section class="profileCard">
@@ -219,6 +225,14 @@
       </section>
     }
 
+    @if (activeTab() === 'multimedia' && profileSubjectUserId(); as subjectId) {
+      <app-profile-multimedia
+        [profileUserId]="subjectId"
+        [isOwnProfile]="isOwnProfile()"
+        [tabActive]="activeTab() === 'multimedia'"
+      />
+    }
+
     @if (activeTab() === 'activity') {
       <section class="profileCard profileCard--wide">
         <h2 class="profileSectionTitle">Actividad</h2>
@@ -243,19 +257,20 @@
       </section>
     }
 
-    @if (activeTab() === 'multimedia' && profileSubjectUserId(); as subjectId) {
-      <app-profile-multimedia
-        [profileUserId]="subjectId"
-        [isOwnProfile]="isOwnProfile()"
-        [tabActive]="activeTab() === 'multimedia'"
-      />
-    }
-
     @if (activeTab() === 'score') {
       <section class="profileCard profileCard--wide profileCard--muted" role="status">
         <h2 class="profileSectionTitle">Puntaje</h2>
         <p class="profileHint">Esta sección se implementará más adelante.</p>
       </section>
+    }
+
+    @if (isOwnProfile()) {
+      <app-profile-edit
+        [open]="isEditOpen()"
+        [profile]="privateProfile()"
+        (closed)="closeEditProfile()"
+        (saved)="onProfileSaved()"
+      />
     }
 
   }
