@@ -69,9 +69,46 @@
 }
 
 .reelsSliderWrap {
+  --reels-slide-height: calc(100dvh - var(--reels-slider-header-offset) - var(--reels-bottom-nav-height));
   flex: 1 1 auto;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
+  width: 100%;
+  height: var(--reels-slide-height);
+  max-height: var(--reels-slide-height);
+}
+
+.reelsSliderWrap ::ng-deep media-slider {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100% !important;
+  max-width: none !important;
+  height: var(--reels-slide-height) !important;
+  max-height: var(--reels-slide-height);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.reelsSliderWrap ::ng-deep media-slide {
+  height: var(--reels-slide-height) !important;
+  min-height: var(--reels-slide-height) !important;
+  max-height: var(--reels-slide-height);
+}
+
+.reelsSliderWrap ::ng-deep media-action-button {
+  display: block;
+}
+
+.reelsSliderWrap ::ng-deep media-slide .slide__actions {
+  position: relative;
+  z-index: 6;
+  isolation: isolate;
+}
+
+.reelsSliderWrap ::ng-deep media-slide .slide__overlay {
+  z-index: 1;
 }
 
 .reelsSliderWrap ::ng-deep media-slide .slide__avatar > img {

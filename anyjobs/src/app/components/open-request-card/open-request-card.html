@@ -27,15 +27,14 @@
   </a>
 
   <div class="body">
-    <a class="titleLink" [href]="detailHref()" (click)="openDetail($event)">{{ request().excerpt }}</a>
+    <div class="titleRow">
+      <a class="titleLink" [href]="detailHref()" (click)="openDetail($event)">{{ request().excerpt }}</a>
+      <span class="chip chip--budget" *ngIf="request().budgetLabel">{{ formattedBudgetLabel() }}</span>
+    </div>
 
-    <div
-      class="chips"
-      *ngIf="request().locationLabel || request().publishedAtLabel || request().budgetLabel"
-    >
+    <div class="chips" *ngIf="request().locationLabel || request().publishedAtLabel">
       <span class="chip" *ngIf="request().publishedAtLabel">{{ request().publishedAtLabel }}</span>
       <span class="chip" *ngIf="request().locationLabel">{{ request().locationLabel }}</span>
-      <span class="chip chip--budget" *ngIf="request().budgetLabel">{{ request().budgetLabel }}</span>
     </div>
 
     <div class="actions">

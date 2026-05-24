@@ -73,7 +73,7 @@
           <ng-container *ngSwitchCase="'success'">
             <ng-container *ngIf="publishedItems().length > 0; else publishedEmpty">
               <div class="list" aria-label="Solicitudes que publiqué">
-                <article class="item" *ngFor="let it of publishedItems()">
+                <article class="item" *ngFor="let it of publishedItems()" [id]="'request-' + it.id">
                   <div class="itemGrid">
                     <div class="thumb" *ngIf="it.imageUrl">
                       <img
@@ -122,16 +122,39 @@
                     </div>
                   </div>
 
-                  <div class="proposal" *ngIf="isPublishedPostulantesExpanded(it.id)">
-                    <p class="proposalListTitle">Postulantes</p>
+                  <section
+                    class="expandPanel"
+                    *ngIf="isPublishedPostulantesExpanded(it.id)"
+                    aria-label="Postulantes de la solicitud"
+                  >
+                    <header class="expandPanel__header">
+                      <h3 class="expandPanel__title">Postulantes</h3>
+                      <span
+                        class="expandPanel__badge"
+                        *ngIf="
+                          postulantesLoaded(it.id) &&
+                          !isPostulantesLoading(it.id) &&
+                          !postulantesErrorFor(it.id)
+                        "
+                      >
+                        {{ postulantesCountLabel(it.id) }}
+                      </span>
+                    </header>
 
-                    <div *ngIf="isPostulantesLoading(it.id)" class="state" aria-busy="true">
-                      <div class="skeletonTitle"></div>
-                      <div class="skeletonLine"></div>
+                    <div *ngIf="isPostulantesLoading(it.id)" class="expandPanel__loading" aria-busy="true">
+                      <div class="expandPanel__skeleton"></div>
+                      <div class="expandPanel__skeleton expandPanel__skeleton--short"></div>
                     </div>
 
-                    <div *ngIf="!isPostulantesLoading(it.id) && postulantesErrorFor(it.id)" class="state state--error" role="status">
-                      <p class="state__title">{{ postulantesErrorFor(it.id) }}</p>
+                    <div
+                      *ngIf="!isPostulantesLoading(it.id) && postulantesErrorFor(it.id)"
+                      class="expandPanel__error"
+                      role="status"
+                    >
+                      <p class="expandPanel__errorText">{{ postulantesErrorFor(it.id) }}</p>
+                      <button type="button" class="btn btn--profile btn--sm" (click)="retryPostulantes(it.id)">
+                        Reintentar
+                      </button>
                     </div>
 
                     <ng-container
@@ -141,60 +164,41 @@
                         postulantesLoaded(it.id)
                       "
                     >
-                      <div *ngIf="proposalsForRequest(it.id).length === 0" class="state" role="status">
-                        <p class="state__title">Todavía no hay postulaciones para esta request.</p>
+                      <div *ngIf="proposalsForRequest(it.id).length === 0" class="postulantesEmpty" role="status">
+                        <div class="postulantesEmpty__icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM4 18.5a6 6 0 0 1 16 0"
+                              stroke="currentColor"
+                              stroke-width="1.75"
+                              stroke-linecap="round"
+                            />
+                            <path
+                              d="M19 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM21.5 18a4.5 4.5 0 0 0-4-2.2"
+                              stroke="currentColor"
+                              stroke-width="1.75"
+                              stroke-linecap="round"
+                            />
+                          </svg>
+                        </div>
+                        <p class="postulantesEmpty__title">Aún no hay postulantes</p>
+                        <p class="postulantesEmpty__hint">
+                          Cuando alguien se interese en tu solicitud, verás aquí su propuesta.
+                        </p>
                       </div>
 
-                      <div class="proposalComment" *ngFor="let p of proposalsForRequest(it.id)">
-                        <header class="proposalHeader" aria-label="Autor de la propuesta">
-                          <div class="proposalHeaderLeft">
-                            <app-user-identity-link
-                              [userId]="p.userId"
-                              [displayName]="p.author?.name ?? 'Postulante'"
-                              [subtitle]="p.author?.subtitle"
-                            />
-                            <div class="proposalRating" *ngIf="p.author?.rating !== undefined">
-                              <span class="proposalStar" aria-hidden="true">★</span>
-                              <span class="proposalRatingValue">{{ p.author?.rating | number: '1.1-2' }}</span>
-                              <span class="proposalRatingSep" *ngIf="p.author?.reviewsCount !== undefined" aria-hidden="true">·</span>
-                              <span class="proposalRatingCount" *ngIf="p.author?.reviewsCount !== undefined">
-                                {{ p.author?.reviewsCount }} reseñas
-                              </span>
-                            </div>
-                          </div>
-
-                          <div class="proposalHeaderActions" role="group" aria-label="Acciones de propuesta">
-                            <a
-                              class="btn btn--profile btn--sm"
-                              [routerLink]="['/usuarios', p.userId]"
-                              *ngIf="p.userId.trim()"
-                            >
-                              Ver perfil
-                            </a>
-                            <button type="button" class="btn btn--profile btn--profile-accent btn--sm" (click)="openChooseWip(p)">
-                              Elegir
-                            </button>
-                          </div>
-                        </header>
-
-                        <div class="proposalBody" aria-label="Contenido de propuesta">
-                          <p class="proposalMessage">{{ p.message }}</p>
-
-                          <div class="proposalMeta" aria-label="Detalles de la propuesta">
-                            <div class="proposalMetaItem">
-                              <span class="proposalMetaLabel">¿Quién soy?</span>
-                              <span class="proposalMetaValue">{{ p.whoAmI }}</span>
-                            </div>
-
-                            <div class="proposalMetaItem proposalMetaItem--estimate">
-                              <span class="proposalMetaLabel">Estimación</span>
-                              <span class="proposalMetaValue proposalMetaValue--estimate">{{ p.estimate }}</span>
-                            </div>
-                          </div>
-                        </div>
+                      <div class="proposalList" *ngIf="proposalsForRequest(it.id).length > 0">
+                        <ng-container *ngFor="let p of proposalsForRequest(it.id)">
+                          <ng-container
+                            *ngTemplateOutlet="
+                              proposalCardTpl;
+                              context: { proposal: p, showChoose: true }
+                            "
+                          ></ng-container>
+                        </ng-container>
                       </div>
                     </ng-container>
-                  </div>
+                  </section>
                 </article>
               </div>
             </ng-container>
@@ -279,58 +283,23 @@
                     </div>
                   </div>
 
-                  <div class="proposal" *ngIf="isAppliedProposalExpanded(it.proposal.id)">
-                    <p class="proposalListTitle">Tu propuesta</p>
+                  <section
+                    class="expandPanel"
+                    *ngIf="isAppliedProposalExpanded(it.proposal.id)"
+                    aria-label="Detalle de tu propuesta"
+                  >
+                    <header class="expandPanel__header">
+                      <h3 class="expandPanel__title">Tu propuesta</h3>
+                      <span class="expandPanel__badge expandPanel__badge--sent">Enviada</span>
+                    </header>
 
-                    <div class="proposalComment">
-                      <header class="proposalHeader" aria-label="Autor de la propuesta">
-                        <div class="proposalHeaderLeft">
-                          <app-user-identity-link
-                            [userId]="it.proposal.userId"
-                            [displayName]="it.proposal.author?.name ?? 'Postulante'"
-                            [subtitle]="it.proposal.author?.subtitle"
-                          />
-                          <div class="proposalRating" *ngIf="it.proposal.author?.rating !== undefined">
-                            <span class="proposalStar" aria-hidden="true">★</span>
-                            <span class="proposalRatingValue">{{ it.proposal.author?.rating | number: '1.1-2' }}</span>
-                            <span class="proposalRatingSep" *ngIf="it.proposal.author?.reviewsCount !== undefined" aria-hidden="true">·</span>
-                            <span class="proposalRatingCount" *ngIf="it.proposal.author?.reviewsCount !== undefined">
-                              {{ it.proposal.author?.reviewsCount }} reseñas
-                            </span>
-                          </div>
-                        </div>
-
-                        <div class="proposalHeaderActions" role="group" aria-label="Acciones de propuesta">
-                          <a
-                            class="btn btn--profile btn--sm"
-                            [routerLink]="['/usuarios', it.proposal.userId]"
-                            *ngIf="it.proposal.userId.trim()"
-                          >
-                            Ver perfil
-                          </a>
-                          <button type="button" class="btn btn--profile btn--profile-accent btn--sm" (click)="openChooseWip(it.proposal)">
-                            Elegir
-                          </button>
-                        </div>
-                      </header>
-
-                      <div class="proposalBody" aria-label="Contenido de propuesta">
-                        <p class="proposalMessage">{{ it.proposal.message }}</p>
-
-                        <div class="proposalMeta" aria-label="Detalles de la propuesta">
-                          <div class="proposalMetaItem">
-                            <span class="proposalMetaLabel">¿Quién soy?</span>
-                            <span class="proposalMetaValue">{{ it.proposal.whoAmI }}</span>
-                          </div>
-
-                          <div class="proposalMetaItem proposalMetaItem--estimate">
-                            <span class="proposalMetaLabel">Estimación</span>
-                            <span class="proposalMetaValue proposalMetaValue--estimate">{{ it.proposal.estimate }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        proposalCardTpl;
+                        context: { proposal: it.proposal, showChoose: false }
+                      "
+                    ></ng-container>
+                  </section>
                 </article>
               </div>
             </ng-container>
@@ -350,6 +319,56 @@
     </ng-template>
   </div>
 </section>
+
+<ng-template #proposalCardTpl let-proposal="proposal" let-showChoose="showChoose">
+  <article class="proposalCard" [attr.aria-label]="'Propuesta de ' + (proposal.author?.name ?? 'postulante')">
+    <div class="proposalCard__top">
+      <app-user-identity-link
+        class="proposalCard__identity"
+        [userId]="proposal.userId"
+        [displayName]="proposal.author?.name ?? 'Postulante'"
+        [subtitle]="proposal.author?.subtitle"
+      />
+      <div class="proposalCard__rating" *ngIf="proposal.author?.rating !== undefined">
+        <span class="proposalCard__star" aria-hidden="true">★</span>
+        <span>{{ proposal.author?.rating | number: '1.1-2' }}</span>
+        <ng-container *ngIf="proposal.author?.reviewsCount !== undefined">
+          <span class="proposalCard__ratingSep" aria-hidden="true">·</span>
+          <span class="proposalCard__reviews">{{ proposal.author?.reviewsCount }} reseñas</span>
+        </ng-container>
+      </div>
+    </div>
+
+    <p class="proposalCard__date" *ngIf="proposalCreatedAtLabel(proposal)">
+      <time [attr.datetime]="proposal.createdAt" [attr.title]="proposalCreatedAtTitle(proposal)">
+        {{ proposalCreatedAtLabel(proposal) }}
+      </time>
+    </p>
+
+    <p class="proposalCard__message" *ngIf="proposal.message?.trim()">{{ proposal.message }}</p>
+
+    <div
+      class="proposalCard__details"
+      *ngIf="shouldShowWhoAmI(proposal) || proposal.estimate?.trim()"
+      aria-label="Detalles de la propuesta"
+    >
+      <div class="proposalCard__detail" *ngIf="shouldShowWhoAmI(proposal)">
+        <span class="proposalCard__detailLabel">Presentación</span>
+        <p class="proposalCard__detailText">{{ proposal.whoAmI }}</p>
+      </div>
+      <div class="proposalCard__estimate" *ngIf="proposal.estimate?.trim()">
+        <span class="proposalCard__detailLabel">Oferta</span>
+        <span class="proposalCard__estimateValue">{{ proposal.estimate }}</span>
+      </div>
+    </div>
+
+    <div class="proposalCard__actions" *ngIf="showChoose" role="group" aria-label="Acciones">
+      <button type="button" class="btn btn--profile btn--profile-accent" (click)="openChooseWip(proposal)">
+        Elegir postulante
+      </button>
+    </div>
+  </article>
+</ng-template>
 
 <app-modal [open]="isChooseWipOpen()" title="Elegir (próximamente)" size="sm" (closed)="closeChooseWip()">
   <div class="state" role="status">

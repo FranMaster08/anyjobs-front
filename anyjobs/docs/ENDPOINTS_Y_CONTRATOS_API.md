@@ -416,8 +416,10 @@ Solo incluye solicitudes no eliminadas con `locationLat`/`locationLng` persistid
 **Content-Type**: `multipart/form-data` (no usar solo `application/json` si quieres alinear el controlador Nest con `FilesInterceptor`).
 
 **Partes del formulario (texto)**:
-- Obligatorios: `title`, `excerpt`, `description`, `tags` (valor **JSON string** de un array de strings, p. ej. `["Limpieza"]`), `locationLabel`, `budgetLabel`, `contactPhone`, `contactEmail`
-- Opcionales: `publishedAtLabel`, `imageUrl`, `imageAlt`, `images` (JSON string de objetos `{ "url": "string", "alt": "string" }` si aplica)
+- Obligatorios: `title`, `excerpt`, `description`, `tags` (valor **JSON string** de un array de strings, p. ej. `["Limpieza"]`), `locationLabel`, `budgetLabel`
+- Opcionales: `publishedAtLabel`, `imageUrl`, `imageAlt`, `images` (JSON string de objetos `{ "url": "string", "alt": "string" }` si aplica), `workConditions` (JSON string de objeto con subcampos enum opcionales: `ownToolsRequired`, `workerMustTravel`, `requesterProvidesMaterials`, `requesterProvidesTools`, `priorExperienceRequired`, `scheduleFlexible`, `priorVisitRequired`, `easyAccessOrInstructions`, `additionalInstructions` texto ≤500)
+
+**Nota contacto**: el backend resuelve `contactPhone` y `contactEmail` desde el perfil del usuario autenticado; el front no debe enviarlos en el multipart de creación.
 
 **Archivos**: repetir el campo **`files`** (hasta **6** ficheros por petición), como multipart file parts.
 

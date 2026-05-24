@@ -12,18 +12,21 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, map, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpErrorResponse } from '@angular/common/http';
 
 import { ModalComponent } from '../../../components/modal/modal';
 import { UserIdentityLinkComponent } from '../../../shared/components/user-identity-link/user-identity-link';
+import { WorkConditionIconComponent } from '../work-condition-icon/work-condition-icon';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
+import {
+  hasWorkConditionsData,
+  listWorkConditionDisplayItems,
+  type WorkConditionDisplayItem,
+} from '../open-request-work-conditions.constants';
 import { OpenRequestsService } from '../open-requests.service';
 import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { UserApi } from '../../../shared/api/user.api';
 import type { UserPublicProfileDto } from '../../../shared/api/user-profile.models';
-import { ProposalsService } from '../../../shared/proposals/proposals.service';
-import { Proposal } from '../../../shared/proposals/proposals.models';
 
 /**
  * Pantalla de detalle de solicitud abierta.
@@ -32,7 +35,7 @@ import { Proposal } from '../../../shared/proposals/proposals.models';
 @Component({
   selector: 'app-open-request-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, ModalComponent, UserIdentityLinkComponent],
+  imports: [CommonModule, RouterLink, ModalComponent, UserIdentityLinkComponent, WorkConditionIconComponent],
   templateUrl: './open-request-detail.html',
   styleUrl: './open-request-detail.scss',
 })
@@ -41,14 +44,12 @@ export class OpenRequestDetail {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OpenRequestsService);
-  private readonly proposals = inject(ProposalsService);
   private readonly analytics = inject(OpenRequestsAnalyticsService);
   private readonly authSession = inject(AuthSessionService);
   private readonly userApi = inject(UserApi);
 
   private detailViewStartedAt: number | null = null;
   private trackedDetailRequestId: string | null = null;
-  private postulantesLoadSeq = 0;
   private publisherProfileLoadSeq = 0;
 
   protected readonly authVm = this.authSession.vm;
@@ -79,19 +80,21 @@ export class OpenRequestDetail {
 
   protected readonly isRequestOwner = computed(() => this.isOwnerWithSession());
 
-  /**
-   * Solo renderiza la tarjeta cuando el dueño está autenticado y la lista cargó (o está cargando).
-   * Nunca muestra errores de API (p. ej. token expirado) a visitantes ni en vista pública.
-   */
-  protected readonly showPostulantesSection = computed(() => {
-    if (!this.isOwnerWithSession()) return false;
-    const st = this.postulantesState();
-    return st === 'loading' || st === 'success';
+  protected readonly showWorkConditionsSection = computed(() => {
+    const d = this.detail();
+    return d?.workConditions ? hasWorkConditionsData(d.workConditions) : false;
   });
 
-  protected readonly postulantesState = signal<'idle' | 'loading' | 'success' | 'error'>('idle');
-  protected readonly postulantes = signal<readonly Proposal[]>([]);
-  protected readonly postulantesError = signal<string | null>(null);
+  protected readonly workConditionRows = computed(() => {
+    const d = this.detail();
+    if (!d?.workConditions) return [];
+    return listWorkConditionDisplayItems(d.workConditions);
+  });
+
+  protected readonly workConditionsAdditionalInstructions = computed(() => {
+    const text = this.detail()?.workConditions?.additionalInstructions?.trim() ?? '';
+    return text.length > 0 ? text : null;
+  });
 
   protected readonly publisherProfile = signal<UserPublicProfileDto | null>(null);
 
@@ -103,7 +106,6 @@ export class OpenRequestDetail {
         map((pm) => (pm.get('id') ?? '').trim()),
         switchMap((id) => {
           this.flushDetailDwellTime();
-          this.resetPostulantes();
           this.resetPublisherProfile();
           this.isGalleryOpen.set(false);
 
@@ -132,7 +134,6 @@ export class OpenRequestDetail {
               route: `/solicitudes/${id}`,
             });
           }
-          this.loadPostulantesIfOwner(id, detail);
           this.loadPublisherProfile(detail);
         },
         error: () => {
@@ -162,7 +163,6 @@ export class OpenRequestDetail {
     if (!id) return;
 
     this.state.set('loading');
-    this.resetPostulantes();
     this.resetPublisherProfile();
 
     this.service
@@ -173,7 +173,6 @@ export class OpenRequestDetail {
           this.detail.set(detail);
           this.activeImageIndex.set(0);
           this.state.set('success');
-          this.loadPostulantesIfOwner(id, detail);
           this.loadPublisherProfile(detail);
         },
         error: () => {
@@ -233,6 +232,10 @@ export class OpenRequestDetail {
     this.activeImageIndex.set(next);
   }
 
+  protected trackWorkConditionRow(_index: number, row: WorkConditionDisplayItem): string {
+    return row.key;
+  }
+
   protected scrollToApply(): void {
     if (typeof document === 'undefined') return;
     const el = document.getElementById('applyCard');
@@ -287,55 +290,6 @@ export class OpenRequestDetail {
   protected showPublisherReputation(d: OpenRequestDetailModel): boolean {
     if (this.isDemoProviderData(d)) return false;
     return (d.reputation ?? 0) > 0 || (d.reviewsCount ?? 0) > 0;
-  }
-
-  private loadPostulantesIfOwner(requestId: string, detail: OpenRequestDetailModel): void {
-    const owner = detail.ownerUserId?.trim() ?? '';
-    const uid = this.authVm().user?.id?.trim() ?? '';
-    if (!this.authVm().isLoggedIn || !uid || !owner || owner !== uid) {
-      this.resetPostulantes();
-      return;
-    }
-
-    const seq = ++this.postulantesLoadSeq;
-    this.postulantesState.set('loading');
-    this.postulantesError.set(null);
-
-    this.proposals.listByRequest(requestId).subscribe({
-      next: (items) => {
-        if (seq !== this.postulantesLoadSeq) return;
-        this.postulantes.set(items);
-        this.postulantesState.set('success');
-        this.postulantesError.set(null);
-      },
-      error: (err: unknown) => {
-        if (seq !== this.postulantesLoadSeq) return;
-        this.handlePostulantesLoadError(err);
-      },
-    });
-  }
-
-  private handlePostulantesLoadError(err: unknown): void {
-    if (err instanceof HttpErrorResponse) {
-      if (err.status === 401 || err.status === 403) {
-        this.resetPostulantes();
-        return;
-      }
-    }
-
-    this.postulantesError.set(
-      err instanceof HttpErrorResponse && typeof err.error?.message === 'string'
-        ? err.error.message
-        : 'No se pudieron cargar las postulaciones.',
-    );
-    this.postulantesState.set('error');
-  }
-
-  private resetPostulantes(): void {
-    this.postulantesLoadSeq += 1;
-    this.postulantesState.set('idle');
-    this.postulantes.set([]);
-    this.postulantesError.set(null);
   }
 
   private resetPublisherProfile(): void {

@@ -22,17 +22,36 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import 'driver.js/dist/driver.css';
 
 import { ModalComponent } from '../../../components/modal/modal';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
+import { LocationGeographyService } from '../../../shared/location/location-geography.service';
+import { SUPPORTED_COUNTRY_OPTIONS } from '../../auth/registration/registration.constants';
+import { budgetCurrencyForCountry, formatOpenRequestBudgetLabel } from '../open-request-budget.utils';
+import { buildOpenRequestLocationLabel } from '../open-request-location.utils';
+import {
+  WORK_CONDITION_FIELD_DEFS,
+  WORK_CONDITIONS_ADDITIONAL_INSTRUCTIONS_MAX_LENGTH,
+  buildWorkConditionsFromForm,
+  type WorkConditionEnumKey,
+} from '../open-request-work-conditions.constants';
 import { MAX_OPEN_REQUEST_UPLOAD_FILES } from '../open-requests-multipart';
 import { CreateOpenRequestInput } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
+import { startPublishRequestTour } from '../publish-request-tour';
 
 const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 /** Tipos MIME aceptados al publicar imágenes (alineados con uso típico en API). */
 const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MAX_IMAGE_BYTES_PER_FILE = 10 * 1024 * 1024;
+const MAX_NEIGHBORHOOD_LENGTH = 120;
+const SUCCESS_REDIRECT_DELAY_MS = 1500;
+
+const COUNTRY_LABELS: Record<string, string> = {
+  CO: 'Colombia',
+  AR: 'Argentina',
+};
 
 function fileLooksLikeAcceptedImage(f: File): boolean {
   const t = f.type.toLowerCase();
@@ -40,7 +59,6 @@ function fileLooksLikeAcceptedImage(f: File): boolean {
   if (t.length > 0) return false;
   return /\.(jpe?g|png|webp|gif)$/i.test(f.name.trim());
 }
-const SUCCESS_REDIRECT_DELAY_MS = 1500;
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -63,7 +81,16 @@ export class OpenRequestCreate {
   private readonly fb = inject(FormBuilder);
   private readonly openRequests = inject(OpenRequestsService);
   private readonly auth = inject(AuthSessionService);
+  private readonly locationGeography = inject(LocationGeographyService);
   protected readonly authVm = this.auth.vm;
+
+  protected readonly countryOptions = SUPPORTED_COUNTRY_OPTIONS.map((c) => ({
+    code: c.code,
+    label: COUNTRY_LABELS[c.code] ?? c.code,
+  }));
+
+  private readonly formStatusTick = signal(0);
+  private tourHandle: { destroy: () => void } | null = null;
 
   protected readonly state = signal<SubmitState>('idle');
   protected readonly errorMessage = signal<string | null>(null);
@@ -75,10 +102,11 @@ export class OpenRequestCreate {
     excerpt: 'Resumen corto',
     description: 'Descripción',
     tagsInput: 'Etiquetas',
-    locationLabel: 'Ubicación',
+    countryCode: 'País',
+    division: 'Departamento / provincia',
+    municipality: 'Municipio / ciudad',
+    neighborhood: 'Barrio',
     budgetLabel: 'Presupuesto',
-    contactPhone: 'Teléfono',
-    contactEmail: 'Email',
   };
 
   protected readonly form = this.fb.nonNullable.group({
@@ -95,16 +123,53 @@ export class OpenRequestCreate {
       Validators.minLength(20),
     ]),
     tagsInput: this.fb.nonNullable.control('', [tagsValidator()]),
-    locationLabel: this.fb.nonNullable.control('', [
-      Validators.required,
+    countryCode: this.fb.nonNullable.control('', [Validators.required]),
+    division: this.fb.nonNullable.control('', [Validators.required]),
+    municipality: this.fb.nonNullable.control('', [Validators.required]),
+    neighborhood: this.fb.nonNullable.control('', [
+      Validators.maxLength(MAX_NEIGHBORHOOD_LENGTH),
       noUuidValidator(),
     ]),
-    budgetLabel: this.fb.nonNullable.control('', [Validators.required]),
-    contactPhone: this.fb.nonNullable.control('', [Validators.required]),
-    contactEmail: this.fb.nonNullable.control('', [
-      Validators.required,
-      Validators.email,
-    ]),
+    budgetLabel: this.fb.nonNullable.control(
+      { value: '', disabled: true },
+      [Validators.required],
+    ),
+    workConditions: this.fb.nonNullable.group({
+      ownToolsRequired: this.fb.nonNullable.control(''),
+      workerMustTravel: this.fb.nonNullable.control(''),
+      requesterProvidesMaterials: this.fb.nonNullable.control(''),
+      requesterProvidesTools: this.fb.nonNullable.control(''),
+      priorExperienceRequired: this.fb.nonNullable.control(''),
+      scheduleFlexible: this.fb.nonNullable.control(''),
+      priorVisitRequired: this.fb.nonNullable.control(''),
+      easyAccessOrInstructions: this.fb.nonNullable.control(''),
+      additionalInstructions: this.fb.nonNullable.control('', [
+        Validators.maxLength(WORK_CONDITIONS_ADDITIONAL_INSTRUCTIONS_MAX_LENGTH),
+      ]),
+    }),
+  });
+
+  protected readonly workConditionFields = WORK_CONDITION_FIELD_DEFS;
+  protected readonly additionalInstructionsMaxLength = WORK_CONDITIONS_ADDITIONAL_INSTRUCTIONS_MAX_LENGTH;
+
+  protected readonly divisionOptions = computed(() => {
+    this.formStatusTick();
+    this.locationGeography.divisionsLoaded();
+    const code = this.form.controls.countryCode.value;
+    return code ? [...this.locationGeography.divisions(code)] : [];
+  });
+
+  protected readonly municipalityOptions = computed(() => {
+    this.formStatusTick();
+    this.locationGeography.municipalitiesLoaded();
+    const code = this.form.controls.countryCode.value;
+    const division = this.form.controls.division.value;
+    return code && division ? [...this.locationGeography.municipalities(code, division)] : [];
+  });
+
+  protected readonly budgetCurrency = computed(() => {
+    this.formStatusTick();
+    return budgetCurrencyForCountry(this.form.controls.countryCode.value);
   });
 
   protected readonly isSubmitDisabled = computed(() => this.state() === 'submitting');
@@ -119,40 +184,91 @@ export class OpenRequestCreate {
   protected readonly maxImageFiles = MAX_OPEN_REQUEST_UPLOAD_FILES;
 
   constructor() {
-    const user = this.authVm().user;
-    if (user?.email) {
-      this.form.controls.contactEmail.setValue(user.email);
-    }
-    if (user?.phoneNumber) {
-      this.form.controls.contactPhone.setValue(user.phoneNumber);
-    }
+    this.locationGeography
+      .ensureCatalog()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formStatusTick.update((n) => n + 1));
 
     this.form.controls.tagsInput.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((raw) => this.tagsPreview.set(parseTags(raw)));
 
-    // Cuando el usuario corrige el form tras un error de validación local, limpiamos el banner.
+    this.form.controls.countryCode.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((countryCode) => {
+        this.form.controls.division.setValue('');
+        this.form.controls.municipality.setValue('');
+        this.form.controls.division.markAsUntouched();
+        this.form.controls.municipality.markAsUntouched();
+        if (countryCode) {
+          this.form.controls.budgetLabel.enable({ emitEvent: false });
+          this.locationGeography
+            .loadDivisionsForCountry(countryCode)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.formStatusTick.update((n) => n + 1));
+        } else {
+          this.form.controls.budgetLabel.disable({ emitEvent: false });
+          this.form.controls.budgetLabel.setValue('');
+        }
+        this.formStatusTick.update((n) => n + 1);
+      });
+
+    this.form.controls.division.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((division) => {
+        this.form.controls.municipality.setValue('');
+        this.form.controls.municipality.markAsUntouched();
+        const countryCode = this.form.controls.countryCode.value;
+        if (countryCode && division) {
+          this.locationGeography
+            .loadMunicipalitiesForDivision(countryCode, division)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.formStatusTick.update((n) => n + 1));
+        }
+      });
+
     this.form.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         if (this.missingFields().length === 0) return;
-        if (this.form.valid && !this.imageSelectionError()) {
+        if (
+          this.form.valid &&
+          !this.imageSelectionError() &&
+          this.hasRequiredMultimedia() &&
+          this.locationLabelError() === null
+        ) {
           this.state.set('idle');
           this.errorMessage.set(null);
           this.missingFields.set([]);
         }
       });
 
-    // Auto-cierra el modal de éxito y navega cuando la creación finaliza.
     effect((onCleanup) => {
       if (!this.isSuccessOpen()) return;
       const timeoutId = window.setTimeout(() => this.closeSuccess(), SUCCESS_REDIRECT_DELAY_MS);
       onCleanup(() => window.clearTimeout(timeoutId));
     });
+
+    this.destroyRef.onDestroy(() => this.tourHandle?.destroy());
   }
 
   /** Aceptado por el input type=file (evita tipos arbitrarios antes de subir). */
   protected readonly imageFileAccept = 'image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif';
+
+  protected startHelpTour(): void {
+    this.tourHandle?.destroy();
+    this.tourHandle = startPublishRequestTour();
+  }
+
+  protected selectWorkCondition(key: WorkConditionEnumKey, value: string): void {
+    const ctrl = this.form.controls.workConditions.controls[key];
+    ctrl.setValue(ctrl.value === value ? '' : value);
+    ctrl.markAsTouched();
+  }
+
+  protected isWorkConditionSelected(key: WorkConditionEnumKey, value: string): boolean {
+    return this.form.controls.workConditions.controls[key].value === value;
+  }
 
   protected onImageFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -236,26 +352,43 @@ export class OpenRequestCreate {
     }
 
     this.form.markAllAsTouched();
-    if (!this.form.valid) {
-      this.reportInvalidForm();
+    const locationError = this.locationLabelError();
+    const missingMultimedia = !this.hasRequiredMultimedia();
+    if (missingMultimedia) {
+      this.imageSelectionError.set('Debes adjuntar al menos un archivo de contenido multimedia.');
+    }
+    if (!this.form.valid || locationError || missingMultimedia) {
+      this.reportInvalidForm(locationError, missingMultimedia);
       return;
     }
 
     this.missingFields.set([]);
 
     const raw = this.form.getRawValue();
+    const locationLabel = buildOpenRequestLocationLabel({
+      countryCode: raw.countryCode,
+      division: raw.division,
+      municipality: raw.municipality,
+      neighborhood: raw.neighborhood,
+    });
+
+    if (!locationLabel) {
+      this.reportInvalidForm('No se pudo construir la ubicación. Revisa país, departamento y municipio.');
+      return;
+    }
+
     const files = this.selectedImageFiles();
+    const workConditions = buildWorkConditionsFromForm(this.form.controls.workConditions.getRawValue());
 
     const input: CreateOpenRequestInput = {
       title: raw.title,
       excerpt: raw.excerpt,
       description: raw.description,
       tags: parseTags(raw.tagsInput),
-      locationLabel: raw.locationLabel,
-      budgetLabel: raw.budgetLabel,
-      contactPhone: raw.contactPhone,
-      contactEmail: raw.contactEmail,
-      ...(files.length > 0 ? { imageFiles: files } : {}),
+      locationLabel,
+      budgetLabel: formatOpenRequestBudgetLabel(raw.budgetLabel, locationLabel) || raw.budgetLabel,
+      imageFiles: files,
+      ...(workConditions ? { workConditions } : {}),
     };
 
     this.state.set('submitting');
@@ -311,14 +444,42 @@ export class OpenRequestCreate {
     return this.errorMessage() === 'Tu sesión expiró, vuelve a iniciar sesión';
   }
 
-  private reportInvalidForm(): void {
+  private hasRequiredMultimedia(): boolean {
+    return this.selectedImageFiles().length > 0;
+  }
+
+  private locationLabelError(): string | null {
+    const raw = this.form.getRawValue();
+    if (!raw.countryCode || !raw.division || !raw.municipality) return null;
+    const label = buildOpenRequestLocationLabel({
+      countryCode: raw.countryCode,
+      division: raw.division,
+      municipality: raw.municipality,
+      neighborhood: raw.neighborhood,
+    });
+    if (!label) return 'Revisa los campos de ubicación.';
+    if (UUID_PATTERN.test(label)) return 'La ubicación no puede contener identificadores técnicos.';
+    return null;
+  }
+
+  private reportInvalidForm(
+    locationError: string | null = null,
+    missingMultimedia = false,
+  ): void {
     const missing = this.collectInvalidFieldLabels();
+    if (locationError && !missing.includes('Ubicación')) {
+      missing.push('Ubicación');
+    }
+    if (missingMultimedia && !missing.includes('Contenido multimedia')) {
+      missing.push('Contenido multimedia');
+    }
     this.missingFields.set(missing);
     this.state.set('error');
     this.errorMessage.set(
-      missing.length === 1
-        ? `Falta completar o corregir 1 campo: ${missing[0]}.`
-        : `Faltan ${missing.length} campos por completar o corregir.`,
+      locationError ??
+        (missing.length === 1
+          ? `Falta completar o corregir 1 campo: ${missing[0]}.`
+          : `Faltan ${missing.length} campos por completar o corregir.`),
     );
     this.focusFirstInvalidControl();
   }
@@ -326,9 +487,14 @@ export class OpenRequestCreate {
   private collectInvalidFieldLabels(): string[] {
     const labels: string[] = [];
     for (const [name, ctrl] of Object.entries(this.form.controls)) {
+      if (name === 'workConditions') continue;
       if (!ctrl.invalid) continue;
       const label = this.fieldLabels[name] ?? name;
       if (!labels.includes(label)) labels.push(label);
+    }
+    const wc = this.form.controls.workConditions;
+    if (wc.controls.additionalInstructions.invalid && !labels.includes('Instrucciones adicionales')) {
+      labels.push('Instrucciones adicionales');
     }
     return labels;
   }
@@ -400,6 +566,7 @@ function tagsValidator(): ValidatorFn {
 function noUuidValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = typeof control.value === 'string' ? control.value : '';
+    if (!value.trim()) return null;
     return UUID_PATTERN.test(value) ? { uuidNotAllowed: true } : null;
   };
 }

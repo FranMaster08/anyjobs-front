@@ -16,7 +16,7 @@
     position: relative;
     border-radius: var(--aj-radius-md);
     background: var(--aj-color-surface);
-    padding: 18px;
+    padding: 20px;
     box-shadow: var(--aj-shadow-sm);
     border: 1px solid var(--aj-color-border);
     margin-bottom: 16px;
@@ -28,7 +28,114 @@
     position: absolute;
     inset: 0 0 auto 0;
     height: 3px;
-    background: linear-gradient(90deg, rgba(14, 165, 164, 0.95), rgba(14, 165, 164, 0.25));
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--aj-color-primary) 95%, transparent),
+      color-mix(in srgb, var(--aj-color-primary) 25%, transparent)
+    );
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .header__copy {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .header__help {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 9px 14px 9px 9px;
+    border-radius: var(--aj-radius-pill);
+    border: 1px solid color-mix(in srgb, var(--aj-color-primary) 30%, var(--aj-color-border));
+    background: color-mix(in srgb, var(--aj-color-primary) 7%, var(--aj-color-surface));
+    color: var(--aj-color-ink);
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .header__help:hover {
+    background: color-mix(in srgb, var(--aj-color-primary) 13%, var(--aj-color-surface));
+    border-color: color-mix(in srgb, var(--aj-color-primary) 48%, var(--aj-color-border));
+    box-shadow: var(--aj-shadow-sm);
+  }
+
+  .header__help:active {
+    transform: translateY(1px);
+  }
+
+  .header__help:focus-visible {
+    outline: 2px solid var(--aj-color-focus);
+    outline-offset: 2px;
+  }
+
+  .header__helpIcon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: var(--aj-radius-pill);
+    background: var(--aj-color-primary);
+    color: var(--aj-color-surface);
+  }
+
+  .header__helpText {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    text-align: left;
+  }
+
+  .header__helpLabel {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .header__helpHint {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--aj-color-muted);
+    line-height: 1.2;
+  }
+
+  @media (max-width: 640px) {
+    .header {
+      padding: 16px;
+    }
+
+    .header__inner {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .header__help {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .header__helpHint {
+      display: none;
+    }
   }
 
   .kicker {
@@ -290,5 +397,78 @@
     font-weight: 700;
     font-size: 13px;
     line-height: 1.45;
+  }
+
+  .sectionIntro {
+    margin: 0 0 16px;
+  }
+
+  .conditionGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .conditionRow {
+    border: 1px solid var(--aj-color-border);
+    border-radius: var(--aj-radius-md);
+    background: color-mix(in srgb, var(--aj-color-surface) 92%, var(--aj-color-bg));
+    padding: 12px 14px;
+  }
+
+  .conditionRow__label {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--aj-color-ink);
+    line-height: 1.35;
+  }
+
+  .conditionOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .conditionPill {
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: var(--aj-radius-pill);
+    border: 1px solid var(--aj-color-border);
+    background: var(--aj-color-surface);
+    color: var(--aj-color-ink);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 40px;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .conditionPill:hover {
+    border-color: color-mix(in srgb, var(--aj-color-primary) 35%, var(--aj-color-border));
+  }
+
+  .conditionPill.is-selected {
+    border-color: color-mix(in srgb, var(--aj-color-primary) 55%, var(--aj-color-border));
+    background: color-mix(in srgb, var(--aj-color-primary) 12%, var(--aj-color-surface));
+    color: var(--aj-color-ink);
+  }
+
+  .conditionInstructions {
+    margin-top: 4px;
+  }
+
+  .field__control--textarea {
+    min-height: 108px;
+    resize: vertical;
   }
 }

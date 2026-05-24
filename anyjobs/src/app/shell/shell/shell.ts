@@ -27,6 +27,7 @@ import { HeaderOpenRequestsFiltersToggleComponent } from '../header-open-request
 import { OpenRequestsFiltersUiService } from '../../features/open-requests/open-requests-filters-ui.service';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import {
+  isImmersiveMediaPath,
   isOpenRequestsLandingPath,
   pathOnlyFromUrl,
 } from '../../features/open-requests/open-requests-navigation';
@@ -92,6 +93,7 @@ export class Shell {
   protected readonly showLanguageSelector = SHELL_SHOW_LANGUAGE_SELECTOR;
   protected readonly showMobilePublishCta = SHELL_SHOW_MOBILE_PUBLISH_CTA;
   protected readonly showOpenRequestsFiltersInHeader = signal(false);
+  protected readonly currentYear = new Date().getFullYear();
 
   private fragmentScrollHandle: ReturnType<typeof setTimeout> | null = null;
   private pendingScrollTarget: string | null = null;
@@ -183,6 +185,17 @@ export class Shell {
           });
         }
 
+        if (fragment === 'contacto') {
+          if (isImmersiveMediaPath(pathOnly)) {
+            void this.router.navigateByUrl('/solicitudes').then(() => {
+              this.scheduleScrollToFragment('contacto');
+            });
+            return;
+          }
+          this.scheduleScrollToFragment('contacto');
+          return;
+        }
+
         if (fragment && isOpenRequestsLandingPath(pathOnly)) {
           // Los anclas de `/solicitudes` viven dentro del *ngSwitch* de la landing y solo
           // existen tras `success`; un solo `setTimeout(0)` corre demasiado pronto.
@@ -272,6 +285,23 @@ export class Shell {
 
   /** Cierra el modal y navega; el scroll del body se restaura aunque la ruta ya sea /registro. */
   /** Navega a la landing de solicitudes y hace scroll a una sección, sin `#fragment` en la URL. */
+  protected scrollToContact(event: Event): void {
+    event.preventDefault();
+    this.closeMobileNav();
+    this.closeAccountMenu();
+    this.scrollToFooterContact();
+  }
+
+  private scrollToFooterContact(): void {
+    if (isImmersiveMediaPath(pathOnlyFromUrl(this.router.url))) {
+      void this.router.navigateByUrl('/solicitudes').then(() => {
+        this.scheduleScrollToFragment('contacto');
+      });
+      return;
+    }
+    this.scheduleScrollToFragment('contacto');
+  }
+
   protected scrollToOpenRequestsSection(event: Event, sectionId: string): void {
     event.preventDefault();
     this.closeMobileNav();
@@ -279,6 +309,11 @@ export class Shell {
 
     const target = sectionId.trim();
     if (!target) return;
+
+    if (target === 'contacto') {
+      this.scrollToFooterContact();
+      return;
+    }
 
     if (isOpenRequestsLandingPath(pathOnlyFromUrl(this.router.url))) {
       this.scheduleScrollToFragment(target);

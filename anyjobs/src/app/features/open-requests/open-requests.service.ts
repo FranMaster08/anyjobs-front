@@ -16,6 +16,7 @@ import {
   OpenRequestsListResponse,
   PatchOpenRequestInput,
 } from './open-requests.models';
+import type { WorkConditions } from './open-request-work-conditions.constants';
 
 export const OPEN_REQUESTS_API_URL = new InjectionToken<string>('OPEN_REQUESTS_API_URL', {
   providedIn: 'root',
@@ -87,6 +88,7 @@ interface OpenRequestDetailDto {
   contactPhone?: string | null;
   contactEmail?: string | null;
   images?: OpenRequestImageDto[] | null;
+  workConditions?: WorkConditions | null;
 }
 
 interface OpenRequestProviderReviewDto {
@@ -288,6 +290,8 @@ function normalizeDetail(dto: OpenRequestDetailDto, base: OpenRequestListItemDto
 
   const providerReviews: OpenRequestProviderReview[] | undefined = normalizeProviderReviews(dto.providerReviews ?? null);
 
+  const workConditions = normalizeWorkConditions(dto.workConditions);
+
   return {
     id: dto.id,
     ...(typeof dto.ownerUserId === 'string' && dto.ownerUserId.trim().length > 0
@@ -316,7 +320,31 @@ function normalizeDetail(dto: OpenRequestDetailDto, base: OpenRequestListItemDto
     contactPhone: (dto.contactPhone ?? '').trim() || undefined,
     contactEmail: (dto.contactEmail ?? '').trim() || undefined,
     images,
+    ...(workConditions ? { workConditions } : {}),
   };
+}
+
+function normalizeWorkConditions(raw: WorkConditions | null | undefined): WorkConditions | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const out: WorkConditions = {};
+  const keys: (keyof WorkConditions)[] = [
+    'ownToolsRequired',
+    'workerMustTravel',
+    'requesterProvidesMaterials',
+    'requesterProvidesTools',
+    'priorExperienceRequired',
+    'scheduleFlexible',
+    'priorVisitRequired',
+    'easyAccessOrInstructions',
+    'additionalInstructions',
+  ];
+  for (const key of keys) {
+    const value = raw[key];
+    if (typeof value !== 'string') continue;
+    const trimmed = value.trim();
+    if (trimmed.length > 0) (out as Record<string, string>)[key] = trimmed;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 function normalizeProviderReviews(raw: OpenRequestProviderReviewDto[] | null): OpenRequestProviderReview[] | undefined {

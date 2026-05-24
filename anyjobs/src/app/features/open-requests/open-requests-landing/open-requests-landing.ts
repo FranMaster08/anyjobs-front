@@ -23,6 +23,7 @@ import {
   RequestsMapComponent,
   RequestsMapMarker,
 } from '../../../components/requests-map/requests-map';
+import { formatOpenRequestBudgetLabel } from '../open-request-budget.utils';
 import { NearbyOpenRequestItem, OpenRequestListItem } from '../open-requests.models';
 import { OpenRequestsService } from '../open-requests.service';
 import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
@@ -210,6 +211,10 @@ export class OpenRequestsLanding implements AfterViewInit {
   /** Texto de zona para la lista de solicitudes cercanas (sin UUID embebido en `locationLabel`). */
   protected nearbyZoneLabel(raw: string | undefined): string {
     return locationLabelZoneOnly(raw);
+  }
+
+  protected formattedBudgetLabel(item: OpenRequestListItem): string {
+    return formatOpenRequestBudgetLabel(item.budgetLabel, item.locationLabel);
   }
 
   constructor() {

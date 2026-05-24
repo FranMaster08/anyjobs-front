@@ -1,3 +1,5 @@
+import type { WorkConditions } from './open-request-work-conditions.constants';
+
 export interface OpenRequestsListParams {
   readonly page: number;
   readonly pageSize: number;
@@ -62,6 +64,7 @@ export interface OpenRequestDetail {
   readonly contactPhone?: string;
   readonly contactEmail?: string;
   readonly images: readonly OpenRequestImage[];
+  readonly workConditions?: WorkConditions;
 }
 
 export interface OpenRequestsListResponse {
@@ -77,8 +80,6 @@ export interface CreateOpenRequestInput {
   readonly tags: readonly string[];
   readonly locationLabel: string;
   readonly budgetLabel: string;
-  readonly contactPhone: string;
-  readonly contactEmail: string;
   readonly imageUrl?: string;
   readonly imageAlt?: string;
   /** Hasta 6 imágenes locales; se envían como partes `files` en multipart. */
@@ -86,6 +87,7 @@ export interface CreateOpenRequestInput {
   /** JSON de `ImageDto[]` si se envían URLs en payload en lugar de `files`. */
   readonly imagesJson?: string;
   readonly publishedAtLabel?: string;
+  readonly workConditions?: WorkConditions;
 }
 
 /**
@@ -106,5 +108,5 @@ export interface PatchOpenRequestInput {
   readonly imageFiles?: readonly File[];
   readonly imagesJson?: string;
   readonly publishedAtLabel?: string;
+  readonly workConditions?: WorkConditions;
 }
-

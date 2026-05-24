@@ -1,14 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { computed, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 
 import { OpenRequestDetail } from './open-request-detail';
 import { OpenRequestsService } from '../open-requests.service';
 import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.models';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
-import { ProposalsService } from '../../../shared/proposals/proposals.service';
 import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { UserApi } from '../../../shared/api/user.api';
 
@@ -63,10 +61,6 @@ function createFixture(authUserId: string | null): ComponentFixture<OpenRequestD
         },
       },
       {
-        provide: ProposalsService,
-        useValue: { listByRequest: () => of([]) },
-      },
-      {
         provide: OpenRequestsAnalyticsService,
         useValue: { track: vi.fn() },
       },
@@ -92,19 +86,22 @@ function createFixture(authUserId: string | null): ComponentFixture<OpenRequestD
 }
 
 describe('OpenRequestDetail', () => {
-  it('no muestra Postulantes para visitante sin sesión', () => {
+  it('no muestra la sección de postulantes para visitante sin sesión', () => {
     const fixture = createFixture(null);
-    expect(fixture.nativeElement.textContent).not.toContain('Postulantes');
+    expect(fixture.nativeElement.textContent).not.toContain('Ver postulantes');
   });
 
-  it('no muestra Postulantes para usuario autenticado que no es el owner', () => {
+  it('no muestra acciones de postulantes para usuario autenticado que no es el owner', () => {
     const fixture = createFixture(otherId);
-    expect(fixture.nativeElement.textContent).not.toContain('Postulantes');
+    expect(fixture.nativeElement.textContent).not.toContain('Ver postulantes');
   });
 
-  it('muestra Postulantes para el owner autenticado', () => {
+  it('muestra enlace a Mis solicitudes para el owner autenticado', () => {
     const fixture = createFixture(ownerId);
-    expect(fixture.nativeElement.textContent).toContain('Postulantes');
+    const text = fixture.nativeElement.textContent ?? '';
+    expect(text).toContain('Ver postulantes');
+    expect(text).toContain('Ir a Mis solicitudes');
+    expect(text).not.toContain('Todavía no hay postulaciones para esta request.');
   });
 
   it('no muestra el UUID en la descripción', () => {
@@ -114,9 +111,15 @@ describe('OpenRequestDetail', () => {
     expect(fixture.nativeElement.textContent).toContain('María García');
   });
 
-  it('oculta Postulantes si el dueño recibe 401 al listar sin limpiar sesión en el componente', () => {
-    const auth = buildAuthMock(ownerId, true);
-    const clearSpy = vi.fn();
+  it('muestra Condiciones y recursos cuando el detalle las incluye', () => {
+    TestBed.resetTestingModule();
+    const detailWithConditions: OpenRequestDetailModel = {
+      ...demoDetail,
+      workConditions: {
+        ownToolsRequired: 'yes',
+        additionalInstructions: 'Usar ascensor B',
+      },
+    };
 
     TestBed.configureTestingModule({
       imports: [OpenRequestDetail],
@@ -129,20 +132,10 @@ describe('OpenRequestDetail', () => {
             snapshot: { paramMap: convertToParamMap({ id: 'req-test' }) },
           },
         },
-        {
-          provide: AuthSessionService,
-          useValue: { vm: auth.vm, setSession: auth.setSession, clear: clearSpy },
-        },
+        { provide: AuthSessionService, useValue: buildAuthMock(null, false) },
         {
           provide: OpenRequestsService,
-          useValue: { getOpenRequestDetail: () => of(demoDetail) },
-        },
-        {
-          provide: ProposalsService,
-          useValue: {
-            listByRequest: () =>
-              throwError(() => new HttpErrorResponse({ status: 401, error: { message: 'No autenticado.' } })),
-          },
+          useValue: { getOpenRequestDetail: () => of(detailWithConditions) },
         },
         { provide: OpenRequestsAnalyticsService, useValue: { track: vi.fn() } },
         {
@@ -163,8 +156,16 @@ describe('OpenRequestDetail', () => {
 
     const fixture = TestBed.createComponent(OpenRequestDetail);
     fixture.detectChanges();
+    const text = fixture.nativeElement.textContent ?? '';
+    expect(text).toContain('Condiciones y recursos');
+    expect(text).toContain('Herramientas propias requeridas');
+    expect(text).toContain('Sí');
+    expect(text).toContain('Instrucciones adicionales');
+    expect(text).toContain('Usar ascensor B');
+  });
 
-    expect(fixture.nativeElement.textContent).not.toContain('Postulantes');
-    expect(clearSpy).not.toHaveBeenCalled();
+  it('no muestra Condiciones y recursos en solicitudes legacy sin datos', () => {
+    const fixture = createFixture(null);
+    expect(fixture.nativeElement.textContent).not.toContain('Condiciones y recursos');
   });
 });

@@ -29,8 +29,6 @@ describe('OpenRequestsService.createOpenRequest', () => {
     tags: ['Limpieza'],
     locationLabel: 'Barcelona · Eixample',
     budgetLabel: '€60',
-    contactPhone: '+34600111222',
-    contactEmail: 'cliente@example.com',
   };
 
   it('envía POST multipart al apiUrl con campos esperados y normaliza la respuesta', () => {
@@ -47,6 +45,8 @@ describe('OpenRequestsService.createOpenRequest', () => {
     const fd = req.request.body as FormData;
     expect(fd.get('title')).toBe('Limpieza profunda');
     expect(fd.get('tags')).toBe(JSON.stringify(['Limpieza']));
+    expect(fd.get('contactPhone')).toBeNull();
+    expect(fd.get('contactEmail')).toBeNull();
 
     req.flush({
       id: 'req-123',

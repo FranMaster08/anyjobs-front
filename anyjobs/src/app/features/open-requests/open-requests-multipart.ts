@@ -16,8 +16,10 @@ export function buildOpenRequestCreateFormData(input: Readonly<CreateOpenRequest
   fd.append('tags', JSON.stringify([...input.tags]));
   fd.append('locationLabel', input.locationLabel.trim());
   fd.append('budgetLabel', input.budgetLabel.trim());
-  fd.append('contactPhone', input.contactPhone.trim());
-  fd.append('contactEmail', input.contactEmail.trim());
+
+  if (input.workConditions) {
+    fd.append('workConditions', JSON.stringify(input.workConditions));
+  }
 
   const pub = input.publishedAtLabel?.trim() ?? '';
   if (pub.length > 0) fd.append('publishedAtLabel', pub);
@@ -46,6 +48,9 @@ export function buildOpenRequestPatchFormData(patch: PatchOpenRequestInput): For
   if (patch.tags !== undefined) fd.append('tags', JSON.stringify([...patch.tags]));
   if (patch.locationLabel !== undefined) fd.append('locationLabel', patch.locationLabel.trim());
   if (patch.budgetLabel !== undefined) fd.append('budgetLabel', patch.budgetLabel.trim());
+  if (patch.workConditions !== undefined) {
+    fd.append('workConditions', JSON.stringify(patch.workConditions));
+  }
   if (patch.contactPhone !== undefined) fd.append('contactPhone', patch.contactPhone.trim());
   if (patch.contactEmail !== undefined) fd.append('contactEmail', patch.contactEmail.trim());
 

@@ -1,9 +1,33 @@
 <section class="page createRequest">
   <div class="container">
-    <header class="header">
-      <p class="kicker">PUBLICAR</p>
-      <h1 class="title">Publicar solicitud</h1>
-      <p class="subtitle">Cuéntanos qué necesitas y recibe propuestas.</p>
+    <header class="header" data-tour="publish-help-intro">
+      <div class="header__inner">
+        <div class="header__copy">
+          <p class="kicker">PUBLICAR</p>
+          <h1 class="title">Publicar solicitud</h1>
+          <p class="subtitle">Cuéntanos qué necesitas y recibe propuestas.</p>
+        </div>
+        <button
+          *ngIf="authVm().isLoggedIn"
+          type="button"
+          class="header__help"
+          (click)="startHelpTour()"
+          aria-label="Iniciar guía paso a paso para publicar una solicitud"
+        >
+          <span class="header__helpIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
+              <path
+                fill="currentColor"
+                d="M12 2a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2zm0 2a5 5 0 0 1 3.92 8.2.9.9 0 0 0-.22.59V16h-7.4v-3.21a.9.9 0 0 0-.22-.59A5 5 0 0 1 12 4zm-1 18h2v2h-2v-2z"
+              />
+            </svg>
+          </span>
+          <span class="header__helpText">
+            <span class="header__helpLabel">Guía paso a paso</span>
+            <span class="header__helpHint">Recorrido interactivo</span>
+          </span>
+        </button>
+      </div>
     </header>
 
     <ng-container *ngIf="!authVm().isLoggedIn; else logged">
@@ -28,7 +52,7 @@
         <fieldset class="section" [disabled]="state() === 'submitting'">
           <legend class="section__legend">Información principal</legend>
 
-          <div class="field">
+          <div class="field" data-tour="publish-title">
             <label class="field__label" for="title">Título</label>
             <input
               id="title"
@@ -50,7 +74,7 @@
             </p>
           </div>
 
-          <div class="field">
+          <div class="field" data-tour="publish-excerpt">
             <label class="field__label" for="excerpt">Resumen corto</label>
             <input
               id="excerpt"
@@ -72,7 +96,7 @@
             </p>
           </div>
 
-          <div class="field">
+          <div class="field" data-tour="publish-description">
             <label class="field__label" for="description">Descripción</label>
             <textarea
               id="description"
@@ -93,7 +117,7 @@
             </p>
           </div>
 
-          <div class="field">
+          <div class="field" data-tour="publish-tags">
             <label class="field__label" for="tagsInput">Etiquetas</label>
             <input
               id="tagsInput"
@@ -119,114 +143,203 @@
           </div>
         </fieldset>
 
-        <fieldset class="section" [disabled]="state() === 'submitting'">
+        <fieldset class="section" [disabled]="state() === 'submitting'" data-tour="publish-location">
           <legend class="section__legend">Ubicación y presupuesto</legend>
 
           <div class="grid">
             <div class="field">
-              <label class="field__label" for="locationLabel">Ubicación</label>
-              <input
-                id="locationLabel"
+              <label class="field__label" for="countryCode">País</label>
+              <select
+                id="countryCode"
                 class="field__control"
-                type="text"
-                formControlName="locationLabel"
-                placeholder="Barcelona · Eixample"
-                autocomplete="off"
-                [attr.aria-invalid]="form.controls.locationLabel.invalid && form.controls.locationLabel.touched ? 'true' : null"
-                aria-describedby="location-error"
-              />
-              <p
-                id="location-error"
-                class="field__error"
-                *ngIf="form.controls.locationLabel.touched && form.controls.locationLabel.invalid"
+                formControlName="countryCode"
+                [attr.aria-invalid]="form.controls.countryCode.invalid && form.controls.countryCode.touched ? 'true' : null"
+                aria-describedby="country-error"
               >
-                <ng-container *ngIf="form.controls.locationLabel.errors?.['required']">La ubicación es obligatoria.</ng-container>
-                <ng-container *ngIf="form.controls.locationLabel.errors?.['uuidNotAllowed']">No incluyas identificadores técnicos en la ubicación.</ng-container>
+                <option value="" disabled>Selecciona un país</option>
+                <option *ngFor="let country of countryOptions" [value]="country.code">{{ country.label }}</option>
+              </select>
+              <p
+                id="country-error"
+                class="field__error"
+                *ngIf="form.controls.countryCode.touched && form.controls.countryCode.invalid"
+              >
+                El país es obligatorio.
               </p>
             </div>
 
             <div class="field">
-              <label class="field__label" for="budgetLabel">Presupuesto</label>
+              <label class="field__label" for="division">Departamento / provincia</label>
+              <select
+                id="division"
+                class="field__control"
+                formControlName="division"
+                [disabled]="!form.controls.countryCode.value"
+                [attr.aria-invalid]="form.controls.division.invalid && form.controls.division.touched ? 'true' : null"
+                aria-describedby="division-error"
+              >
+                <option value="" disabled>Selecciona departamento o provincia</option>
+                <option *ngFor="let d of divisionOptions()" [value]="d">{{ d }}</option>
+              </select>
+              <p
+                id="division-error"
+                class="field__error"
+                *ngIf="form.controls.division.touched && form.controls.division.invalid"
+              >
+                El departamento o provincia es obligatorio.
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="municipality">Municipio / ciudad</label>
+              <select
+                id="municipality"
+                class="field__control"
+                formControlName="municipality"
+                [disabled]="!form.controls.division.value"
+                [attr.aria-invalid]="form.controls.municipality.invalid && form.controls.municipality.touched ? 'true' : null"
+                aria-describedby="municipality-error"
+              >
+                <option value="" disabled>Selecciona municipio o ciudad</option>
+                <option *ngFor="let m of municipalityOptions()" [value]="m">{{ m }}</option>
+              </select>
+              <p
+                id="municipality-error"
+                class="field__error"
+                *ngIf="form.controls.municipality.touched && form.controls.municipality.invalid"
+              >
+                El municipio o ciudad es obligatorio.
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="neighborhood">Barrio (opcional)</label>
               <input
-                id="budgetLabel"
+                id="neighborhood"
                 class="field__control"
                 type="text"
-                formControlName="budgetLabel"
-                placeholder="€60"
+                formControlName="neighborhood"
+                placeholder="Ej. El Poblado, Palermo"
                 autocomplete="off"
-                [attr.aria-invalid]="form.controls.budgetLabel.invalid && form.controls.budgetLabel.touched ? 'true' : null"
-                aria-describedby="budget-error"
+                maxlength="120"
+                [attr.aria-invalid]="form.controls.neighborhood.invalid && form.controls.neighborhood.touched ? 'true' : null"
+                aria-describedby="neighborhood-error"
               />
               <p
-                id="budget-error"
+                id="neighborhood-error"
                 class="field__error"
-                *ngIf="form.controls.budgetLabel.touched && form.controls.budgetLabel.invalid"
+                *ngIf="form.controls.neighborhood.touched && form.controls.neighborhood.invalid"
               >
-                El presupuesto es obligatorio.
+                <ng-container *ngIf="form.controls.neighborhood.errors?.['maxlength']">Máximo 120 caracteres.</ng-container>
+                <ng-container *ngIf="form.controls.neighborhood.errors?.['uuidNotAllowed']">No incluyas identificadores técnicos.</ng-container>
               </p>
             </div>
           </div>
-        </fieldset>
 
-        <fieldset class="section" [disabled]="state() === 'submitting'">
-          <legend class="section__legend">Contacto</legend>
-
-          <div class="grid">
-            <div class="field">
-              <label class="field__label" for="contactPhone">Teléfono</label>
-              <input
-                id="contactPhone"
-                class="field__control"
-                type="tel"
-                formControlName="contactPhone"
-                placeholder="+34 600 111 222"
-                autocomplete="tel"
-                [attr.aria-invalid]="form.controls.contactPhone.invalid && form.controls.contactPhone.touched ? 'true' : null"
-                aria-describedby="phone-error"
-              />
-              <p
-                id="phone-error"
-                class="field__error"
-                *ngIf="form.controls.contactPhone.touched && form.controls.contactPhone.invalid"
-              >
-                El teléfono es obligatorio.
-              </p>
-            </div>
-
-            <div class="field">
-              <label class="field__label" for="contactEmail">Email</label>
-              <input
-                id="contactEmail"
-                class="field__control"
-                type="email"
-                formControlName="contactEmail"
-                placeholder="contacto@example.com"
-                autocomplete="email"
-                [attr.aria-invalid]="form.controls.contactEmail.invalid && form.controls.contactEmail.touched ? 'true' : null"
-                aria-describedby="email-error"
-              />
-              <p
-                id="email-error"
-                class="field__error"
-                *ngIf="form.controls.contactEmail.touched && form.controls.contactEmail.invalid"
-              >
-                <ng-container *ngIf="form.controls.contactEmail.errors?.['required']">El email es obligatorio.</ng-container>
-                <ng-container *ngIf="form.controls.contactEmail.errors?.['email']">Email no válido.</ng-container>
-              </p>
-            </div>
+          <div class="field" data-tour="publish-budget">
+            <label class="field__label" for="budgetLabel">Presupuesto</label>
+            <input
+              id="budgetLabel"
+              class="field__control"
+              type="text"
+              formControlName="budgetLabel"
+              [placeholder]="budgetCurrency()?.placeholder ?? 'Selecciona un país primero'"
+              autocomplete="off"
+              [attr.aria-invalid]="form.controls.budgetLabel.invalid && form.controls.budgetLabel.touched ? 'true' : null"
+              aria-describedby="budget-hint budget-error"
+            />
+            <p id="budget-hint" class="field__hint">
+              <ng-container *ngIf="budgetCurrency() as currency; else budgetCountryFirst">
+                {{ currency.hint }}
+              </ng-container>
+              <ng-template #budgetCountryFirst>Elige el país para ver el formato de moneda del presupuesto.</ng-template>
+            </p>
+            <p
+              id="budget-error"
+              class="field__error"
+              *ngIf="form.controls.budgetLabel.touched && form.controls.budgetLabel.invalid"
+            >
+              El presupuesto es obligatorio.
+            </p>
           </div>
         </fieldset>
 
-        <fieldset class="section" [disabled]="state() === 'submitting'">
-          <legend class="section__legend">Imágenes (opcional)</legend>
+        <fieldset
+          class="section"
+          [disabled]="state() === 'submitting'"
+          formGroupName="workConditions"
+          data-tour="publish-work-conditions"
+        >
+          <legend class="section__legend">Condiciones y recursos disponibles</legend>
+          <p class="field__hint sectionIntro">
+            Opcional. Ayuda a quienes postulen a entender herramientas, traslado, materiales y expectativas del
+            trabajo.
+          </p>
+
+          <div class="conditionGrid">
+            <div
+              class="conditionRow"
+              *ngFor="let field of workConditionFields"
+              [attr.data-condition]="field.key"
+            >
+              <p class="conditionRow__label">{{ field.label }}</p>
+              <div class="conditionOptions" role="group" [attr.aria-label]="field.label">
+                <button
+                  type="button"
+                  class="conditionPill"
+                  *ngFor="let option of field.options"
+                  [class.is-selected]="isWorkConditionSelected(field.key, option.value)"
+                  [attr.aria-pressed]="isWorkConditionSelected(field.key, option.value)"
+                  (click)="selectWorkCondition(field.key, option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field conditionInstructions">
+            <label class="field__label" for="additionalInstructions">Instrucciones adicionales (opcional)</label>
+            <textarea
+              id="additionalInstructions"
+              class="field__control field__control--textarea"
+              rows="4"
+              formControlName="additionalInstructions"
+              placeholder="Acceso al edificio, parqueadero, materiales, restricciones u horarios preferidos."
+              [attr.aria-invalid]="
+                form.controls.workConditions.controls.additionalInstructions.invalid &&
+                form.controls.workConditions.controls.additionalInstructions.touched
+                  ? 'true'
+                  : null
+              "
+              aria-describedby="additional-instructions-hint additional-instructions-error"
+            ></textarea>
+            <p id="additional-instructions-hint" class="field__hint">
+              Máximo {{ additionalInstructionsMaxLength }} caracteres.
+            </p>
+            <p
+              id="additional-instructions-error"
+              class="field__error"
+              *ngIf="
+                form.controls.workConditions.controls.additionalInstructions.touched &&
+                form.controls.workConditions.controls.additionalInstructions.invalid
+              "
+            >
+              Las instrucciones adicionales no pueden superar {{ additionalInstructionsMaxLength }} caracteres.
+            </p>
+          </div>
+        </fieldset>
+
+        <fieldset class="section" [disabled]="state() === 'submitting'" data-tour="publish-images">
+          <legend class="section__legend">Contenido multimedia</legend>
 
           <p class="field__hint">
-            Podés elegir varias imágenes de una vez, o repetir «Elegir archivos» para ir sumando (hasta {{ maxImageFiles }}
-            en total; JPG, PNG, WebP o GIF; máx. 10 MB cada una).
+            Adjunta al menos un archivo. Podés elegir varios a la vez o repetir la selección para ir sumando (hasta
+            {{ maxImageFiles }} en total; JPG, PNG, WebP o GIF; máx. 10 MB cada uno).
           </p>
 
           <div class="field">
-            <label class="field__label" for="imageFiles">Archivos</label>
+            <label class="field__label" for="imageFiles">Archivos multimedia</label>
             <input
               #imageFileInput
               id="imageFiles"
@@ -283,6 +396,7 @@
           <button
             type="submit"
             class="btn"
+            data-tour="publish-submit"
             [disabled]="isSubmitDisabled()"
             [attr.aria-busy]="state() === 'submitting' ? 'true' : null"
           >

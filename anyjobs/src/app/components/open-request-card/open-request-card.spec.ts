@@ -36,5 +36,19 @@ describe('OpenRequestCardComponent', () => {
     expect(img).toBeTruthy();
     expect(img?.getAttribute('src')).toBe('/img.png');
   });
+
+  it('should format budget with currency and thousand separators', async () => {
+    fixture.componentRef.setInput('request', {
+      id: '1',
+      excerpt: 'Limpieza',
+      budgetLabel: '110000',
+      locationLabel: 'Centro · Bogotá · Cundinamarca · Colombia',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.chip--budget')?.textContent?.trim()).toBe('$110.000');
+  });
 });
 

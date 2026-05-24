@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
@@ -17,6 +17,7 @@ import { UserIdentityLinkComponent } from '../../../shared/components/user-ident
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { ProposalsService } from '../../../shared/proposals/proposals.service';
 import { Proposal } from '../../../shared/proposals/proposals.models';
+import { formatNotificationRelativeTime } from '../../../shared/notifications/notifications-relative-time';
 import { OpenRequestsService } from '../../open-requests/open-requests.service';
 import {
   OpenRequestDetail,
@@ -51,6 +52,7 @@ function postulantesHttpMessage(err: unknown): string {
 export class MyRequestsDashboard {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly proposals = inject(ProposalsService);
   private readonly openRequests = inject(OpenRequestsService);
   protected readonly authVm = inject(AuthSessionService).vm;
@@ -124,6 +126,51 @@ export class MyRequestsDashboard {
     const loaded = this.requestProposals()[rid] !== undefined;
     if (loaded) return;
 
+    this.loadPostulantes(rid);
+  }
+
+  protected retryPostulantes(requestId: string): void {
+    const rid = requestId.trim();
+    if (!rid) return;
+    this.loadPostulantes(rid);
+  }
+
+  protected postulantesCountLabel(requestId: string): string {
+    const count = this.proposalsForRequest(requestId).length;
+    if (count === 0) return 'Sin postulantes';
+    if (count === 1) return '1 postulante';
+    return `${count} postulantes`;
+  }
+
+  protected shouldShowWhoAmI(proposal: Proposal): boolean {
+    const who = proposal.whoAmI?.trim() ?? '';
+    const message = proposal.message?.trim() ?? '';
+    if (!who) return false;
+    return who !== message;
+  }
+
+  protected proposalCreatedAtLabel(proposal: Proposal): string {
+    const iso = proposal.createdAt?.trim() ?? '';
+    if (!iso) return '';
+    const relative = formatNotificationRelativeTime(iso);
+    if (!relative) return '';
+    if (relative.startsWith('Hace')) {
+      return `Postulada ${relative.charAt(0).toLowerCase()}${relative.slice(1)}`;
+    }
+    return `Postulada el ${relative}`;
+  }
+
+  protected proposalCreatedAtTitle(proposal: Proposal): string {
+    const iso = proposal.createdAt?.trim() ?? '';
+    const ts = Date.parse(iso);
+    if (!Number.isFinite(ts)) return '';
+    return new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(ts));
+  }
+
+  private loadPostulantes(requestId: string): void {
+    const rid = requestId.trim();
+    if (!rid) return;
+
     this.proposalPostulantesError.update((prev) => ({ ...prev, [rid]: undefined }));
     this.postulantesLoadingIds.update((prev) => new Set(prev).add(rid));
 
@@ -181,6 +228,20 @@ export class MyRequestsDashboard {
     return this.requestProposals()[requestId] !== undefined;
   }
 
+  private openPostulantesFromQueryParam(): void {
+    const requestId = this.route.snapshot.queryParamMap.get('postulantes')?.trim() ?? '';
+    if (!requestId) return;
+    if (!this.publishedItems().some((it) => it.id === requestId)) return;
+
+    this.activeTab.set('published');
+    this.togglePublishedPostulantes(requestId);
+
+    if (typeof document === 'undefined') return;
+    setTimeout(() => {
+      document.getElementById(`request-${requestId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  }
+
   private load(): void {
     this.publishedItems.set([]);
     this.appliedItems.set([]);
@@ -212,6 +273,7 @@ export class MyRequestsDashboard {
         next: (res) => {
           this.publishedItems.set(res.items);
           this.publishedState.set('success');
+          this.openPostulantesFromQueryParam();
         },
         error: () => {
           this.publishedItems.set([]);

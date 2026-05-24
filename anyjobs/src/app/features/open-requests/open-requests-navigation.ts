@@ -22,6 +22,12 @@ export function isOpenRequestsLandingPath(path: string): boolean {
   return pathOnlyFromUrl(path) === '/solicitudes';
 }
 
+/** Rutas con visor de reels a pantalla completa (sin footer de contacto). */
+export function isImmersiveMediaPath(path: string): boolean {
+  const normalized = pathOnlyFromUrl(path);
+  return normalized === '/home' || normalized === '/reels';
+}
+
 export function isOpenRequestDetailPath(path: string): boolean {
   const normalized = pathOnlyFromUrl(path);
   const match = normalized.match(DETAIL_PATH_RE);

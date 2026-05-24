@@ -20,7 +20,6 @@ import { finalize } from 'rxjs';
 import {
   MediaSliderComponent,
   type SlideActionEvent,
-  type SlideData,
   type SlideFollowEvent,
 } from 'ngx-vertical-slider';
 

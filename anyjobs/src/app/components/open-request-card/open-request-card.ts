@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { formatOpenRequestBudgetLabel } from '../../features/open-requests/open-request-budget.utils';
 import { OpenRequestListItem } from '../../features/open-requests/open-requests.models';
 import {
   navigateToOpenRequestDetail,
@@ -28,6 +29,11 @@ export class OpenRequestCardComponent {
   protected readonly ariaLabel = 'Ver detalle de la solicitud';
 
   protected readonly trackByValue = (_: number, v: string) => v;
+
+  protected formattedBudgetLabel(): string {
+    const request = this.request();
+    return formatOpenRequestBudgetLabel(request.budgetLabel, request.locationLabel);
+  }
 
   protected detailHref(): string {
     return openRequestDetailPath(this.request().id);

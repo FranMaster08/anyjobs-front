@@ -112,71 +112,44 @@
 }
 
 .homeSliderWrap {
+  --home-slide-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
   width: 100%;
-  max-width: var(--home-slider-max-width-sm);
-  margin: 0 auto;
-  height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
-  min-height: calc(100dvh - var(--home-slider-header-offset) - var(--home-bottom-nav-height));
+  height: var(--home-slide-height);
+  max-height: var(--home-slide-height);
 }
 
 @media (max-width: 900px) {
   .homeSliderWrap {
     flex: 1 1 auto;
     min-height: 0;
-    height: 100%;
-    max-height: 100%;
   }
 }
 
-/* La librería fija cada slide a `100dvh` y el host del slider también; si el wrap es
- * más bajo (header + barra inferior), el slide sobresale y el overlay queda con
- * coordenadas incorrectas (p. ej. `top` negativo). Acotar al alto real del contenedor. */
+/* La librería fija cada slide a `100dvh`; acotamos slider y slides al alto real del wrap. */
 .homeSliderWrap ::ng-deep media-slider {
-  max-height: 100%;
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100% !important;
+  max-width: none !important;
+  height: var(--home-slide-height) !important;
+  max-height: var(--home-slide-height);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .homeSliderWrap ::ng-deep media-slide {
-  height: 100% !important;
-  min-height: 100% !important;
-  max-height: 100%;
+  height: var(--home-slide-height) !important;
+  min-height: var(--home-slide-height) !important;
+  max-height: var(--home-slide-height);
 }
 
 .homeSliderWrap ::ng-deep media-slide .slide__media {
   z-index: 0;
-}
-
-/* ngx-vertical-slider fuerza max-width: 420px desde 700px — lo anulamos para respetar el ancho del wrap. */
-@media (min-width: 700px) {
-  .homeSliderWrap media-slider {
-    max-width: none !important;
-    width: 100% !important;
-  }
-
-  .homeSliderWrap ::ng-deep media-slide {
-    height: 100% !important;
-    min-height: 100% !important;
-  }
-}
-
-/* Escritorio: la columna del slider ocupa el 70% del ancho del contenido (main). */
-@media (min-width: 900px) {
-  .homeSliderWrap {
-    width: 70%;
-    max-width: none;
-  }
-}
-
-/* La librería usa :host { height: 100dvh }; lo acotamos al hueco bajo el header. */
-.homeSliderWrap media-slider {
-  display: block;
-  flex: 1 1 auto;
-  min-height: 0;
-  width: 100%;
-  height: 100% !important;
 }
 
 /*

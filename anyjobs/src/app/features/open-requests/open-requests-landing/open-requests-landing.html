@@ -57,7 +57,7 @@
                       <span>{{ feat.locationLabel }}</span>
                     }
                     @if (feat.budgetLabel) {
-                      <span>{{ feat.budgetLabel }}</span>
+                      <span>{{ formattedBudgetLabel(feat) }}</span>
                     }
                     @if (feat.publishedAtLabel) {
                       <span>{{ feat.publishedAtLabel }}</span>
@@ -86,11 +86,7 @@
                   {{ site.config()?.sections?.requests?.title ?? 'Selección destacada' }}
                 </h2>
               </div>
-              <a
-                class="btn btn--secondary btn--sm"
-                [routerLink]="['/solicitudes']"
-                fragment="contacto"
-              >
+              <a class="btn btn--secondary btn--sm" href="#contacto">
                 {{ site.config()?.sections?.requests?.cta ?? 'Publicar / Consultar' }}
               </a>
             </div>
@@ -227,77 +223,6 @@
                 </div>
               </div>
 
-            </div>
-          </section>
-
-          <section id="contacto" class="section">
-            <div class="sectionCard">
-              <div class="sectionCardHeader">
-                <p class="sectionLabel">
-                  {{ site.config()?.sections?.contact?.label ?? 'CONTACTO' }}
-                </p>
-                <h2 class="sectionTitle">
-                  {{ site.config()?.sections?.contact?.title ?? '¿Hablamos?' }}
-                </h2>
-                <p class="contactIntro">
-                  {{
-                    site.config()?.sections?.contact?.intro ??
-                      'Responde a una solicitud en minutos. Si necesitas ayuda, contáctanos por el canal que prefieras.'
-                  }}
-                </p>
-              </div>
-
-              <div class="contactGrid" aria-label="Acciones de contacto">
-                <a
-                  class="contactCard"
-                  [href]="site.config()?.sections?.contact?.phone?.href ?? 'tel:+34000000000'"
-                  aria-label="Llamar por teléfono"
-                >
-                  <div class="contactTop">
-                    <div class="contactIcon" aria-hidden="true">☎</div>
-                    <div class="contactInfo">
-                      <p class="contactTitle">
-                        {{ site.config()?.sections?.contact?.phone?.label ?? 'TELÉFONO' }}
-                      </p>
-                      <p class="contactValue">
-                        {{ site.config()?.sections?.contact?.phone?.value ?? '+34 000 000 000' }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="contactMeta">
-                    <span class="contactHint">{{
-                      site.config()?.sections?.contact?.phone?.hint ?? 'L-V 9:00–18:00'
-                    }}</span>
-                    <span class="contactChevron" aria-hidden="true">›</span>
-                  </div>
-                </a>
-
-                <a
-                  class="contactCard"
-                  [href]="
-                    site.config()?.sections?.contact?.email?.href ?? 'mailto:hola@anyjobs.local'
-                  "
-                  aria-label="Enviar email"
-                >
-                  <div class="contactTop">
-                    <div class="contactIcon" aria-hidden="true">✉</div>
-                    <div class="contactInfo">
-                      <p class="contactTitle">
-                        {{ site.config()?.sections?.contact?.email?.label ?? 'EMAIL' }}
-                      </p>
-                      <p class="contactValue">
-                        {{ site.config()?.sections?.contact?.email?.value ?? 'hola@anyjobs.local' }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="contactMeta">
-                    <span class="contactHint">{{
-                      site.config()?.sections?.contact?.email?.hint ?? 'Respuesta en 24h'
-                    }}</span>
-                    <span class="contactChevron" aria-hidden="true">›</span>
-                  </div>
-                </a>
-              </div>
             </div>
           </section>
 

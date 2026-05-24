@@ -95,17 +95,28 @@
   min-width: 0;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .titleLink {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  flex: 1;
+  min-width: 0;
+  display: block;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 15px;
   font-weight: 800;
   line-height: 1.3;
   color: var(--aj-color-ink);
-  min-width: 0;
-  overflow-wrap: anywhere;
+}
+
+.titleRow .chip--budget {
+  flex-shrink: 0;
 }
 
 .chips {

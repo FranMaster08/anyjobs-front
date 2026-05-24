@@ -9,6 +9,8 @@ import { OpenRequestsService } from '../open-requests.service';
 import { CreateOpenRequestInput, OpenRequestDetail } from '../open-requests.models';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { AuthSession } from '../../../shared/auth/auth.models';
+import { LocationGeographyService } from '../../../shared/location/location-geography.service';
+import { buildLocationCatalogResponse } from '../../../shared/location/location-geography.data';
 
 interface AuthVm {
   session: AuthSession | null;
@@ -50,6 +52,15 @@ function configure(
   routerNavigateSpy: ReturnType<typeof vi.fn>;
 } {
   const auth = buildAuthMock(authVm);
+  const geography = {
+    ensureCatalog: () => of(buildLocationCatalogResponse()),
+    loadDivisionsForCountry: () => of([]),
+    loadMunicipalitiesForDivision: () => of([]),
+    divisions: () => ['Antioquia'],
+    municipalities: () => ['Medellín'],
+    divisionsLoaded: signal({}),
+    municipalitiesLoaded: signal({}),
+  };
 
   TestBed.configureTestingModule({
     imports: [OpenRequestCreate],
@@ -57,6 +68,7 @@ function configure(
       provideRouter([]),
       { provide: AuthSessionService, useValue: auth.service },
       { provide: OpenRequestsService, useValue: serviceMock },
+      { provide: LocationGeographyService, useValue: geography },
     ],
   });
 
@@ -78,10 +90,8 @@ const validInput: CreateOpenRequestInput = {
   excerpt: 'Necesito limpieza',
   description: 'Descripción suficientemente larga para validar el campo.',
   tags: ['Limpieza'],
-  locationLabel: 'Barcelona · Eixample',
-  budgetLabel: '€60',
-  contactPhone: '+34600111222',
-  contactEmail: 'cliente@example.com',
+  locationLabel: 'El Poblado · Medellín · Antioquia · Colombia',
+  budgetLabel: '$120.000',
 };
 
 const validDetail: OpenRequestDetail = {
@@ -92,7 +102,18 @@ const validDetail: OpenRequestDetail = {
   images: [],
 };
 
-function fillForm(component: OpenRequestCreate, partial: Partial<CreateOpenRequestInput & { tagsInput: string }> = {}): void {
+function fillForm(
+  component: OpenRequestCreate,
+  partial: Partial<
+    CreateOpenRequestInput & {
+      tagsInput: string;
+      countryCode: string;
+      division: string;
+      municipality: string;
+      neighborhood: string;
+    }
+  > = {},
+): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = (component as any).form;
   form.patchValue({
@@ -100,10 +121,11 @@ function fillForm(component: OpenRequestCreate, partial: Partial<CreateOpenReque
     excerpt: validInput.excerpt,
     description: validInput.description,
     tagsInput: 'Limpieza',
-    locationLabel: validInput.locationLabel,
+    countryCode: 'CO',
+    division: 'Antioquia',
+    municipality: 'Medellín',
+    neighborhood: 'El Poblado',
     budgetLabel: validInput.budgetLabel,
-    contactPhone: validInput.contactPhone,
-    contactEmail: validInput.contactEmail,
     ...partial,
   });
 }
@@ -114,6 +136,15 @@ function fakeFileInputChangeEvent(files: File[]): Event {
     value: '',
   } as unknown as HTMLInputElement;
   return { target } as unknown as Event;
+}
+
+function fakePngFile(name = 'foto.png'): File {
+  return new File([new Uint8Array([137, 80])], name, { type: 'image/png' });
+}
+
+function attachTestMultimedia(component: OpenRequestCreate, files: File[] = [fakePngFile()]): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (component as any).selectedImageFiles.set(files);
 }
 
 describe('parseTags', () => {
@@ -149,6 +180,22 @@ describe('OpenRequestCreate', () => {
       { createOpenRequest: () => of(validDetail) },
     );
     expect((fixture.nativeElement as HTMLElement).querySelector('form')).not.toBeNull();
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Contacto');
+  });
+
+  it('muestra botón de ayuda cuando hay sesión', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    const { fixture } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      { createOpenRequest: () => of(validDetail) },
+    );
+    const help = (fixture.nativeElement as HTMLElement).querySelector('.header__help');
+    expect(help).not.toBeNull();
+    expect(help?.textContent?.trim()).toContain('Guía paso a paso');
   });
 
   it('al hacer submit con campos requeridos vacíos lista los campos pendientes y no envía', () => {
@@ -182,29 +229,12 @@ describe('OpenRequestCreate', () => {
     const missing = (component as any).missingFields() as readonly string[];
     expect(missing.length).toBeGreaterThan(0);
     expect(missing).toContain('Título');
-    expect(missing).toContain('Descripción');
+    expect(missing).toContain('País');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((component as any).state()).toBe('error');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((component as any).errorMessage()).toMatch(/Faltan? .* (campo|campos)/i);
   });
 
-  it('rechaza contactEmail inválido', () => {
-    const session: AuthSession = {
-      token: 't',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
-    };
-    const { component } = configure(
-      { session, isLoggedIn: true, user: session.user },
-      { createOpenRequest: () => of(validDetail) },
-    );
-    fillForm(component, { contactEmail: 'no-es-email' });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((component as any).form.controls.contactEmail.errors).toMatchObject({ email: true });
-  });
-
-  it('rechaza locationLabel con UUID embebido', () => {
+  it('rechaza barrio con UUID embebido', () => {
     const session: AuthSession = {
       token: 't',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -215,10 +245,10 @@ describe('OpenRequestCreate', () => {
       { createOpenRequest: () => of(validDetail) },
     );
     fillForm(component, {
-      locationLabel: '4f1a2b3c-9d2e-4a7b-8c6d-1234567890ab · Sevilla · Triana',
+      neighborhood: '4f1a2b3c-9d2e-4a7b-8c6d-1234567890ab',
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((component as any).form.controls.locationLabel.errors).toMatchObject({
+    expect((component as any).form.controls.neighborhood.errors).toMatchObject({
       uuidNotAllowed: true,
     });
   });
@@ -248,6 +278,49 @@ describe('OpenRequestCreate', () => {
     expect((component as any).selectedImageFiles()).toEqual([f1, f2]);
   });
 
+  it('bloquea submit sin contenido multimedia', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    let postCalls = 0;
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      {
+        createOpenRequest: () => {
+          postCalls += 1;
+          return of(validDetail);
+        },
+      },
+    );
+    fillForm(component);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).submit();
+    expect(postCalls).toBe(0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((component as any).missingFields()).toContain('Contenido multimedia');
+  });
+
+  it('muestra placeholder de presupuesto según el país', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    const { fixture, component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      { createOpenRequest: () => of(validDetail) },
+    );
+    fillForm(component, { countryCode: 'AR', budgetLabel: '' });
+    fixture.detectChanges();
+    const budget = (fixture.nativeElement as HTMLElement).querySelector(
+      '#budgetLabel',
+    ) as HTMLInputElement | null;
+    expect(budget?.placeholder).toBe('$60.000');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('pesos argentinos');
+  });
+
   it('envía imageFiles cuando hay imágenes seleccionadas', () => {
     const session: AuthSession = {
       token: 't',
@@ -264,17 +337,16 @@ describe('OpenRequestCreate', () => {
         },
       },
     );
+    const png = fakePngFile();
     fillForm(component);
-    const png = new File([new Uint8Array([137, 80])], 'foto.png', { type: 'image/png' });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (component as any).selectedImageFiles.set([png]);
+    attachTestMultimedia(component, [png]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).submit();
     expect(captured).not.toBeNull();
     expect(captured!.imageFiles).toEqual([png]);
   });
 
-  it("normaliza tags 'a, b, a, ' a ['a','b'] en el body enviado", () => {
+  it("normaliza tags 'a, b, a, ' y construye locationLabel estructurado", () => {
     const session: AuthSession = {
       token: 't',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -291,10 +363,14 @@ describe('OpenRequestCreate', () => {
       },
     );
     fillForm(component, { tagsInput: 'a, b, a, ' });
+    attachTestMultimedia(component);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).submit();
     expect(captured).not.toBeNull();
     expect(captured!.tags).toEqual(['a', 'b']);
+    expect(captured!.locationLabel).toBe('El Poblado · Medellín · Antioquia · Colombia');
+    expect(captured).not.toHaveProperty('contactEmail');
+    expect(captured).not.toHaveProperty('contactPhone');
   });
 
   it('navega a /solicitudes/<id> al cerrar el modal de éxito', async () => {
@@ -308,6 +384,7 @@ describe('OpenRequestCreate', () => {
       { createOpenRequest: () => of(validDetail) },
     );
     fillForm(component);
+    attachTestMultimedia(component);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).submit();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -327,6 +404,7 @@ describe('OpenRequestCreate', () => {
       { createOpenRequest: () => throwError(() => err) },
     );
     fillForm(component);
+    attachTestMultimedia(component);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).submit();
     expect(authClearSpy).not.toHaveBeenCalled();
@@ -346,6 +424,7 @@ describe('OpenRequestCreate', () => {
       { createOpenRequest: () => throwError(() => err) },
     );
     fillForm(component);
+    attachTestMultimedia(component);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).submit();
     expect(authClearSpy).not.toHaveBeenCalled();
@@ -353,5 +432,81 @@ describe('OpenRequestCreate', () => {
     expect((component as any).errorMessage()).toBe(
       'Tu cuenta no tiene permiso para publicar solicitudes',
     );
+  });
+
+  it('muestra la sección Condiciones y recursos disponibles', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    const { fixture } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      { createOpenRequest: () => of(validDetail) },
+    );
+    const html = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(html).toContain('Condiciones y recursos disponibles');
+    expect(fixture.nativeElement.querySelector('[data-tour="publish-work-conditions"]')).not.toBeNull();
+  });
+
+  it('envía workConditions cuando el usuario selecciona opciones', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    let captured: CreateOpenRequestInput | null = null;
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      {
+        createOpenRequest: (input: CreateOpenRequestInput) => {
+          captured = input;
+          return of(validDetail);
+        },
+      },
+    );
+    fillForm(component);
+    attachTestMultimedia(component);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).form.controls.workConditions.patchValue({
+      ownToolsRequired: 'yes',
+      workerMustTravel: 'to_coordinate',
+      additionalInstructions: 'Portería 24h',
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).submit();
+    expect(captured).not.toBeNull();
+    expect(captured!.workConditions).toEqual({
+      ownToolsRequired: 'yes',
+      workerMustTravel: 'to_coordinate',
+      additionalInstructions: 'Portería 24h',
+    });
+  });
+
+  it('bloquea envío si instrucciones adicionales superan 500 caracteres', () => {
+    const session: AuthSession = {
+      token: 't',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: { id: 'u', fullName: 'X', email: 'u@x.com', roles: [] as any },
+    };
+    let called = false;
+    const { component } = configure(
+      { session, isLoggedIn: true, user: session.user },
+      {
+        createOpenRequest: () => {
+          called = true;
+          return of(validDetail);
+        },
+      },
+    );
+    fillForm(component);
+    attachTestMultimedia(component);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).form.controls.workConditions.controls.additionalInstructions.setValue('x'.repeat(501));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).submit();
+    expect(called).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((component as any).missingFields()).toContain('Instrucciones adicionales');
   });
 });

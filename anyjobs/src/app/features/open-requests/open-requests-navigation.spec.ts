@@ -3,6 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 
 import {
+  isImmersiveMediaPath,
   isOpenRequestDetailPath,
   isOpenRequestsLandingPath,
   navigateToOpenRequestDetail,
@@ -12,6 +13,12 @@ import {
 } from './open-requests-navigation';
 
 describe('open-requests-navigation', () => {
+  it('detects immersive media paths', () => {
+    expect(isImmersiveMediaPath('/home')).toBe(true);
+    expect(isImmersiveMediaPath('/reels')).toBe(true);
+    expect(isImmersiveMediaPath('/solicitudes')).toBe(false);
+  });
+
   it('detects landing path', () => {
     expect(isOpenRequestsLandingPath('/solicitudes')).toBe(true);
     expect(isOpenRequestsLandingPath('/solicitudes/')).toBe(true);
