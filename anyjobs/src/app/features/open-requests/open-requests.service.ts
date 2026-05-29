@@ -17,6 +17,7 @@ import {
   PatchOpenRequestInput,
 } from './open-requests.models';
 import type { WorkConditions } from './open-request-work-conditions.constants';
+import { normalizeLifecycleStatus } from './open-request-lifecycle-labels';
 
 export const OPEN_REQUESTS_API_URL = new InjectionToken<string>('OPEN_REQUESTS_API_URL', {
   providedIn: 'root',
@@ -40,6 +41,7 @@ interface MockOpenRequestsApi {
 
 interface OpenRequestListItemDto {
   id: string;
+  lifecycleStatus?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
   excerpt?: string | null;
@@ -68,6 +70,7 @@ interface OpenRequestImageDto {
 
 interface OpenRequestDetailDto {
   id: string;
+  lifecycleStatus?: string | null;
   ownerUserId?: string | null;
   title?: string | null;
   excerpt?: string | null;
@@ -190,6 +193,20 @@ export class OpenRequestsService {
       .pipe(map((dto) => toListResponse(dto, pageSize)));
   }
 
+  cancelOpenRequest(id: string): Observable<OpenRequestDetail> {
+    const trimmedId = id.trim();
+    if (trimmedId.length === 0) {
+      return throwError(() => new Error('Identificador de solicitud inválido'));
+    }
+    if (this.apiUrl.includes('/mock/')) {
+      return throwError(() => new Error('cancelOpenRequest no está disponible en modo mock'));
+    }
+
+    return this.http
+      .post<OpenRequestDetailDto>(`${this.apiUrl}/${encodeURIComponent(trimmedId)}/cancel`, {})
+      .pipe(map((dto) => normalizeDetail(dto, null)));
+  }
+
   getOpenRequestDetail(id: string): Observable<OpenRequestDetail> {
     const trimmedId = id.trim();
     if (trimmedId.length === 0) {
@@ -223,6 +240,7 @@ function normalizeListItem(dto: OpenRequestListItemDto): OpenRequestListItem {
 
   return {
     id: dto.id,
+    lifecycleStatus: normalizeLifecycleStatus(dto.lifecycleStatus ?? undefined),
     excerpt: excerpt.length > 0 ? excerpt : 'Sin descripción',
     imageUrl: imageUrl.length > 0 ? imageUrl : undefined,
     imageAlt: imageAlt.length > 0 ? imageAlt : undefined,
@@ -294,6 +312,7 @@ function normalizeDetail(dto: OpenRequestDetailDto, base: OpenRequestListItemDto
 
   return {
     id: dto.id,
+    lifecycleStatus: normalizeLifecycleStatus(dto.lifecycleStatus ?? undefined),
     ...(typeof dto.ownerUserId === 'string' && dto.ownerUserId.trim().length > 0
       ? { ownerUserId: dto.ownerUserId.trim() }
       : dto.ownerUserId === null

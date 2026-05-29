@@ -9,12 +9,14 @@ import { OpenRequestDetail as OpenRequestDetailModel } from '../open-requests.mo
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { UserApi } from '../../../shared/api/user.api';
+import { ProposalsService } from '../../../shared/proposals/proposals.service';
 
 const ownerId = '00000000-0000-0000-0000-00000000aa01';
 const otherId = '00000000-0000-0000-0000-00000000bb02';
 
 const demoDetail: OpenRequestDetailModel = {
   id: 'req-test',
+  lifecycleStatus: 'ACTIVE',
   ownerUserId: ownerId,
   title: 'Solicitud test',
   excerpt: 'Resumen',
@@ -39,7 +41,10 @@ function buildAuthMock(userId: string | null, isLoggedIn: boolean) {
   };
 }
 
-function createFixture(authUserId: string | null): ComponentFixture<OpenRequestDetail> {
+function createFixture(
+  authUserId: string | null,
+  proposals: readonly { requestId: string }[] = [],
+): ComponentFixture<OpenRequestDetail> {
   const auth = buildAuthMock(authUserId, Boolean(authUserId));
 
   TestBed.configureTestingModule({
@@ -77,6 +82,21 @@ function createFixture(authUserId: string | null): ComponentFixture<OpenRequestD
             }),
         },
       },
+      {
+        provide: ProposalsService,
+        useValue: {
+          listByRequest: () =>
+            of(
+              proposals.map((_, i) => ({
+                id: `prop-${i}`,
+                requestId: 'req-test',
+                estimate: '100',
+                message: 'Hola',
+                whoAmI: 'Yo',
+              })),
+            ),
+        },
+      },
     ],
   });
 
@@ -97,11 +117,21 @@ describe('OpenRequestDetail', () => {
   });
 
   it('muestra enlace a Mis solicitudes para el owner autenticado', () => {
-    const fixture = createFixture(ownerId);
+    const fixture = createFixture(ownerId, [{ requestId: 'req-test' }, { requestId: 'req-test' }]);
     const text = fixture.nativeElement.textContent ?? '';
-    expect(text).toContain('Ver postulantes');
-    expect(text).toContain('Ir a Mis solicitudes');
-    expect(text).not.toContain('Todavía no hay postulaciones para esta request.');
+    expect(text).toContain('Ver postulantes (2)');
+    expect(text).toContain('Volver a Mis solicitudes');
+    expect(text).toContain('Cancelar esta solicitud');
+  });
+
+  it('deshabilita postulantes cuando el contador es cero', () => {
+    const fixture = createFixture(ownerId, []);
+    const text = fixture.nativeElement.textContent ?? '';
+    expect(text).toContain('Sin postulantes aún');
+    const disabledBtn = fixture.nativeElement.querySelector(
+      'button.btn[disabled]',
+    ) as HTMLButtonElement | null;
+    expect(disabledBtn?.textContent?.trim()).toBe('Sin postulantes aún');
   });
 
   it('no muestra el UUID en la descripción', () => {
@@ -167,5 +197,56 @@ describe('OpenRequestDetail', () => {
   it('no muestra Condiciones y recursos en solicitudes legacy sin datos', () => {
     const fixture = createFixture(null);
     expect(fixture.nativeElement.textContent).not.toContain('Condiciones y recursos');
+  });
+
+  it('muestra Cancelar esta solicitud al owner cuando está activa', () => {
+    const fixture = createFixture(ownerId);
+    expect(fixture.nativeElement.textContent).toContain('Cancelar esta solicitud');
+  });
+
+  it('no muestra Cancelar solicitud cuando ya está cerrada', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [OpenRequestDetail],
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({ id: 'req-test' })),
+            snapshot: { paramMap: convertToParamMap({ id: 'req-test' }) },
+          },
+        },
+        { provide: AuthSessionService, useValue: buildAuthMock(ownerId, true) },
+        {
+          provide: OpenRequestsService,
+          useValue: {
+            getOpenRequestDetail: () => of({ ...demoDetail, lifecycleStatus: 'CANCELLED' }),
+          },
+        },
+        { provide: OpenRequestsAnalyticsService, useValue: { track: vi.fn() } },
+        {
+          provide: UserApi,
+          useValue: {
+            getPublicProfile: () =>
+              of({
+                userId: ownerId,
+                fullName: 'María García',
+                roles: ['CLIENT'],
+                visibility: 'public' as const,
+                metrics: { openRequestsPublished: 1, proposalsSent: 0 },
+              }),
+          },
+        },
+        {
+          provide: ProposalsService,
+          useValue: { listByRequest: () => of([]) },
+        },
+      ],
+    });
+    const fixture = TestBed.createComponent(OpenRequestDetail);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Esta solicitud está cerrada');
+    expect(fixture.nativeElement.textContent).not.toContain('Cancelar esta solicitud');
   });
 });

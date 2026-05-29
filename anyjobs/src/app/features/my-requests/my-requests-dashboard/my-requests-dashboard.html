@@ -74,7 +74,7 @@
             <ng-container *ngIf="publishedItems().length > 0; else publishedEmpty">
               <div class="list" aria-label="Solicitudes que publiqué">
                 <article class="item" *ngFor="let it of publishedItems()" [id]="'request-' + it.id">
-                  <div class="itemGrid">
+                  <div class="itemGrid" [class.itemGrid--noThumb]="!it.imageUrl">
                     <div class="thumb" *ngIf="it.imageUrl">
                       <img
                         class="thumbImg"
@@ -92,7 +92,9 @@
                         </div>
 
                         <div class="chips" aria-label="Estado de la solicitud">
-                          <span class="chip chip--owned">Publicada por ti</span>
+                          <span class="chip" [ngClass]="publishedChipClass(it)">{{
+                            publishedLifecycleLabel(it)
+                          }}</span>
                         </div>
                       </div>
 
@@ -234,8 +236,8 @@
             <ng-container *ngIf="appliedItems().length > 0; else appliedEmpty">
               <div class="list" aria-label="Solicitudes a las que postulé">
                 <article class="item" *ngFor="let it of appliedItems()">
-                  <div class="itemGrid">
-                    <div class="thumb" *ngIf="it.request?.images?.length">
+                  <div class="itemGrid" [class.itemGrid--noThumb]="!appliedHasThumb(it)">
+                    <div class="thumb" *ngIf="appliedHasThumb(it)">
                       <img
                         class="thumbImg"
                         [src]="it.request!.images[0]!.url"
@@ -252,7 +254,9 @@
                         </div>
 
                         <div class="chips" aria-label="Estado de propuesta">
-                          <span class="chip chip--status">Enviada</span>
+                          <span class="chip" [ngClass]="appliedStatusChipClass(it)">{{
+                            appliedStatusLabel(it)
+                          }}</span>
                           <span class="chip chip--estimate">Tu oferta: {{ it.proposal.estimate }}</span>
                         </div>
                       </div>
@@ -263,7 +267,12 @@
                         <span class="pill pill--muted">ID: {{ it.proposal.requestId }}</span>
                       </div>
 
-                      <div class="itemActions" role="group" aria-label="Acciones">
+                      <div
+                        *ngIf="!appliedRequestCancelled(it)"
+                        class="itemActions"
+                        role="group"
+                        aria-label="Acciones"
+                      >
                         <a class="btn btn--profile btn--sm" [routerLink]="['/solicitudes', it.proposal.requestId]">
                           Ver detalle
                         </a>
@@ -285,12 +294,17 @@
 
                   <section
                     class="expandPanel"
-                    *ngIf="isAppliedProposalExpanded(it.proposal.id)"
+                    *ngIf="isAppliedProposalExpanded(it.proposal.id) && !appliedRequestCancelled(it)"
                     aria-label="Detalle de tu propuesta"
                   >
                     <header class="expandPanel__header">
                       <h3 class="expandPanel__title">Tu propuesta</h3>
-                      <span class="expandPanel__badge expandPanel__badge--sent">Enviada</span>
+                      <span
+                        class="expandPanel__badge"
+                        [class.expandPanel__badge--sent]="!appliedRequestCancelled(it)"
+                        [class.expandPanel__badge--cancelled]="appliedRequestCancelled(it)"
+                        >{{ appliedStatusLabel(it) }}</span
+                      >
                     </header>
 
                     <ng-container

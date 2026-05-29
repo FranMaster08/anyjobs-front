@@ -321,6 +321,30 @@
   border: 1px solid rgba(17, 24, 39, 0.12);
 }
 
+.openRequestDetail .authActions .btn--danger {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #fff;
+}
+
+.openRequestDetail .authActions .btn--danger:not(:disabled):hover {
+  background: #b91c1c;
+}
+
+.openRequestDetail .cancelModalText {
+  margin: 0 0 var(--aj-space-md);
+}
+
+.openRequestDetail .cancelModalError {
+  margin: 0 0 var(--aj-space-sm);
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+.openRequestDetail .cancelModalActions {
+  margin-top: var(--aj-space-md);
+}
+
 .openRequestDetail .authActions .btn--secondary:not(:disabled):hover {
   background: rgba(17, 24, 39, 0.09);
 }

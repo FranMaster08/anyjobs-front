@@ -227,10 +227,18 @@
     align-items: start;
   }
 
+  .itemGrid--noThumb {
+    grid-template-columns: 1fr;
+  }
+
   @media (max-width: 520px) {
     .itemGrid {
       grid-template-columns: 72px 1fr;
       gap: 10px;
+    }
+
+    .itemGrid--noThumb {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -318,10 +326,22 @@
     color: var(--aj-color-ink);
   }
 
-  .chip--owned {
+  .chip--active {
     background: rgba(14, 165, 164, 0.1);
     border-color: rgba(14, 165, 164, 0.28);
     color: #0f766e;
+  }
+
+  .chip--closed {
+    background: rgba(107, 114, 128, 0.12);
+    border-color: rgba(107, 114, 128, 0.28);
+    color: #4b5563;
+  }
+
+  .chip--cancelled {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.22);
+    color: #b91c1c;
   }
 
   .metaPills {
@@ -399,6 +419,11 @@
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
+  }
+
+  .expandPanel__badge--cancelled {
+    background: rgba(220, 38, 38, 0.1);
+    color: #b91c1c;
   }
 
   .expandPanel__badge--sent {

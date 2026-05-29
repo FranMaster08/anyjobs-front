@@ -1,4 +1,7 @@
 import type { WorkConditions } from './open-request-work-conditions.constants';
+import type { OpenRequestLifecycleStatus } from './open-request-lifecycle-labels';
+
+export type { OpenRequestLifecycleStatus } from './open-request-lifecycle-labels';
 
 export interface OpenRequestsListParams {
   readonly page: number;
@@ -9,6 +12,7 @@ export interface OpenRequestsListParams {
 
 export interface OpenRequestListItem {
   readonly id: string;
+  readonly lifecycleStatus?: OpenRequestLifecycleStatus;
   readonly imageUrl?: string;
   readonly imageAlt?: string;
   readonly excerpt: string;
@@ -44,6 +48,7 @@ export interface OpenRequestProviderReview {
 
 export interface OpenRequestDetail {
   readonly id: string;
+  readonly lifecycleStatus?: OpenRequestLifecycleStatus;
   /** UUID del usuario creador; viene del API cuando existe en BD. */
   readonly ownerUserId?: string | null;
   readonly title: string;
