@@ -498,7 +498,7 @@ export class OpenRequestsLanding implements AfterViewInit {
 
   private setupListImpressions(): void {
     const root = this.listGrid?.nativeElement;
-    if (!root) return;
+    if (!root || typeof IntersectionObserver === 'undefined') return;
 
     if (!this.listImpressionObserver) {
       this.listImpressionObserver = new IntersectionObserver(

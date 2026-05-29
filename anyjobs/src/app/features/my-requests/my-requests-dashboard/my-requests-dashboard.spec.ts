@@ -11,6 +11,10 @@ import { OpenRequestsService } from '../../open-requests/open-requests.service';
 describe('MyRequestsDashboard', () => {
   let fixture: ComponentFixture<MyRequestsDashboard>;
 
+  function myRequestsTabs(root: HTMLElement): HTMLButtonElement[] {
+    return Array.from(root.querySelectorAll('.myRequestsTab')) as HTMLButtonElement[];
+  }
+
   function configure(opts: {
     loggedIn: boolean;
     listByUser: () => ReturnType<ProposalsService['listByUser']>;
@@ -112,7 +116,7 @@ describe('MyRequestsDashboard', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const tabs = compiled.querySelectorAll<HTMLButtonElement>('.myRequestsTab');
+    const tabs = myRequestsTabs(compiled);
     expect(tabs.length).toBe(2);
     expect(tabs[0]?.textContent).toContain('Publicadas por mí');
     expect(tabs[1]?.textContent).toContain('Postulé a estas');
@@ -168,14 +172,14 @@ describe('MyRequestsDashboard', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const appliedTab = compiled.querySelectorAll<HTMLButtonElement>('.myRequestsTab')[1];
+    const appliedTab = myRequestsTabs(compiled)[1];
     appliedTab?.click();
     fixture.detectChanges();
 
     expect(compiled.textContent).toContain('Todavía no postulaste a ninguna solicitud.');
   });
 
-  it('renderiza items publicados con badge "Publicada por ti" y contador en la tab', async () => {
+  it('renderiza items publicados con chip de estado y contador en la tab', async () => {
     TestBed.resetTestingModule();
     configure({
       loggedIn: true,
@@ -185,6 +189,7 @@ describe('MyRequestsDashboard', () => {
           items: [
             {
               id: 'req-pub-1',
+              lifecycleStatus: 'ACTIVE',
               excerpt: 'Mi solicitud publicada',
               tags: ['Limpieza'],
               locationLabel: 'Madrid · Centro',
@@ -204,9 +209,55 @@ describe('MyRequestsDashboard', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Mi solicitud publicada');
-    expect(compiled.textContent).toContain('Publicada por ti');
+    expect(compiled.textContent).toContain('Activo');
 
-    const publishedTab = compiled.querySelectorAll<HTMLButtonElement>('.myRequestsTab')[0];
+    const publishedTab = myRequestsTabs(compiled)[0];
     expect(publishedTab?.textContent?.replace(/\s+/g, ' ')).toContain('Publicadas por mí 1');
+  });
+
+  it('oculta acciones en postulación cuando la solicitud está cancelada', async () => {
+    TestBed.resetTestingModule();
+    configure({
+      loggedIn: true,
+      listMyOpenRequests: () => of({ items: [], nextPage: null, hasMore: false }),
+      listByUser: () =>
+        of([
+          {
+            id: 'prop-1',
+            requestId: 'req-cancelled',
+            userId: 'user-1',
+            author: { name: 'Yo', subtitle: '' },
+            whoAmI: 'x',
+            message: 'x',
+            estimate: '€10',
+            createdAt: new Date().toISOString(),
+            status: 'SENT',
+          },
+        ]),
+      getOpenRequestDetail: () =>
+        of({
+          id: 'req-cancelled',
+          lifecycleStatus: 'CANCELLED',
+          title: 'Cancelada',
+          excerpt: 'x',
+          images: [],
+        }),
+    });
+    await TestBed.compileComponents();
+    fixture = TestBed.createComponent(MyRequestsDashboard);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const appliedTab = myRequestsTabs(fixture.nativeElement as HTMLElement)[1];
+    appliedTab?.click();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const appliedList = compiled.querySelector('[aria-label="Solicitudes a las que postulé"]');
+    expect(appliedList).toBeTruthy();
+    expect(appliedList!.textContent).toContain('Cancelada');
+    expect(appliedList!.querySelector('.itemActions')).toBeNull();
+    expect(appliedList!.querySelector('a[href*="/solicitudes/req-cancelled"]')).toBeNull();
   });
 });

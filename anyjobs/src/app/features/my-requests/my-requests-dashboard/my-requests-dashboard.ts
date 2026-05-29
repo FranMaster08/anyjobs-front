@@ -23,6 +23,12 @@ import {
   OpenRequestDetail,
   OpenRequestListItem,
 } from '../../open-requests/open-requests.models';
+import {
+  isRequestCancelled,
+  normalizeLifecycleStatus,
+  openRequestLifecycleLabel,
+  type OpenRequestLifecycleStatus,
+} from '../../open-requests/open-request-lifecycle-labels';
 
 interface AppliedRequestItem {
   readonly proposal: Proposal;
@@ -108,6 +114,35 @@ export class MyRequestsDashboard {
 
   protected closeChooseWip(): void {
     this.isChooseWipOpen.set(false);
+  }
+
+  protected publishedLifecycleStatus(it: OpenRequestListItem): OpenRequestLifecycleStatus {
+    return normalizeLifecycleStatus(it.lifecycleStatus);
+  }
+
+  protected publishedLifecycleLabel(it: OpenRequestListItem): string {
+    return openRequestLifecycleLabel(this.publishedLifecycleStatus(it), 'owner');
+  }
+
+  protected publishedChipClass(it: OpenRequestListItem): string {
+    return this.publishedLifecycleStatus(it) === 'CANCELLED' ? 'chip--closed' : 'chip--active';
+  }
+
+  protected appliedHasThumb(it: AppliedRequestItem): boolean {
+    return (it.request?.images?.length ?? 0) > 0;
+  }
+
+  protected appliedRequestCancelled(it: AppliedRequestItem): boolean {
+    return isRequestCancelled(normalizeLifecycleStatus(it.request?.lifecycleStatus));
+  }
+
+  protected appliedStatusLabel(it: AppliedRequestItem): string {
+    const status = normalizeLifecycleStatus(it.request?.lifecycleStatus);
+    return openRequestLifecycleLabel(status, 'applicant');
+  }
+
+  protected appliedStatusChipClass(it: AppliedRequestItem): string {
+    return this.appliedRequestCancelled(it) ? 'chip--cancelled' : 'chip--status';
   }
 
   protected togglePublishedPostulantes(requestId: string): void {

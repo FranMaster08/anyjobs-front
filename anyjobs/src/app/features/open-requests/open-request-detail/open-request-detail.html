@@ -184,25 +184,51 @@
               <div class="sidebarCard" id="applyCard">
                 <ng-container *ngIf="isRequestOwner(); else applySidebar">
                   <p class="sidebarTitle">Tu solicitud</p>
-                  <p class="authHint">
+                  <p class="authHint" *ngIf="isRequestActive()">
                     Eres el creador de esta solicitud. Revisa las postulaciones recibidas desde Mis
                     solicitudes.
                   </p>
+                  <p class="authHint" *ngIf="isRequestCancelled()">Esta solicitud está cerrada.</p>
                   <div class="authActions" role="group" aria-label="Acciones del publicador">
                     <a
+                      *ngIf="postulantesHasApplicants()"
                       class="btn"
                       [routerLink]="['/mis-solicitudes']"
                       [queryParams]="{ postulantes: requestId() }"
                     >
-                      Ver postulantes
+                      {{ postulantesLinkLabel() }}
                     </a>
-                    <a class="btn btn--secondary" routerLink="/mis-solicitudes">Ir a Mis solicitudes</a>
+                    <button
+                      *ngIf="!postulantesHasApplicants()"
+                      type="button"
+                      class="btn"
+                      disabled
+                      [attr.aria-busy]="postulantesCountLoading()"
+                    >
+                      {{
+                        postulantesCountLoading() ? 'Ver postulantes' : 'Sin postulantes aún'
+                      }}
+                    </button>
+                    <a class="btn btn--secondary" routerLink="/mis-solicitudes">
+                      Volver a Mis solicitudes
+                    </a>
+                    <button
+                      *ngIf="isRequestActive()"
+                      type="button"
+                      class="btn btn--danger"
+                      (click)="openCancelConfirm()"
+                    >
+                      Cancelar esta solicitud
+                    </button>
                   </div>
                 </ng-container>
 
                 <ng-template #applySidebar>
                   <p class="sidebarTitle">Postular</p>
-                  <p class="authHint">
+                  <p class="authHint" *ngIf="isRequestCancelled()">
+                    Esta solicitud ya no acepta postulaciones.
+                  </p>
+                  <p class="authHint" *ngIf="!isRequestCancelled()">
                     <ng-container *ngIf="authVm().isLoggedIn; else needAccount">
                       Ya tienes sesión iniciada. Puedes postularte ahora.
                     </ng-container>
@@ -211,7 +237,12 @@
                     </ng-template>
                   </p>
 
-                  <div class="authActions" role="group" aria-label="Acciones de cuenta">
+                  <div
+                    *ngIf="!isRequestCancelled()"
+                    class="authActions"
+                    role="group"
+                    aria-label="Acciones de cuenta"
+                  >
                     <ng-container *ngIf="authVm().isLoggedIn; else authCtas">
                       <button type="button" class="btn" (click)="goToProposal()">Postular</button>
                     </ng-container>
@@ -272,6 +303,34 @@
                   <img class="thumb" [src]="img.url" [alt]="img.alt ?? ''" />
                 </button>
               </div>
+            </div>
+          </app-modal>
+
+          <app-modal
+            [open]="cancelConfirmOpen()"
+            title="Cancelar solicitud"
+            size="sm"
+            (closed)="closeCancelConfirm()"
+          >
+            <p class="cancelModalText">¿Desea cancelar esta solicitud?</p>
+            <p *ngIf="cancelError()" class="cancelModalError" role="alert">{{ cancelError() }}</p>
+            <div class="authActions cancelModalActions" role="group" aria-label="Confirmar cancelación">
+              <button
+                type="button"
+                class="btn btn--danger"
+                [disabled]="cancelInProgress()"
+                (click)="confirmCancelRequest()"
+              >
+                {{ cancelInProgress() ? 'Cancelando…' : 'Sí' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn--secondary"
+                [disabled]="cancelInProgress()"
+                (click)="closeCancelConfirm()"
+              >
+                No
+              </button>
             </div>
           </app-modal>
         </ng-container>

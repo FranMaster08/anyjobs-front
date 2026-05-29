@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, map, switchMap } from 'rxjs';
+import { EMPTY, finalize, map, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ModalComponent } from '../../../components/modal/modal';
@@ -23,10 +23,15 @@ import {
   type WorkConditionDisplayItem,
 } from '../open-request-work-conditions.constants';
 import { OpenRequestsService } from '../open-requests.service';
+import {
+  isRequestCancelled,
+  normalizeLifecycleStatus,
+} from '../open-request-lifecycle-labels';
 import { OpenRequestsAnalyticsService } from '../open-requests-analytics.service';
 import { AuthSessionService } from '../../../shared/auth/auth-session.service';
 import { UserApi } from '../../../shared/api/user.api';
 import type { UserPublicProfileDto } from '../../../shared/api/user-profile.models';
+import { ProposalsService } from '../../../shared/proposals/proposals.service';
 
 /**
  * Pantalla de detalle de solicitud abierta.
@@ -47,6 +52,7 @@ export class OpenRequestDetail {
   private readonly analytics = inject(OpenRequestsAnalyticsService);
   private readonly authSession = inject(AuthSessionService);
   private readonly userApi = inject(UserApi);
+  private readonly proposals = inject(ProposalsService);
 
   private detailViewStartedAt: number | null = null;
   private trackedDetailRequestId: string | null = null;
@@ -80,6 +86,35 @@ export class OpenRequestDetail {
 
   protected readonly isRequestOwner = computed(() => this.isOwnerWithSession());
 
+  protected readonly requestLifecycleStatus = computed(() =>
+    normalizeLifecycleStatus(this.detail()?.lifecycleStatus),
+  );
+
+  protected readonly isRequestActive = computed(
+    () => !isRequestCancelled(this.requestLifecycleStatus()),
+  );
+
+  protected readonly isRequestCancelled = computed(() =>
+    isRequestCancelled(this.requestLifecycleStatus()),
+  );
+
+  protected readonly cancelConfirmOpen = signal(false);
+  protected readonly cancelInProgress = signal(false);
+  protected readonly cancelError = signal<string | null>(null);
+
+  /** `null` = cargando contador para el dueño. */
+  protected readonly postulantesCount = signal<number | null>(null);
+
+  protected readonly postulantesLinkLabel = computed(() => {
+    const count = this.postulantesCount();
+    if (count == null || count <= 0) return '';
+    return `Ver postulantes (${count})`;
+  });
+
+  protected readonly postulantesHasApplicants = computed(() => (this.postulantesCount() ?? 0) > 0);
+
+  protected readonly postulantesCountLoading = computed(() => this.postulantesCount() === null);
+
   protected readonly showWorkConditionsSection = computed(() => {
     const d = this.detail();
     return d?.workConditions ? hasWorkConditionsData(d.workConditions) : false;
@@ -111,10 +146,12 @@ export class OpenRequestDetail {
 
           if (!id) {
             this.detail.set(null);
+            this.postulantesCount.set(null);
             this.state.set('error');
             return EMPTY;
           }
 
+          this.postulantesCount.set(null);
           this.state.set('loading');
           return this.service.getOpenRequestDetail(id).pipe(map((detail) => ({ id, detail })));
         }),
@@ -135,9 +172,11 @@ export class OpenRequestDetail {
             });
           }
           this.loadPublisherProfile(detail);
+          this.loadPostulantesCount(id, detail);
         },
         error: () => {
           this.detail.set(null);
+          this.postulantesCount.set(null);
           this.state.set('error');
         },
       });
@@ -164,6 +203,7 @@ export class OpenRequestDetail {
 
     this.state.set('loading');
     this.resetPublisherProfile();
+    this.postulantesCount.set(null);
 
     this.service
       .getOpenRequestDetail(id)
@@ -174,9 +214,11 @@ export class OpenRequestDetail {
           this.activeImageIndex.set(0);
           this.state.set('success');
           this.loadPublisherProfile(detail);
+          this.loadPostulantesCount(id, detail);
         },
         error: () => {
           this.detail.set(null);
+          this.postulantesCount.set(null);
           this.state.set('error');
         },
       });
@@ -203,9 +245,43 @@ export class OpenRequestDetail {
     this.isGalleryOpen.set(false);
   }
 
+  protected openCancelConfirm(): void {
+    this.cancelError.set(null);
+    this.cancelConfirmOpen.set(true);
+  }
+
+  protected closeCancelConfirm(): void {
+    if (this.cancelInProgress()) return;
+    this.cancelConfirmOpen.set(false);
+  }
+
+  protected confirmCancelRequest(): void {
+    const id = this.requestId().trim();
+    if (!id || !this.isRequestOwner() || !this.isRequestActive()) return;
+
+    this.cancelInProgress.set(true);
+    this.cancelError.set(null);
+
+    this.service
+      .cancelOpenRequest(id)
+      .pipe(
+        finalize(() => this.cancelInProgress.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (detail) => {
+          this.detail.set(detail);
+          this.cancelConfirmOpen.set(false);
+        },
+        error: () => {
+          this.cancelError.set('No pudimos cancelar la solicitud. Intenta de nuevo.');
+        },
+      });
+  }
+
   protected goToProposal(): void {
     const id = this.requestId();
-    if (!id || this.isRequestOwner()) return;
+    if (!id || this.isRequestOwner() || this.isRequestCancelled()) return;
     this.analytics.track({
       kind: 'proposalStarted',
       openRequestId: id,
@@ -246,6 +322,24 @@ export class OpenRequestDetail {
   protected scrollToTop(): void {
     if (typeof window === 'undefined') return;
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }
+
+  private loadPostulantesCount(requestId: string, detail: OpenRequestDetailModel): void {
+    const ownerId = detail.ownerUserId?.trim() ?? '';
+    const auth = this.authVm();
+    const viewerId = auth.user?.id?.trim() ?? '';
+    if (!auth.isLoggedIn || ownerId.length === 0 || viewerId !== ownerId) {
+      this.postulantesCount.set(null);
+      return;
+    }
+
+    this.proposals
+      .listByRequest(requestId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (items) => this.postulantesCount.set(items.length),
+        error: () => this.postulantesCount.set(0),
+      });
   }
 
   protected publisherDisplayName(d: OpenRequestDetailModel): string {
